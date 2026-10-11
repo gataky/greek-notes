@@ -29,6 +29,9 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
+extra_css:
+  - stylesheets/sheet.css
+
 plugins:
   - search
 
@@ -40,4 +43,6 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Grammar:
+      - Articles: greek-articles.md
+      - Adjectives: greek-adjectives.md
       - Passive verbs: greek-passive-verbs-when-to-use-them.md

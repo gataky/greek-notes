@@ -1,6 +1,6 @@
 # Greek Passive Verbs: When to Use Them
 
-Oct 10, 2026 · @Jeff
+Sat Oct 10, 2026
 
 ## Overview
 
