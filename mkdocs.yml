@@ -4,6 +4,9 @@ site_description: Personal reference notes for learning Modern Greek
 theme:
   name: material
   language: en
+  font:
+    text: Noto Serif
+    code: Roboto Mono
   features:
     - navigation.instant
     - navigation.sections
@@ -13,13 +16,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
+      primary: blue
+      accent: light blue
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
+      primary: blue
+      accent: light blue
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
