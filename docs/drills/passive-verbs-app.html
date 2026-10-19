@@ -1,0 +1,404 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Greek Passive Drill</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<style>
+/* Layout: one calm column; a single drill card is the hero, reference tables sit behind a tab. */
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --ink: #10233f;
+  --muted: #5a6a80;
+  --line: #d6dee9;
+  --accent: #1f5fa8;
+  --accent-soft: #e2ecf8;
+  --good: #2b7a48;
+  --good-soft: #e3f3e8;
+  --warn: #9a620e;
+  --warn-soft: #fbf0dc;
+  --bad: #b23434;
+  --bad-soft: #f9e4e4;
+  --display: "GFS Didot", "Noto Serif", Georgia, serif;
+  --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
+    --accent: #80b3ee; --accent-soft: #1a2d46;
+    --good: #6cc68e; --good-soft: #15301f; --warn: #e3ad58; --warn-soft: #33270f; --bad: #ef8585; --bad-soft: #3a1b1b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
+  --accent: #80b3ee; --accent-soft: #1a2d46;
+  --good: #6cc68e; --good-soft: #15301f; --warn: #e3ad58; --warn-soft: #33270f; --bad: #ef8585; --bad-soft: #3a1b1b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; max-width: 60ch; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+  font: 600 15px var(--body); padding: 10px 14px; cursor: pointer; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:focus-visible, button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+.prompt { display: flex; flex-direction: column; gap: 6px; }
+.prompt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.pattern-tag { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
+.counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.question { font-family: var(--display); font-size: clamp(30px, 7vw, 40px); line-height: 1.15; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.question .pron { color: var(--accent); }
+.question .plus { color: var(--muted); font-size: .7em; }
+.gloss { color: var(--muted); font-size: 15px; }
+
+.answer-row { display: flex; gap: 10px; flex-wrap: wrap; }
+#answer { flex: 1 1 220px; min-width: 0; font: 400 24px var(--display); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+#answer:focus { border-color: var(--accent); outline: none; }
+.btn { appearance: none; border: 1.5px solid var(--accent); background: var(--accent); color: var(--surface); font: 600 15px var(--body); padding: 10px 18px; border-radius: 10px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+.keys { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.keys span { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.key { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 400 18px var(--display); width: 38px; height: 36px; border-radius: 8px; cursor: pointer; }
+.key:hover { border-color: var(--accent); }
+
+.feedback { border-radius: 10px; padding: 12px 14px; font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
+.feedback.good { background: var(--good-soft); color: var(--good); }
+.feedback.warn { background: var(--warn-soft); color: var(--warn); }
+.feedback.bad { background: var(--bad-soft); color: var(--bad); }
+.feedback strong { font-weight: 700; }
+.feedback .form { font-family: var(--display); font-size: 22px; color: var(--ink); }
+.feedback .form b { color: var(--accent); font-weight: 400; text-decoration: underline; text-underline-offset: 4px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+
+.stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 600; }
+
+.settings { display: flex; flex-direction: column; gap: 10px; }
+.settings h2, .section h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; cursor: pointer; font-size: 14px; background: var(--surface); user-select: none; }
+.chip input { accent-color: var(--accent); margin: 0; }
+.chip:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.chip .g { font-family: var(--display); font-size: 17px; }
+
+.misses { display: flex; flex-wrap: wrap; gap: 8px; }
+.miss { font-family: var(--display); font-size: 17px; background: var(--bad-soft); color: var(--ink); border-radius: 8px; padding: 3px 10px; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+
+.tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tcard h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; }
+.tcard p { margin: 0; font-size: 14px; color: var(--muted); }
+.tcard table { border-collapse: collapse; width: 100%; }
+.tcard td { padding: 5px 0; border-top: 1px solid var(--line); }
+.tcard td:first-child { color: var(--muted); font-size: 14px; width: 34%; }
+.tcard td:last-child { font-family: var(--display); font-size: 20px; }
+.tcard td b { color: var(--accent); font-weight: 400; }
+.verbs { font-size: 14px; color: var(--muted); }
+.verbs span { font-family: var(--display); color: var(--ink); font-size: 16px; }
+.tips { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.tips ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.tips .g { font-family: var(--display); font-size: 17px; }
+@media (prefers-reduced-motion: no-preference) {
+  .feedback { animation: rise .18s ease-out; }
+  @keyframes rise { from { transform: translateY(4px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Lesson 1 · Present passive</div>
+    <h1>Greek Passive Drill</h1>
+    <p class="sub">Type the correct form of each verb. You'll be told when only the accent is off or when you've used another person's ending, and anything you miss comes back later.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Endings tables</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap" style="gap:22px">
+    <div class="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="pattern-tag" id="ptag">-ομαι</span>
+          <span class="counter" id="counter">Question 1</span>
+        </div>
+        <div class="question" aria-live="polite"><span class="pron" id="qpron">εμείς</span><span class="plus">+</span><span id="qverb">έρχομαι</span></div>
+        <div class="gloss" id="qgloss">we · come</div>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off">
+        <input id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Type the form…" aria-label="Your answer">
+        <button class="btn" id="check" type="submit">Check</button>
+      </form>
+
+      <div class="keys" aria-label="Accented letters">
+        <span>Accents</span>
+        <button class="key" type="button">ά</button><button class="key" type="button">έ</button><button class="key" type="button">ή</button><button class="key" type="button">ί</button><button class="key" type="button">ό</button><button class="key" type="button">ύ</button><button class="key" type="button">ώ</button><button class="key" type="button">ς</button>
+      </div>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="reveal">Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings">
+      <h2>Patterns to practise</h2>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="settings">
+      <h2>Missed this session</h2>
+      <div class="misses" id="misses"><p class="empty">Nothing yet. Missed forms show up here and get asked again.</p></div>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tables" id="tables"></div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li>In <span class="g">-ομαι</span> verbs the accent moves forward for εμείς: <span class="g">έρχομαι → ερχόμαστε</span>.</li>
+          <li>Every pattern except the first ends in <span class="g">-ούνται</span> for αυτοί: <span class="g">αγαπιούνται, θεωρούνται, θυμούνται</span>.</li>
+          <li>For εσείς you'll also hear <span class="g">ερχόσαστε, αγαπιόσαστε</span> in speech. The drill accepts both.</li>
+          <li>The verb agrees with its subject: <span class="g">η Μαρία αγαπιέται</span>, but <span class="g">οι φίλοι αγαπιούνται</span>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const PRON = [
+  { g: "εγώ", e: "I" }, { g: "εσύ", e: "you" }, { g: "αυτός / αυτή", e: "he / she" },
+  { g: "εμείς", e: "we" }, { g: "εσείς", e: "you (pl.)" }, { g: "αυτοί", e: "they" }
+];
+
+// Each pattern builds six [stem, ending] pairs from a verb.
+const PATTERNS = {
+  omai: {
+    label: "-ομαι", head: "γράφομαι", note: "Most verbs, including common deponents.",
+    build: v => [[v.s, "ομαι"], [v.s, "εσαι"], [v.s, "εται"], [v.u, "όμαστε"], [v.s, "εστε"], [v.s, "ονται"]],
+    alt: v => ({ 4: [v.u + "όσαστε"] }),
+    verbs: [
+      { s: "έρχ", u: "ερχ", m: "come" }, { s: "κάθ", u: "καθ", m: "sit" },
+      { s: "σκέφτ", u: "σκεφτ", m: "think" }, { s: "χρειάζ", u: "χρειαζ", m: "need" },
+      { s: "εργάζ", u: "εργαζ", m: "work" }, { s: "ντύν", u: "ντυν", m: "get dressed" },
+      { s: "πλέν", u: "πλεν", m: "wash (oneself)" }, { s: "γράφ", u: "γραφ", m: "be written" },
+      { s: "λέγ", u: "λεγ", m: "be called (named)" }, { s: "βλέπ", u: "βλεπ", m: "be seen / see each other" }
+    ]
+  },
+  iemai: {
+    label: "-ιέμαι", head: "αγαπιέμαι", note: "Most verbs whose active form ends in -άω.",
+    build: v => [[v.s, "ιέμαι"], [v.s, "ιέσαι"], [v.s, "ιέται"], [v.s, "ιόμαστε"], [v.s, "ιέστε"], [v.s, "ιούνται"]],
+    alt: v => ({ 4: [v.s + "ιόσαστε"] }),
+    verbs: [
+      { s: "αγαπ", m: "be loved" }, { s: "ρωτ", m: "be asked" }, { s: "κρατ", m: "be held / hold on" },
+      { s: "φιλ", m: "be kissed / kiss each other" }, { s: "βοηθ", m: "be helped" }, { s: "γελ", m: "be fooled" }
+    ]
+  },
+  oumai: {
+    label: "-ούμαι", head: "θεωρούμαι", note: "A smaller, more formal group from -ώ verbs.",
+    build: v => [[v.s, "ούμαι"], [v.s, "είσαι"], [v.s, "είται"], [v.s, "ούμαστε"], [v.s, "είστε"], [v.s, "ούνται"]],
+    alt: () => ({}),
+    verbs: [
+      { s: "θεωρ", m: "be considered" }, { s: "απασχολ", m: "be busy / employed" },
+      { s: "συγκιν", m: "be moved (emotionally)" }, { s: "αδικ", m: "be wronged" }, { s: "αποτελ", m: "consist (of)" }
+    ]
+  },
+  amai: {
+    label: "-άμαι", head: "θυμάμαι", note: "A few very common deponents.",
+    build: v => [[v.s, "άμαι"], [v.s, "άσαι"], [v.s, "άται"], [v.s, "όμαστε"], [v.s, "άστε"], [v.s, "ούνται"]],
+    alt: v => ({ 4: [v.s + "όσαστε"] }),
+    verbs: [
+      { s: "θυμ", m: "remember" }, { s: "φοβ", m: "be afraid" }, { s: "κοιμ", m: "sleep" }, { s: "λυπ", m: "be sorry" }
+    ]
+  }
+};
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+let enabled = store.get("gpd-patterns", ["omai", "iemai", "amai"]);
+if (!Array.isArray(enabled) || !enabled.length) enabled = ["omai"];
+let state = { q: 0, correct: 0, total: 0, streak: 0, current: null, answered: false };
+let retry = [];
+let misses = [];
+
+const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").normalize("NFC");
+const clean = s => s.trim().toLowerCase().replace(/\s+/g, "").normalize("NFC");
+
+function formsOf(pkey, verb) { return PATTERNS[pkey].build(verb).map(([a, b]) => a + b); }
+
+function pick() {
+  if (retry.length && Math.random() < 0.4) {
+    const i = Math.floor(Math.random() * retry.length);
+    const it = retry.splice(i, 1)[0];
+    if (enabled.includes(it.p)) return it;
+  }
+  const p = enabled[Math.floor(Math.random() * enabled.length)];
+  const verbs = PATTERNS[p].verbs;
+  let item;
+  do {
+    item = { p, v: Math.floor(Math.random() * verbs.length), n: Math.floor(Math.random() * 6) };
+  } while (state.current && item.p === state.current.p && item.v === state.current.v && item.n === state.current.n);
+  return item;
+}
+
+function ask() {
+  const it = pick();
+  state.current = it; state.answered = false; state.q++;
+  const P = PATTERNS[it.p], verb = P.verbs[it.v];
+  $("ptag").textContent = P.label;
+  $("counter").textContent = "Question " + state.q;
+  $("qpron").textContent = PRON[it.n].g;
+  $("qverb").textContent = formsOf(it.p, verb)[0];
+  $("qgloss").textContent = PRON[it.n].e + " · " + verb.m;
+  $("answer").value = ""; $("answer").disabled = false;
+  $("check").disabled = false; $("reveal").disabled = false; $("next").disabled = true;
+  $("feedback").hidden = true;
+  $("answer").focus({ preventScroll: true });
+}
+
+function formHTML(pkey, verb, n) {
+  const [a, b] = PATTERNS[pkey].build(verb)[n];
+  return a + "<b>" + b + "</b>";
+}
+
+function show(kind, html) {
+  const f = $("feedback");
+  f.className = "feedback " + kind; f.innerHTML = html; f.hidden = false;
+}
+
+function finish(ok) {
+  state.answered = true; state.total++;
+  if (ok) { state.correct++; state.streak++; } else {
+    state.streak = 0;
+    const it = state.current;
+    retry.push({ ...it });
+    const f = formsOf(it.p, PATTERNS[it.p].verbs[it.v])[it.n];
+    if (!misses.includes(f)) misses.push(f);
+    renderMisses();
+  }
+  $("sCorrect").textContent = state.correct; $("sTotal").textContent = state.total; $("sStreak").textContent = state.streak;
+  $("answer").disabled = true; $("check").disabled = true; $("reveal").disabled = true; $("next").disabled = false;
+  $("next").focus({ preventScroll: true });
+}
+
+function check(e) {
+  e && e.preventDefault();
+  if (state.answered) { ask(); return; }
+  const raw = clean($("answer").value);
+  if (!raw) return;
+  const it = state.current, P = PATTERNS[it.p], verb = P.verbs[it.v];
+  const forms = formsOf(it.p, verb);
+  const accepted = [forms[it.n], ...((P.alt(verb)[it.n]) || [])];
+  const right = formHTML(it.p, verb, it.n);
+
+  if (accepted.includes(raw)) {
+    const extra = raw !== forms[it.n] ? `<span>That's the spoken form. The standard written one is <span class="form">${right}</span></span>` : "";
+    show("good", `<strong>Σωστά!</strong><span class="form">${right}</span>${extra}`);
+    finish(true); return;
+  }
+  if (accepted.map(strip).includes(strip(raw))) {
+    show("warn", `<strong>Almost. Check the accent.</strong><span class="form">${right}</span>`);
+    finish(false); return;
+  }
+  const other = forms.findIndex((f, i) => i !== it.n && (f === raw || strip(f) === strip(raw)));
+  if (other >= 0) {
+    show("bad", `<strong>That's the form for ${PRON[other].g}.</strong><span>For ${PRON[it.n].g} you need:</span><span class="form">${right}</span>`);
+    finish(false); return;
+  }
+  show("bad", `<strong>Not quite.</strong><span>The answer is:</span><span class="form">${right}</span>`);
+  finish(false);
+}
+
+function reveal() {
+  const it = state.current;
+  show("bad", `<strong>Answer</strong><span class="form">${formHTML(it.p, PATTERNS[it.p].verbs[it.v], it.n)}</span><span>This one will come back later.</span>`);
+  finish(false);
+}
+
+function renderMisses() {
+  const m = $("misses");
+  if (!misses.length) { m.innerHTML = '<p class="empty">Nothing yet. Missed forms show up here and get asked again.</p>'; return; }
+  m.innerHTML = misses.map(f => `<span class="miss">${f}</span>`).join("");
+}
+
+function renderChips() {
+  $("chips").innerHTML = Object.entries(PATTERNS).map(([k, P]) =>
+    `<label class="chip" for="pat-${k}"><input type="checkbox" id="pat-${k}" value="${k}" ${enabled.includes(k) ? "checked" : ""}><span class="g">${P.head}</span><span>${P.label}</span></label>`
+  ).join("");
+  $("chips").querySelectorAll("input").forEach(inp => inp.addEventListener("change", () => {
+    const on = [...$("chips").querySelectorAll("input:checked")].map(i => i.value);
+    if (!on.length) { inp.checked = true; return; }
+    enabled = on; store.set("gpd-patterns", enabled);
+    if (!enabled.includes(state.current.p) && !state.answered) { state.q--; ask(); }
+  }));
+}
+
+function renderTables() {
+  $("tables").innerHTML = Object.entries(PATTERNS).map(([k, P]) => {
+    const v = P.verbs.find(x => formsOf(k, x)[0] === P.head) || P.verbs[0];
+    const rows = PRON.map((p, i) => `<tr><td>${p.g}</td><td>${formHTML(k, v, i)}</td></tr>`).join("");
+    const list = P.verbs.map(x => `<span>${formsOf(k, x)[0]}</span> ${x.m}`).join(" · ");
+    return `<div class="tcard"><h3>${P.head}</h3><p>${P.label} · ${P.note}</p><table>${rows}</table><div class="verbs">${list}</div></div>`;
+  }).join("");
+}
+
+function setTab(which) {
+  const drill = which === "drill";
+  $("tab-drill").setAttribute("aria-selected", drill); $("tab-tables").setAttribute("aria-selected", !drill);
+  $("panel-drill").hidden = !drill; $("panel-tables").hidden = drill;
+  if (drill && !state.answered) $("answer").focus({ preventScroll: true });
+}
+
+document.querySelectorAll(".key").forEach(k => k.addEventListener("click", () => {
+  const inp = $("answer"); if (inp.disabled) return;
+  const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+  inp.value = inp.value.slice(0, s) + k.textContent + inp.value.slice(e);
+  inp.focus(); inp.setSelectionRange(s + 1, s + 1);
+}));
+$("form").addEventListener("submit", check);
+$("reveal").addEventListener("click", reveal);
+$("next").addEventListener("click", ask);
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && state.answered && !$("panel-drill").hidden && e.target.tagName !== "BUTTON") { e.preventDefault(); ask(); }
+});
+$("tab-drill").addEventListener("click", () => setTab("drill"));
+$("tab-tables").addEventListener("click", () => setTab("tables"));
+
+renderChips(); renderTables(); ask();
+</script>
+
+</body></html>

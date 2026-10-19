@@ -32,6 +32,9 @@ theme:
 extra_css:
   - stylesheets/sheet.css
 
+extra_javascript:
+  - javascripts/drill-frame.js
+
 plugins:
   - search
 
@@ -46,3 +49,5 @@ nav:
       - Articles: greek-articles.md
       - Adjectives: greek-adjectives.md
       - Passive verbs: greek-passive-verbs-when-to-use-them.md
+  - Drills:
+      - Passive verbs: drills/passive-verbs.md
