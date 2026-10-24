@@ -32,10 +32,12 @@ theme:
         name: Switch to light mode
 
 extra_css:
-  - stylesheets/sheet.css
+  - stylesheets/frames.css
+  - stylesheets/tables.css
 
 extra_javascript:
   - javascripts/drill-frame.js
+  - javascripts/tables.js
   - javascripts/pwa.js
 
 hooks:

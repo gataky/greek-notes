@@ -26,7 +26,10 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
 ## Content
 
 - Notes are Markdown in `docs/`. Each must be added to `nav` in `mkdocs.yml` and linked from `docs/index.md`.
-- Grammar tables are raw HTML (`<div class="sheet-wrap"><table class="sheet">`) styled by `docs/stylesheets/sheet.css` to mirror the layout of the owner's Google Sheet. Border and colour classes include `r1`/`r3`/`b1`/`b3`/`bd` and `nom`/`acc`/`gen`.
+- Every table on the note pages is styled by `docs/stylesheets/tables.css` to match the verb grid (`docs/tools/verb-grid.css`). Keep the two looking alike: card, uppercase headings, row rules, accent highlights.
+  - **Plain Markdown tables** need no markup. `docs/javascripts/tables.js` sets `lang="el"` on cells with Greek, which get the Greek font while the other cells in that table are muted as glosses. Bold inside Greek cells shows in the accent colour. Header cells with Greek aren't uppercased.
+  - **Grid layouts** (paradigms with grouped columns) are hand-written HTML: `<div class="grid-card"><table class="grid">` with `th.group`/`th.sub`, `td.who` row labels, `td.gloss`, `span.end` (accent), `span.pre` (muted), `td.gap` spacer columns, and an optional `p.grid-note` underneath. Row labels can shorten on phones: `masc<span class="full">uline</span><span class="abbr">.</span>`.
+  - Greek uses a self-hosted Greek-only subset of GFS Didot (`docs/fonts/`, OFL) registered as "Greek Didot" with a Greek `unicode-range`, so Latin in the same cell falls through to Commissioner.
 - Interactive pages are standalone HTML apps embedded in a Markdown page with `<iframe class="drill-frame" src="../x-app.html">`. `docs/javascripts/drill-frame.js` (loaded site-wide) hides the app's `<header>`, sizes the iframe to its content, and syncs the light/dark theme by setting `data-theme` on the app's root. Apps therefore define colour tokens on `:root` with dark variants under both `prefers-color-scheme` and `[data-theme="dark"]`. Add `data-pass-hash` to an iframe to forward the page's `#fragment` into it, which is how `tools/verb-tables/#γράφω` opens a verb.
 
 ## Offline app (PWA)

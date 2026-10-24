@@ -4,18 +4,20 @@ Adjectives describe nouns and almost always change to **agree** with them in gen
 
 ## Ending groups
 
-<div class="sheet-wrap">
-<table class="sheet">
-<tr>
-<td class="bd r3"></td>
-<td class="bd r1">masculine</td><td class="bd r1">feminine</td><td class="bd r1">neuter</td><td class="bd r3 c" colspan="2">example</td>
-</tr>
-<tr><td class="b1 r3">most common</td><td class="b1 r1">-ος</td><td class="b1 r1">-η</td><td class="b1 r1">-ο</td><td class="b1 r1">ψηλός</td><td class="b1 r3">tall</td></tr>
-<tr><td class="b1 r3">stem ends in vowel</td><td class="b1 r1">-ος</td><td class="b1 r1">-α</td><td class="b1 r1">-ο</td><td class="b1 r1">ωραίος</td><td class="b1 r3">beautiful</td></tr>
-<tr><td class="b1 r3">physical properties</td><td class="b1 r1">-ύς</td><td class="b1 r1">-ιά</td><td class="b1 r1">-ύ</td><td class="b1 r1">βαρύς</td><td class="b1 r3">heavy</td></tr>
-<tr><td class="b1 r3">colors &amp; materials</td><td class="b1 r1">-ής</td><td class="b1 r1">-ιά</td><td class="b1 r1">-ί</td><td class="b1 r1">καφετής</td><td class="b1 r3">brown</td></tr>
-<tr><td class="b1 r3">learned origin</td><td class="b1 r1">-ης</td><td class="b1 r1">-ης</td><td class="b1 r1">-ες</td><td class="b1 r1">ακριβής</td><td class="b1 r3">exact</td></tr>
-<tr><td class="b3 r3">indeclinable</td><td class="b3 r1" colspan="3">invariable</td><td class="b3 r1">μπλε</td><td class="b3 r3">blue</td></tr>
+<div class="grid-card">
+<table class="grid">
+<thead>
+<tr><th></th><th class="group" colspan="3">Endings</th><th class="gap"></th><th class="group" colspan="2">Example</th></tr>
+<tr><th></th><th class="sub">masculine</th><th class="sub">feminine</th><th class="sub">neuter</th><th class="gap"></th><th class="sub">masculine</th><th class="sub">meaning</th></tr>
+</thead>
+<tbody>
+<tr><td class="who">most common</td><td><span class="end">-ος</span></td><td><span class="end">-η</span></td><td><span class="end">-ο</span></td><td class="gap"></td><td>ψηλ<span class="end">ός</span></td><td class="gloss">tall</td></tr>
+<tr><td class="who">stem ends in vowel</td><td><span class="end">-ος</span></td><td><span class="end">-α</span></td><td><span class="end">-ο</span></td><td class="gap"></td><td>ωραί<span class="end">ος</span></td><td class="gloss">beautiful</td></tr>
+<tr><td class="who">physical properties</td><td><span class="end">-ύς</span></td><td><span class="end">-ιά</span></td><td><span class="end">-ύ</span></td><td class="gap"></td><td>βαρ<span class="end">ύς</span></td><td class="gloss">heavy</td></tr>
+<tr><td class="who">colors &amp; materials</td><td><span class="end">-ής</span></td><td><span class="end">-ιά</span></td><td><span class="end">-ί</span></td><td class="gap"></td><td>καφετ<span class="end">ής</span></td><td class="gloss">brown</td></tr>
+<tr><td class="who">learned origin</td><td><span class="end">-ης</span></td><td><span class="end">-ης</span></td><td><span class="end">-ες</span></td><td class="gap"></td><td>ακριβ<span class="end">ής</span></td><td class="gloss">exact</td></tr>
+<tr><td class="who">indeclinable</td><td class="gloss" colspan="3">invariable</td><td class="gap"></td><td>μπλε</td><td class="gloss">blue</td></tr>
+</tbody>
 </table>
 </div>
 
@@ -70,13 +72,18 @@ Indeclinable adjectives stay the same everywhere: **το** μπλε αυτοκί
 
 ## Degrees of comparison
 
-<div class="sheet-wrap">
-<table class="sheet">
-<tr><td class="bd r3"></td><td class="bd r3 c" colspan="5">degrees of comparison</td></tr>
-<tr><td class="b1 r3">simple</td><td class="b1 r1 c" colspan="3">[x]</td><td class="b1 r1">ψηλός</td><td class="b1 r3">tall</td></tr>
-<tr><td class="b1 r3">comparative</td><td class="b1 r1 c">πιο [χ]</td><td class="b1 r1 c" colspan="2">[χ]-τερος</td><td class="b1 r1">πιο ψηλός<br>ψηλότερος</td><td class="b1 r3">taller</td></tr>
-<tr><td class="b1 r3">relative superlative</td><td class="b1 r1 c">ο πιο [χ]</td><td class="b1 r1 c" colspan="2">ο [χ]-τερος</td><td class="b1 r1">ο πιο ψηλός<br>ο ψηλότερος</td><td class="b1 r3">the tallest</td></tr>
-<tr><td class="b3 r3">absolute superlative</td><td class="b3 r1 c" colspan="3">[χ]-τατος</td><td class="b3 r1">ψηλότατος</td><td class="b3 r3">exceptionally tall</td></tr>
+<div class="grid-card">
+<table class="grid">
+<thead>
+<tr><th></th><th class="group" colspan="2">Pattern</th><th class="gap"></th><th class="group" colspan="2">Example</th></tr>
+<tr><th></th><th class="sub">with πιο</th><th class="sub">with an ending</th><th class="gap"></th><th class="sub">Greek</th><th class="sub">meaning</th></tr>
+</thead>
+<tbody>
+<tr><td class="who">simple</td><td colspan="2">[x]</td><td class="gap"></td><td>ψηλός</td><td class="gloss">tall</td></tr>
+<tr><td class="who">comparative</td><td><span class="pre">πιο</span> [χ]</td><td>[χ]<span class="end">-τερος</span></td><td class="gap"></td><td><span class="pre">πιο</span> ψηλός<br>ψηλ<span class="end">ότερος</span></td><td class="gloss">taller</td></tr>
+<tr><td class="who">relative superlative</td><td><span class="pre">ο πιο</span> [χ]</td><td><span class="pre">ο</span> [χ]<span class="end">-τερος</span></td><td class="gap"></td><td><span class="pre">ο πιο</span> ψηλός<br><span class="pre">ο</span> ψηλ<span class="end">ότερος</span></td><td class="gloss">the tallest</td></tr>
+<tr><td class="who">absolute superlative</td><td class="span">—</td><td>[χ]<span class="end">-τατος</span></td><td class="gap"></td><td>ψηλ<span class="end">ότατος</span></td><td class="gloss">exceptionally tall</td></tr>
+</tbody>
 </table>
 </div>
 

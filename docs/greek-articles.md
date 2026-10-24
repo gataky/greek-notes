@@ -4,32 +4,19 @@ Greek articles change with **gender** (masculine, feminine, neuter), **case** (n
 
 ## Definite article (the)
 
-<div class="sheet-wrap">
-<table class="sheet">
-<tr>
-<td class="nom c b1">nom</td><td class="b1">singular</td><td class="b1 r1">plural</td>
-<td class="acc c b1">acc</td><td class="b1">singular</td><td class="b1 r3">plural</td>
-<td class="gen c b1">gen</td><td class="b1">singular</td><td class="b1 r3">plural</td>
-</tr>
-<tr>
-<td>mas.</td><td class="nom">ο</td><td class="nom-pl r1">οι</td>
-<td>mas.</td><td class="acc">τον</td><td class="acc-pl r3">τους</td>
-<td>mas.</td><td class="gen">του</td><td class="gen-pl r3">των</td>
-</tr>
-<tr>
-<td>fem.</td><td class="nom">η</td><td class="nom-pl r1">οι</td>
-<td>fem.</td><td class="acc">τη(ν)</td><td class="acc-pl r3">τις</td>
-<td>fem.</td><td class="gen">της</td><td class="gen-pl r3">των</td>
-</tr>
-<tr>
-<td class="bd">neu.</td><td class="nom bd">το</td><td class="nom-pl r1 bd">τα</td>
-<td class="bd">neu.</td><td class="acc bd">το</td><td class="acc-pl r3 bd">τα</td>
-<td class="bd">neu.</td><td class="gen bd">του</td><td class="gen-pl r3 bd">των</td>
-</tr>
-<tr>
-<td class="note b3 r3" colspan="9"><div class="note-text">The feminine accusative singular form <b>must have</b> the final -<b>ν</b> when the word immediately following begins with a vowel or with any of the following consonants or consonant clusters: <b>κ, π, τ, γκ, μπ, ντ, ξ, ψ</b><br><br>Before other consonants the -ν <b>may be</b> omitted (and normally is not pronounced)</div></td>
-</tr>
+<div class="grid-card">
+<table class="grid">
+<thead>
+<tr><th></th><th class="group" colspan="2">Nominative</th><th class="gap"></th><th class="group" colspan="2">Accusative</th><th class="gap"></th><th class="group" colspan="2">Genitive</th></tr>
+<tr><th></th><th class="sub">singular</th><th class="sub">plural</th><th class="gap"></th><th class="sub">singular</th><th class="sub">plural</th><th class="gap"></th><th class="sub">singular</th><th class="sub">plural</th></tr>
+</thead>
+<tbody>
+<tr><td class="who">masc<span class="full">uline</span><span class="abbr">.</span></td><td>ο</td><td>οι</td><td class="gap"></td><td>τον</td><td>τους</td><td class="gap"></td><td>του</td><td>των</td></tr>
+<tr><td class="who">fem<span class="full">inine</span><span class="abbr">.</span></td><td>η</td><td>οι</td><td class="gap"></td><td>τη<span class="end">(ν)</span></td><td>τις</td><td class="gap"></td><td>της</td><td>των</td></tr>
+<tr><td class="who">neu<span class="full">ter</span><span class="abbr">.</span></td><td>το</td><td>τα</td><td class="gap"></td><td>το</td><td>τα</td><td class="gap"></td><td>του</td><td>των</td></tr>
+</tbody>
 </table>
+<p class="grid-note">The feminine accusative singular form <strong>must have</strong> the final -<strong>ν</strong> when the word immediately following begins with a vowel or with any of the following consonants or consonant clusters: <strong>κ, π, τ, γκ, μπ, ντ, ξ, ψ</strong>. Before other consonants the -ν <strong>may be</strong> omitted (and normally is not pronounced).</p>
 </div>
 
 **Examples of the -ν rule:**
@@ -45,32 +32,19 @@ Greek articles change with **gender** (masculine, feminine, neuter), **case** (n
 
 The indefinite article is the same word as the number **one**. It has no plural.
 
-<div class="sheet-wrap">
-<table class="sheet">
-<tr>
-<td class="nom c b1">nom</td><td class="b1 r1" colspan="2">singular</td>
-<td class="acc c b1">acc</td><td class="b1 r3" colspan="2">singular</td>
-<td class="gen c b1">gen</td><td class="b1 r3" colspan="2">singular</td>
-</tr>
-<tr>
-<td>mas.</td><td class="nom r1" colspan="2">ένας</td>
-<td>mas.</td><td class="acc r3" colspan="2">έναν</td>
-<td>mas.</td><td class="gen r3" colspan="2">ενός</td>
-</tr>
-<tr>
-<td>fem.</td><td class="nom r1" colspan="2">μια</td>
-<td>fem.</td><td class="acc r3" colspan="2">μια(ν)</td>
-<td>fem.</td><td class="gen r3" colspan="2">μιας</td>
-</tr>
-<tr>
-<td class="bd">neu.</td><td class="nom r1 bd" colspan="2">ένα</td>
-<td class="bd">neu.</td><td class="acc r3 bd" colspan="2">ένα</td>
-<td class="bd">neu.</td><td class="gen r3 bd" colspan="2">ενός</td>
-</tr>
-<tr>
-<td class="note b3 r3" colspan="9"><div class="note-text">The final -ν of the accusative forms of the masculine and feminine is not obligatory, but may be used before words beginning with a vowel or any of the consonants κ, π, τ, ξ or ψ.</div></td>
-</tr>
+<div class="grid-card">
+<table class="grid">
+<thead>
+<tr><th></th><th class="group">Nominative</th><th class="gap"></th><th class="group">Accusative</th><th class="gap"></th><th class="group">Genitive</th></tr>
+<tr><th></th><th class="sub">singular</th><th class="gap"></th><th class="sub">singular</th><th class="gap"></th><th class="sub">singular</th></tr>
+</thead>
+<tbody>
+<tr><td class="who">masc<span class="full">uline</span><span class="abbr">.</span></td><td>ένας</td><td class="gap"></td><td>έναν</td><td class="gap"></td><td>ενός</td></tr>
+<tr><td class="who">fem<span class="full">inine</span><span class="abbr">.</span></td><td>μια</td><td class="gap"></td><td>μια<span class="end">(ν)</span></td><td class="gap"></td><td>μιας</td></tr>
+<tr><td class="who">neu<span class="full">ter</span><span class="abbr">.</span></td><td>ένα</td><td class="gap"></td><td>ένα</td><td class="gap"></td><td>ενός</td></tr>
+</tbody>
 </table>
+<p class="grid-note">The final -ν of the accusative forms of the masculine and feminine is not obligatory, but may be used before words beginning with a vowel or any of the consonants κ, π, τ, ξ or ψ.</p>
 </div>
 
 In everyday Greek, **έναν** is common before any word, while **μιαν** is rare.

@@ -1,0 +1,191 @@
+/* Tables on the note pages, styled like the grid on the verb pages (docs/tools/verb-grid.css):
+   a card, small uppercase headings, Greek in GFS Didot with Latin text in Commissioner,
+   thin row rules and highlighted parts in the accent colour.
+
+   Two kinds of table get this look:
+   - Markdown tables. javascripts/tables.js marks cells containing Greek with lang="el";
+     in a table with Greek, the other cells are glosses and labels, so they're muted.
+   - Hand-written grids: <div class="grid-card"><table class="grid">…</table></div>, using
+     th.group / th.sub headings, td.who row labels, span.end and span.pre like the verb grid. */
+
+/* Same stylesheet the tool pages load, so the offline app caches it once (only Commissioner is used here) */
+@import url("https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap");
+
+/* Greek letters only: anything else in the same cell falls through to Commissioner.
+   size-adjust lines Didot's small letters up with Commissioner's. (OFL, see fonts/OFL-GFS-Didot.txt) */
+@font-face {
+  font-family: "Greek Didot";
+  src: url("../fonts/gfs-didot-greek.woff2") format("woff2");
+  unicode-range: U+0370-03FF;
+  size-adjust: 118%;
+  font-display: swap;
+}
+
+:root {
+  --gn-surface: #ffffff;
+  --gn-ink: #10233f;
+  --gn-muted: #5a6a80;
+  --gn-line: #d6dee9;
+  --gn-accent: #1f5fa8;
+  --gn-body: "Commissioner", "Noto Sans", system-ui, sans-serif;
+  --gn-greek: "Greek Didot", var(--gn-body);
+}
+[data-md-color-scheme="slate"] {
+  --gn-surface: #132031;
+  --gn-ink: #e5ecf5;
+  --gn-muted: #94a4b9;
+  --gn-line: #24354b;
+  --gn-accent: #80b3ee;
+}
+
+/* ---------- The card, shared by both kinds ---------- */
+
+.md-typeset table:not([class]),
+.md-typeset .grid-card {
+  background: var(--gn-surface);
+  border: 1px solid var(--gn-line);
+  border-radius: 0.7rem;
+  color: var(--gn-ink);
+}
+
+/* ---------- Markdown tables ---------- */
+
+.md-typeset__table { display: block; }
+.md-typeset table:not([class]) {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  padding: 0.6rem 1rem 0.5rem;
+  font-family: var(--gn-greek);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.md-typeset table:not([class]) th {
+  background: none;
+  min-width: 0;
+  padding: 0 0.6rem 0.3rem 0;
+  border-bottom: 2px solid var(--gn-accent);
+  font: 600 0.6rem/1.4 var(--gn-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gn-ink);
+  vertical-align: bottom;
+}
+.md-typeset table:not([class]) th.has-greek {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.7rem;
+  font-family: var(--gn-greek);
+}
+.md-typeset table:not([class]) td {
+  padding: 0.3rem 0.6rem 0.3rem 0;
+  border-top: 1px solid var(--gn-line);
+  vertical-align: top;
+}
+.md-typeset table:not([class]) tbody tr:first-child td { border-top: 0; }
+.md-typeset table:not([class]) tbody tr:hover { background: none; box-shadow: none; }
+
+/* In a table with Greek, Greek cells carry the content and the rest are glosses or labels. */
+.md-typeset table:not([class]):has(td:lang(el)) td:not(:lang(el)) {
+  color: var(--gn-muted);
+  font-size: 0.72rem;
+  padding-top: 0.42rem;
+}
+/* Bold inside Greek marks the part to notice, like the highlighted endings on the verb pages. */
+.md-typeset table td:lang(el) strong {
+  color: var(--gn-accent);
+  font-weight: inherit;
+}
+
+/* ---------- Hand-written grids ---------- */
+
+.md-typeset .grid-card {
+  margin: 1em 0;
+  padding: 0.8rem 1rem 0.7rem;
+  overflow-x: auto;
+}
+.md-typeset table.grid {
+  display: table;
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.md-typeset table.grid th {
+  text-align: left;
+  font: 600 0.6rem/1.4 var(--gn-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gn-muted);
+  padding: 0 0.6rem 0.2rem 0;
+  vertical-align: bottom;
+}
+.md-typeset table.grid th.group {
+  color: var(--gn-ink);
+  border-bottom: 2px solid var(--gn-accent);
+  padding-bottom: 0.3rem;
+}
+.md-typeset table.grid th.sub {
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+  font-size: 0.65rem;
+  padding-top: 0.3rem;
+}
+.md-typeset table.grid th.gap,
+.md-typeset table.grid td.gap { width: 0.7rem; padding: 0; border: 0; }
+.md-typeset table.grid td {
+  border-top: 1px solid var(--gn-line);
+  padding: 0.25rem 0.6rem 0.25rem 0;
+  vertical-align: top;
+  font-family: var(--gn-greek);
+  font-size: 0.82rem;  /* with size-adjust, Greek comes out at the verb grid's 19px */
+  white-space: nowrap;
+}
+.md-typeset table.grid td.who {
+  font-family: var(--gn-body);
+  font-size: 0.7rem;
+  color: var(--gn-muted);
+  padding-top: 0.4rem;
+}
+.md-typeset table.grid td.gloss {
+  font-family: var(--gn-body);
+  font-size: 0.72rem;
+  color: var(--gn-muted);
+  padding-top: 0.4rem;
+  white-space: normal;
+}
+.md-typeset table.grid td.span { color: var(--gn-muted); }
+.md-typeset table.grid .end { color: var(--gn-accent); }
+.md-typeset table.grid .pre { color: var(--gn-muted); }
+.md-typeset table.grid .alt { display: block; font-size: 0.8rem; color: var(--gn-muted); }
+
+/* A note under the grid, like the legend under the verb grid */
+.md-typeset .grid-card .grid-note {
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--gn-line);
+  font-family: var(--gn-greek);  /* Greek letters in Didot, the rest in Commissioner */
+  font-size: 0.7rem;
+  line-height: 1.6;
+  color: var(--gn-muted);
+}
+.md-typeset .grid-card .grid-note strong { color: var(--gn-ink); }
+
+.md-typeset table.grid :is(td, th):last-child { padding-right: 0; }
+.md-typeset table.grid .abbr { display: none; }
+
+/* Phones: tighter spacing so the case grids fit without scrolling */
+@media (max-width: 480px) {
+  .md-typeset .grid-card { padding: 0.6rem 0.5rem 0.5rem; }
+  .md-typeset table:not([class]) { padding: 0.5rem 0.7rem 0.4rem; }
+  .md-typeset table.grid td,
+  .md-typeset table.grid th { padding-right: 0.3rem; }
+  .md-typeset table.grid th.gap,
+  .md-typeset table.grid td.gap { width: 0.2rem; }
+  .md-typeset table.grid th { letter-spacing: 0.02em; }
+  /* Row labels written as masc<span class="full">uline</span><span class="abbr">.</span> shorten to "masc." */
+  .md-typeset table.grid .full { display: none; }
+  .md-typeset table.grid .abbr { display: inline; }
+}
