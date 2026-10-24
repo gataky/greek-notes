@@ -15,3 +15,4 @@ My reference notes for learning Modern Greek.
 ## Tools
 
 - [Verb tables: conjugate any verb from the word list](tools/verb-tables.md)
+- [Conjugation patterns: how each verb group conjugates](tools/conjugation-patterns.md)

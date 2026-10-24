@@ -25,6 +25,12 @@ function setupFrame(frame) {
 }
 
 document$.subscribe(() => {
+  // Frames marked data-pass-hash get the page's #fragment, so ../verb-tables/#γράφω opens that verb.
+  if (location.hash) {
+    document.querySelectorAll("iframe.drill-frame[data-pass-hash]").forEach(frame => {
+      frame.src = frame.getAttribute("src").split("#")[0] + location.hash;
+    });
+  }
   document.querySelectorAll("iframe.drill-frame").forEach(frame => {
     frame.addEventListener("load", () => setupFrame(frame));
     if (frame.contentDocument && frame.contentDocument.readyState === "complete") setupFrame(frame);

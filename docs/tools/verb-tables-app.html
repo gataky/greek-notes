@@ -7,46 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="verb-grid.css">
 <style>
-:root {
-  --bg: #f4f7fb;
-  --surface: #ffffff;
-  --ink: #10233f;
-  --muted: #5a6a80;
-  --line: #d6dee9;
-  --accent: #1f5fa8;
-  --accent-soft: #e2ecf8;
-  --warn: #9a620e;
-  --warn-soft: #fbf0dc;
-  --display: "GFS Didot", "Noto Serif", Georgia, serif;
-  --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
-    --accent: #80b3ee; --accent-soft: #1a2d46; --warn: #e3ad58; --warn-soft: #33270f;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
-  --accent: #80b3ee; --accent-soft: #1a2d46; --warn: #e3ad58; --warn-soft: #33270f;
-  color-scheme: dark;
-}
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body {
-  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
-  padding: 28px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
-}
-.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
-header { display: flex; flex-direction: column; gap: 4px; }
-.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; }
-.sub { color: var(--muted); margin: 0; max-width: 60ch; }
-button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
-
 /* Verb picker */
 .picker { position: relative; display: flex; gap: 10px; }
 #search { flex: 1; min-width: 0; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
@@ -60,53 +22,22 @@ button:focus-visible, input:focus-visible, label:focus-within { outline: 2px sol
 #results .e { color: var(--muted); font-size: 14px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #results .none { color: var(--muted); cursor: default; }
 
-/* Selected verb */
-.verb { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 24px; display: flex; flex-direction: column; gap: 8px; }
-.verb-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
-.verb h2 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 8vw, 46px); line-height: 1.1; margin: 0; }
-.verb .english { color: var(--muted); font-size: 17px; }
-.tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.tag { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
-.parts { font-family: var(--display); font-size: 18px; color: var(--muted); }
-.parts b { color: var(--ink); font-weight: 400; }
-.note { font-size: 14px; background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 6px 10px; margin: 0; }
-
-/* Filters */
-.filters { display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; align-items: center; }
-.filters h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.chip { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 9px; cursor: pointer; font-size: 14px; background: var(--surface); user-select: none; }
-.chip input { accent-color: var(--accent); margin: 0; }
-.chip:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
-@media (max-width: 520px) { .filters { grid-template-columns: 1fr; gap: 6px; } .filters .chips { margin-bottom: 6px; } }
-
-/* Tables */
-.tables { display: flex; flex-direction: column; gap: 16px; }
-.mood-title { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 8px 0 -6px; }
-.mood-title span { text-transform: none; letter-spacing: 0; font-family: var(--display); font-size: 16px; font-weight: 400; margin-left: 6px; }
-.tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; min-width: 0; }
-.tcard h4 { margin: 0 0 8px; font-family: var(--display); font-weight: 400; font-size: 24px; }
-.scroll { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; }
-th { text-align: left; font-weight: 600; font-size: 13px; color: var(--muted); padding: 4px 14px 6px 0; vertical-align: bottom; }
-th small { display: block; font-family: var(--display); font-weight: 400; font-size: 15px; color: var(--muted); }
-td { border-top: 1px solid var(--line); padding: 6px 14px 6px 0; vertical-align: top; font-family: var(--display); font-size: 19px; white-space: nowrap; }
-td.who { font-family: var(--body); font-size: 14px; color: var(--muted); padding-top: 9px; }
-td .pre { color: var(--muted); }
-td .end { color: var(--accent); }
-.no-hl td .end { color: inherit; }
-td .alt { display: block; font-size: 15px; color: var(--muted); }
-td .alt .end { color: inherit; }
-td .dash { color: var(--muted); }
-.empty { color: var(--muted); font-size: 15px; margin: 0; }
-/* Wide tables scroll inside their card instead of widening the page */
-.wrap > *, .tables > * { min-width: 0; }
-@media (max-width: 520px) {
-  .tcard { padding: 14px 14px; }
-  td { font-size: 17px; padding-right: 10px; }
-  th { padding-right: 10px; }
-  td .alt { font-size: 14px; }
-}
+/* Verb list, grouped by class */
+.list { display: flex; flex-direction: column; gap: 10px; }
+.list > h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.list details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 18px; }
+.list summary { cursor: pointer; font-weight: 600; font-size: 15px; padding: 2px 0; }
+.list summary .pattern { font-family: var(--display); font-weight: 400; font-size: 17px; color: var(--accent); margin-left: 8px; }
+.list summary .count { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
+/* Columns read top to bottom, like a dictionary */
+.list ul { list-style: none; margin: 10px 0 2px; padding: 0 0 0 8px; columns: 210px; column-gap: 22px; }
+.list li { break-inside: avoid; }
+.list a { display: flex; align-items: baseline; gap: 8px; padding: 4px 8px; margin: 0 -8px; border-radius: 8px; color: var(--ink); text-decoration: none; min-width: 0; }
+.list a:hover { background: var(--accent-soft); }
+.list a[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.list a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.list .g { font-family: var(--display); font-size: 18px; white-space: nowrap; }
+.list .e { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
@@ -114,7 +45,7 @@ td .dash { color: var(--muted); }
   <header>
     <div class="eyebrow">Verbs</div>
     <h1>Greek Verb Tables</h1>
-    <p class="sub">Pick a verb to see every form. Use the checkboxes to show only what you're studying.</p>
+    <p class="sub">Pick a verb to see its forms. Each verb has two stems, continuous and simple, and each has a present and a past set. Every other tense is built from these.</p>
   </header>
 
   <div class="picker">
@@ -124,137 +55,20 @@ td .dash { color: var(--muted); }
     <ul id="results" role="listbox" hidden></ul>
   </div>
 
-  <section class="verb" id="verb" aria-live="polite"></section>
+  <section class="card" id="card" aria-live="polite"></section>
 
-  <section class="filters" id="filters"></section>
-
-  <section class="tables" id="tables"></section>
+  <nav class="list" id="list" aria-label="All verbs"></nav>
 </div>
 
 <script src="greek-verbs.js"></script>
+<script src="verb-grid.js"></script>
 <script>
-const { conjugate, strip } = GreekVerbs;
+const { strip } = GreekVerbs;
 
-const PERSON_LABELS = ["εγώ", "εσύ", "αυτός/ή/ό", "εμείς", "εσείς", "αυτοί/ές/ά"];
-const IMP_LABELS = ["εσύ", "εσείς"];
-
-const FILTERS = [
-  { key: "mood", label: "Mood", options: [["indicative", "Indicative"], ["subjunctive", "Subjunctive"], ["imperative", "Imperative"]] },
-  { key: "tense", label: "Tense", options: [["past", "Past"], ["present", "Present"], ["future", "Future"]] },
-  { key: "aspect", label: "Aspect", options: [["continuous", "Continuous"], ["simple", "Simple"], ["perfect", "Perfect"]] },
-  { key: "person", label: "Person", options: [["1", "1st"], ["2", "2nd"], ["3", "3rd"]] },
-  { key: "number", label: "Number", options: [["sg", "Singular"], ["pl", "Plural"]] },
-  { key: "show", label: "Show", options: [["alts", "Alternative forms"], ["endings", "Highlight endings"]] },
-];
-
-const ASPECT_NAMES = {
-  past: { continuous: "Παρατατικός", simple: "Αόριστος", perfect: "Υπερσυντέλικος" },
-  present: { continuous: "Ενεστώτας", perfect: "Παρακείμενος" },
-  future: { continuous: "Εξακολουθητικός", simple: "Στιγμιαίος", perfect: "Συντελεσμένος" },
-};
-const ASPECT_LABELS = { continuous: "Continuous", simple: "Simple", perfect: "Perfect" };
-const PATTERN_ENDINGS = { a1: "-ω", a2: "-ω after a vowel", b1: "-άω", b2: "-ώ", c1: "-ομαι", c2: "-άμαι", c3: "-ιέμαι", c4: "-ούμαι", irregular: "irregular" };
-
-// ---------- Saved settings (per browser; fine if storage is unavailable) ----------
-
-const STORE_KEY = "greek-verb-tables";
-const defaults = Object.fromEntries(FILTERS.map(f => [f.key, f.options.map(o => o[0])]));
-let settings = defaults;
-try {
-  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
-  if (saved) settings = { ...defaults, ...saved };
-} catch (e) { /* use defaults */ }
-const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(settings)); } catch (e) { /* ignore */ } };
-const on = (key, value) => settings[key].includes(value);
-
-// ---------- Rendering ----------
-
+const { cardHTML, esc, PATTERN_ENDINGS, CLASS_ORDER } = VerbGrid;
 const $ = id => document.getElementById(id);
-const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const render = verb => { $("card").innerHTML = cardHTML(verb); };
 
-// "θα γράψ|ουμε" → muted "θα", stem, highlighted ending
-function formHTML(form) {
-  const space = form.lastIndexOf(" ");
-  const pre = space >= 0 ? form.slice(0, space + 1) : "";
-  const [stem, end = ""] = form.slice(pre.length).split("|");
-  return (pre ? `<span class="pre">${esc(pre)}</span>` : "") + esc(stem) + (end ? `<span class="end">${esc(end)}</span>` : "");
-}
-
-function cellHTML(alternatives) {
-  if (!alternatives.length) return `<span class="dash">—</span>`;
-  const [main, ...rest] = alternatives;
-  const alts = on("show", "alts") ? rest.map(a => `<span class="alt">${formHTML(a)}</span>`).join("") : "";
-  return formHTML(main) + alts;
-}
-
-// Rows to show for 6-person cells: index 0–5 = 1sg, 2sg, 3sg, 1pl, 2pl, 3pl.
-const visiblePersons = () => [0, 1, 2, 3, 4, 5].filter(i => on("person", String(i % 3 + 1)) && on("number", i < 3 ? "sg" : "pl"));
-
-function tableHTML(title, columns, rows, labels) {
-  if (!columns.length || !rows.length) return "";
-  const head = `<tr><th></th>${columns.map(c => `<th>${c.label}${c.greek ? `<small>${c.greek}</small>` : ""}</th>`).join("")}</tr>`;
-  const body = rows.map(i => `<tr><td class="who">${labels[i]}</td>${columns.map(c => `<td>${cellHTML(c.cell[i])}</td>`).join("")}</tr>`).join("");
-  return `<div class="tcard">${title ? `<h4>${title}</h4>` : ""}<div class="scroll"><table>${head}${body}</table></div></div>`;
-}
-
-function render(verb) {
-  const c = conjugate(verb);
-  const pattern = PATTERN_ENDINGS[c.pattern] || c.pattern;
-  const parts = c.future || c.aorist
-    ? `<div class="parts">θα <b>${esc(c.future || "—")}</b> · <b>${esc(c.aorist || "—")}</b></div>` : "";
-  $("verb").innerHTML = `
-    <div class="verb-top"><h2 lang="el">${esc(c.greek)}</h2><span class="english">${esc(c.english)}</span></div>
-    <div class="tags"><span class="tag">${esc(verb.class || c.pattern)} · ${esc(pattern)}</span>${c.voice ? `<span class="tag">${esc(c.voice)}</span>` : ""}</div>
-    ${parts}
-    ${c.notes.map(n => `<p class="note">${esc(n)}</p>`).join("")}`;
-
-  const persons = visiblePersons();
-  const aspects = ["continuous", "simple", "perfect"].filter(a => on("aspect", a));
-  let html = "";
-
-  if (on("mood", "indicative")) {
-    let block = "";
-    for (const tense of ["past", "present", "future"].filter(t => on("tense", t))) {
-      const cols = aspects.filter(a => c.indicative[tense][a])
-        .map(a => ({ label: ASPECT_LABELS[a], greek: ASPECT_NAMES[tense][a], cell: c.indicative[tense][a] }));
-      block += tableHTML(tense[0].toUpperCase() + tense.slice(1), cols, persons, PERSON_LABELS);
-    }
-    if (block) html += `<div class="mood-title">Indicative<span>Οριστική</span></div>` + block;
-  }
-
-  if (on("mood", "subjunctive")) {
-    const cols = aspects.map(a => ({ label: ASPECT_LABELS[a], cell: c.subjunctive[a] }));
-    const block = tableHTML("", cols, persons, PERSON_LABELS);
-    if (block) html += `<div class="mood-title">Subjunctive<span>Υποτακτική</span></div>` + block;
-  }
-
-  if (on("mood", "imperative") && on("person", "2")) {
-    const rows = [0, 1].filter(i => on("number", i === 0 ? "sg" : "pl"));
-    const cols = aspects.filter(a => a !== "perfect").map(a => ({ label: ASPECT_LABELS[a], cell: c.imperative[a] }));
-    const block = tableHTML("", cols, rows, IMP_LABELS);
-    if (block) html += `<div class="mood-title">Imperative<span>Προστακτική</span></div>` + block;
-  }
-
-  $("tables").innerHTML = html || `<p class="empty">Nothing to show. Tick at least one option in each row above.</p>`;
-  $("tables").classList.toggle("no-hl", !on("show", "endings"));
-}
-
-function renderFilters() {
-  $("filters").innerHTML = FILTERS.map(f => `
-    <h3>${f.label}</h3>
-    <div class="chips">${f.options.map(([value, label]) => `
-      <label class="chip"><input type="checkbox" data-key="${f.key}" value="${value}" ${on(f.key, value) ? "checked" : ""}>${label}</label>`).join("")}
-    </div>`).join("");
-}
-
-$("filters").addEventListener("change", e => {
-  const input = e.target;
-  const set = new Set(settings[input.dataset.key]);
-  input.checked ? set.add(input.value) : set.delete(input.value);
-  settings = { ...settings, [input.dataset.key]: [...set] };
-  save();
-  if (current) render(current);
-});
 
 // ---------- Verb picker ----------
 
@@ -265,13 +79,41 @@ let active = -1;
 
 const fold = s => strip(s.toLowerCase().normalize("NFC")).replace(/ς/g, "σ");
 
-function select(verb) {
+function select(verb, { scroll = false } = {}) {
   current = verb;
   $("search").value = "";
   closeResults();
   history.replaceState(null, "", "#" + encodeURIComponent(verb.greek));
   render(verb);
+  document.querySelectorAll("#list a").forEach(a => a.setAttribute("aria-current", String(a.dataset.greek === verb.greek)));
+  if (scroll) $("card").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+// ---------- Verb list ----------
+
+function renderList() {
+  const groups = new Map();
+  for (const v of verbs) {
+    const cls = v.class || "other";
+    if (!groups.has(cls)) groups.set(cls, []);
+    groups.get(cls).push(v);
+  }
+  const rank = cls => (CLASS_ORDER.includes(cls) ? CLASS_ORDER.indexOf(cls) : CLASS_ORDER.length);
+  const sections = [...groups].sort((a, b) => rank(a[0]) - rank(b[0])).map(([cls, list]) => {
+    const pattern = PATTERN_ENDINGS[cls] && PATTERN_ENDINGS[cls] !== cls ? `<span class="pattern">${esc(PATTERN_ENDINGS[cls])}</span>` : "";
+    const items = list.map(v => `<li><a href="#${encodeURIComponent(v.greek)}" data-greek="${esc(v.greek)}" title="${esc(v.english || "")}">
+        <span class="g" lang="el">${esc(v.greek)}</span><span class="e">${esc(v.english || "")}</span></a></li>`).join("");
+    return `<details open><summary>${esc(cls)}${pattern}<span class="count">${list.length}</span></summary><ul>${items}</ul></details>`;
+  });
+  $("list").innerHTML = `<h2>All verbs · ${verbs.length}</h2>` + sections.join("");
+}
+
+$("list").addEventListener("click", e => {
+  const a = e.target.closest("a[data-greek]");
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;  // let modified clicks open a new tab
+  e.preventDefault();
+  select(verbs.find(v => v.greek === a.dataset.greek), { scroll: true });
+});
 
 function search(query) {
   const q = fold(query.trim());
@@ -279,7 +121,7 @@ function search(query) {
   const scored = [];
   for (const v of verbs) {
     const g = fold(v.greek), e = (v.english || "").toLowerCase();
-    let score = g.startsWith(q) ? 0 : g.includes(q) ? 1 : e.split(/[^a-z]+/).some(w => w.startsWith(q)) ? 2 : e.includes(q) ? 3 : -1;
+    const score = g.startsWith(q) ? 0 : g.includes(q) ? 1 : e.split(/[^a-z]+/).some(w => w.startsWith(q)) ? 2 : e.includes(q) ? 3 : -1;
     if (score >= 0) scored.push([score, v]);
   }
   return scored.sort((a, b) => a[0] - b[0]).slice(0, 12).map(s => s[1]);
@@ -336,16 +178,16 @@ $("random").addEventListener("click", () => {
 
 // ---------- Start ----------
 
-renderFilters();
 fetch("verbs.json")
   .then(r => r.json())
   .then(data => {
     verbs = data.sort((a, b) => fold(a.greek).localeCompare(fold(b.greek), "el"));
+    renderList();
     const wanted = decodeURIComponent(location.hash.slice(1));
     select(verbs.find(v => v.greek === wanted) || verbs.find(v => v.greek === "γράφω") || verbs[0]);
   })
   .catch(() => {
-    $("verb").innerHTML = `<p class="note">Couldn't load verbs.json. Open this page through the site (or mkdocs serve), not straight from disk.</p>`;
+    $("card").innerHTML = `<p class="note">Couldn't load verbs.json. Open this page through the site (make serve), not straight from disk.</p>`;
   });
 </script>
 </body>

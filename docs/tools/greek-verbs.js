@@ -110,8 +110,7 @@
   // A past stem from the sheet (aorist or "past:" override). Normally the accent
   // goes back as far as it can, but if the sheet's 1st singular has it later
   // (υπήρχα, υπήρξα), it stays on that syllable in every person.
-  function pastFromSheet(full, base, ending) {
-    const first = full + "α";
+  function pastFromSheet(full, base, ending, first = full + "α") {
     if (nuclei(first).length >= 3 && accentFromEnd(first) < 3) return join(full, ending);
     return past(full, findAugment(full, base), ending);
   }
@@ -151,6 +150,7 @@
   };
 
   const AORIST = ["α", "ες", "ε", "αμε", "ατε", "αν(ε)"];
+  const AORIST_HKA = AORIST.map(e => "ηκ" + e);
   const PAST = {
     a1: AORIST,
     a2: ["γα", "γες", "γε", "γαμε", "γατε", "γαν(ε)"],
@@ -265,7 +265,11 @@
       infinitive = join(fStem, fKind === "b2" ? "εί" : "ει");
     }
     if (aor) {
-      if (aor.endsWith("α")) {
+      if (strip(aor).endsWith("ηκα")) {
+        // γράφτηκα, βρήκα: -ηκα is the ending learners know, so mark it as one.
+        const full = aor.slice(0, -3);
+        aorist = table(AORIST_HKA, e => pastFromSheet(full, fStem || "", e, aor));
+      } else if (aor.endsWith("α")) {
         const full = aor.slice(0, -1);
         aorist = table(AORIST, e => pastFromSheet(full, fStem || "", e));
       } else {

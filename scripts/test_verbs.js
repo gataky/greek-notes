@@ -7,7 +7,12 @@ const path = require("path");
 const { conjugate } = require("../docs/tools/greek-verbs.js");
 
 const verbs = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/tools/verbs.json"), "utf8"));
-const byGreek = Object.fromEntries(verbs.map(v => [v.greek, v]));
+// Example verbs the conjugation patterns page uses that aren't in the word list.
+const EXTRA = [
+  { greek: "αγαπιέμαι", class: "c3", future: "αγαπηθώ", aorist: "αγαπήθηκα" },
+  { greek: "θεωρούμαι", class: "c4", future: "θεωρηθώ", aorist: "θεωρήθηκα" },
+];
+const byGreek = Object.fromEntries([...verbs, ...EXTRA].map(v => [v.greek, v]));
 
 const clean = row => row.map(f => f.replace("|", "")).join(" / ") || "—";
 const cell = (c, where) => where.split(".").reduce((o, k) => o[k], c);
@@ -91,6 +96,16 @@ const EXPECTED = {
     "imperative.simple": ["κοιμήσου", "κοιμηθείτε"],
   },
   βοηθιέμαι: { "indicative.present.continuous": ["βοηθιέμαι", "βοηθιέσαι", "βοηθιέται", "βοηθιόμαστε", "βοηθιόσαστε / βοηθιέστε", "βοηθιούνται"] },
+  αγαπιέμαι: {
+    "indicative.present.continuous": ["αγαπιέμαι", "αγαπιέσαι", "αγαπιέται", "αγαπιόμαστε", "αγαπιόσαστε / αγαπιέστε", "αγαπιούνται"],
+    "indicative.past.continuous": ["αγαπιόμουν(α)", "αγαπιόσουν(α)", "αγαπιόταν(ε)", "αγαπιόμαστε", "αγαπιόσαστε", "αγαπιόνταν"],
+    "indicative.past.simple": ["αγαπήθηκα", "αγαπήθηκες", "αγαπήθηκε", "αγαπηθήκαμε", "αγαπηθήκατε", "αγαπήθηκαν / αγαπηθήκανε"],
+  },
+  θεωρούμαι: {
+    "indicative.present.continuous": ["θεωρούμαι", "θεωρείσαι", "θεωρείται", "θεωρούμαστε", "θεωρείστε", "θεωρούνται"],
+    "indicative.past.continuous": ["θεωρούμουν(α)", "θεωρούσουν(α)", "θεωρούνταν", "θεωρούμαστε", "θεωρούσαστε", "θεωρούνταν"],
+    "indicative.future.simple": ["θα θεωρηθώ", "θα θεωρηθείς", "θα θεωρηθεί", "θα θεωρηθούμε", "θα θεωρηθείτε", "θα θεωρηθούν(ε)"],
+  },
   είμαι: { "indicative.past.continuous": ["ήμουν(α)", "ήσουν(α)", "ήταν(ε)", "ήμασταν / ήμαστε", "ήσασταν / ήσαστε", "ήταν(ε)"] },
 };
 

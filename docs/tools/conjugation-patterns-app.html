@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conjugation Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="verb-grid.css">
+<style>
+/* Jump links to each class */
+.jump { display: flex; flex-wrap: wrap; gap: 8px; }
+.jump a { font: 600 14px var(--body); color: var(--accent); background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 12px; text-decoration: none; }
+.jump a:hover { border-color: var(--accent); background: var(--accent-soft); }
+.jump a span { font-family: var(--display); font-weight: 400; font-size: 16px; margin-left: 6px; }
+
+.card h2 .pattern { color: var(--accent); margin-left: 12px; }
+.card { scroll-margin-top: 16px; }
+
+/* The sheet's verbs that follow this pattern */
+.yours { margin: 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); line-height: 1.9; }
+.yours a { font-family: var(--display); font-size: 17px; color: var(--ink); text-decoration: none; white-space: nowrap; }
+.yours a:hover { color: var(--accent); text-decoration: underline; }
+.yours .sep { margin: 0 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Verbs</div>
+    <h1>Conjugation Patterns</h1>
+    <p class="sub">How each group of verbs conjugates, shown with one regular verb. The highlighted endings are the pattern: swap in another verb's stems and the same endings apply.</p>
+  </header>
+
+  <nav class="jump" id="jump" aria-label="Jump to a group"></nav>
+
+  <div class="wrap" id="patterns"></div>
+</div>
+
+<script src="greek-verbs.js"></script>
+<script src="verb-grid.js"></script>
+<script>
+const { cardHTML, esc } = VerbGrid;
+const $ = id => document.getElementById(id);
+
+// One regular verb per class. c3 and c4 examples aren't in the word list, so they're spelled out here.
+const PATTERNS = [
+  { cls: "a1", about: "Stem ends in a consonant", verb: { greek: "γράφω", english: "I write", future: "γράψω", aorist: "έγραψα" } },
+  { cls: "a2", about: "Stem ends in a vowel", verb: { greek: "ακούω", english: "I hear", future: "ακούσω", aorist: "άκουσα" } },
+  { cls: "b1", about: "Stressed -ά- in the endings", verb: { greek: "μιλάω", english: "I speak", future: "μιλήσω", aorist: "μίλησα" } },
+  { cls: "b2", about: "Stressed -εί- / -ού- in the endings", verb: { greek: "οδηγώ", english: "I drive", future: "οδηγήσω", aorist: "οδήγησα" } },
+  { cls: "c1", about: "Passive and deponent verbs in -ομαι", verb: { greek: "γράφομαι", english: "I am written; I enroll", future: "γραφτώ", aorist: "γράφτηκα" } },
+  { cls: "c2", about: "Deponent verbs in -άμαι", verb: { greek: "κοιμάμαι", english: "I sleep", future: "κοιμηθώ", aorist: "κοιμήθηκα" } },
+  { cls: "c3", about: "Passive of b1 verbs", verb: { greek: "αγαπιέμαι", english: "I am loved", future: "αγαπηθώ", aorist: "αγαπήθηκα" } },
+  { cls: "c4", about: "Passive of b2 verbs", verb: { greek: "θεωρούμαι", english: "I am considered", future: "θεωρηθώ", aorist: "θεωρήθηκα" } },
+  { cls: "irregular", about: "Its own forms, with no simple stem", verb: { greek: "είμαι", english: "I am", overrides: "no perfective" } },
+];
+
+// Just the ending for headings; each section's description says the rest.
+const ENDINGS = { a1: "-ω", a2: "-ω", b1: "-άω", b2: "-ώ", c1: "-ομαι", c2: "-άμαι", c3: "-ιέμαι", c4: "-ούμαι" };
+const label = cls => ENDINGS[cls] || "";
+
+function render(verbs) {
+  $("jump").innerHTML = PATTERNS.map(p => `<a href="#${p.cls}">${p.cls}${label(p.cls) ? `<span>${esc(label(p.cls))}</span>` : ""}</a>`).join("");
+
+  $("patterns").innerHTML = PATTERNS.map(p => {
+    const heading = `<div>
+      <div class="verb-top"><h2>${p.cls}${label(p.cls) ? `<span class="pattern">${esc(label(p.cls))}</span>` : ""}</h2><span class="english">${esc(p.about)}</span></div>
+      <div class="tags"><span class="tag" lang="el">${esc(p.verb.greek)} · ${esc(p.verb.english)}</span></div>
+    </div>`;
+    const mine = verbs.filter(v => v.class === p.cls);
+    const yours = mine.length
+      ? `<p class="yours">Your verbs (${mine.length}): ${mine.map(v =>
+          `<a href="verb-tables/#${encodeURIComponent(v.greek)}" target="_top" lang="el" title="${esc(v.english || "")}">${esc(v.greek)}</a>`).join(`<span class="sep">&nbsp;·</span> `)}</p>`
+      : `<p class="yours">None of your verbs are in this group yet.</p>`;
+    return `<section class="card" id="${p.cls}">${cardHTML({ ...p.verb, class: p.cls }, { heading })}${yours}</section>`;
+  }).join("");
+}
+
+// The page sits in a frame sized to its content, so scroll the parent page, not the frame.
+$("jump").addEventListener("click", e => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  $(a.getAttribute("href").slice(1)).scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+const fold = s => GreekVerbs.strip(s.toLowerCase());
+fetch("verbs.json")
+  .then(r => r.json())
+  .then(verbs => render(verbs.sort((a, b) => fold(a.greek).localeCompare(fold(b.greek), "el"))))
+  .catch(() => render([]));
+</script>
+</body>
+</html>
