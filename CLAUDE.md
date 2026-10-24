@@ -29,6 +29,19 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
 - Grammar tables are raw HTML (`<div class="sheet-wrap"><table class="sheet">`) styled by `docs/stylesheets/sheet.css` to mirror the layout of the owner's Google Sheet. Border and colour classes include `r1`/`r3`/`b1`/`b3`/`bd` and `nom`/`acc`/`gen`.
 - Interactive pages are standalone HTML apps embedded in a Markdown page with `<iframe class="drill-frame" src="../x-app.html">`. `docs/javascripts/drill-frame.js` (loaded site-wide) hides the app's `<header>`, sizes the iframe to its content, and syncs the light/dark theme by setting `data-theme` on the app's root. Apps therefore define colour tokens on `:root` with dark variants under both `prefers-color-scheme` and `[data-theme="dark"]`. Add `data-pass-hash` to an iframe to forward the page's `#fragment` into it, which is how `tools/verb-tables/#γράφω` opens a verb.
 
+## Offline app (PWA)
+
+The whole site installs as a phone app and works offline:
+- `overrides/main.html` (theme `custom_dir`) adds the manifest (`docs/manifest.webmanifest`) and home-screen tags. Icons are in `docs/app/`.
+- `docs/javascripts/pwa.js` registers `docs/sw.js`.
+- `hooks/pwa.py` (an MkDocs hook, so it also runs in CI) fills placeholders in the built `sw.js` after every build:
+  - the list of every built file, skipping `*.map` and lunr language packs for languages search doesn't use;
+  - the Google Fonts stylesheets found in the pages;
+  - a version stamp: a hash of every listed file plus the worker's own source.
+- A new stamp makes installed apps cache the new copy and delete the old one. The worker also caches the Latin and Greek font subsets, kept across versions.
+- Nothing needs updating when pages are added. Pages are cached under their directory URL (`tools/verb-tables/`), matching how they're linked.
+- `mkdocs serve` hands out the unfilled `docs/sw.js`. Its empty file list caches nothing, so dev edits show on reload; keep the template valid JS for that reason.
+
 ## Verb tables (`docs/tools/`)
 
 Data flows from sheet to JSON to the browser. There is no backend.

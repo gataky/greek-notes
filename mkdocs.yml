@@ -3,6 +3,8 @@ site_description: Personal reference notes for learning Modern Greek
 
 theme:
   name: material
+  custom_dir: overrides
+  favicon: app/icon-192.png
   language: en
   font:
     text: Noto Serif
@@ -34,6 +36,10 @@ extra_css:
 
 extra_javascript:
   - javascripts/drill-frame.js
+  - javascripts/pwa.js
+
+hooks:
+  - hooks/pwa.py
 
 plugins:
   - search
