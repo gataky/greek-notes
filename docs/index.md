@@ -11,3 +11,7 @@ My reference notes for learning Modern Greek.
 ## Drills
 
 - [Passive verbs: present passive endings](drills/passive-verbs.md)
+
+## Tools
+
+- [Verb tables: conjugate any verb from the word list](tools/verb-tables.md)
