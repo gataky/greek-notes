@@ -6,6 +6,7 @@ My reference notes for learning Modern Greek.
 
 - [Articles: definite and indefinite](greek-articles.md)
 - [Adjectives: endings, agreement and comparison](greek-adjectives.md)
+- [Numerals: cardinal, ordinal and nominal numbers](greek-numerals.md)
 - [Passive verbs: when to use them](greek-passive-verbs-when-to-use-them.md)
 
 ## Drills
