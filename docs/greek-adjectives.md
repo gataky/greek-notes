@@ -21,17 +21,6 @@ Adjectives describe nouns and almost always change to **agree** with them in gen
 </table>
 </div>
 
-**All three forms, with more examples:**
-
-| Group | Example forms | More examples |
-| --- | --- | --- |
-| Most common | ψηλός, ψηλή, ψηλό | καλός (good), μικρός (small), μεγάλος (big) |
-| Stem ends in a vowel | ωραίος, ωραία, ωραίο | νέος (young, new), κρύος (cold), καινούριος (new) |
-| Physical properties | βαρύς, βαριά, βαρύ | φαρδύς (wide), μακρύς (long), βαθύς (deep) |
-| Colors and materials | καφετής, καφετιά, καφετί | θαλασσής (sea blue), σταχτής (ash grey) |
-| Learned origin | ακριβής, ακριβής, ακριβές | συνεχής (continuous), υγιής (healthy) |
-| Indeclinable | μπλε | ροζ (pink), μοβ (purple), γκρι (grey), μπεζ (beige) |
-
 ## Full forms of the most common group
 
 The endings follow the same pattern as the [articles](greek-articles.md) and nouns.

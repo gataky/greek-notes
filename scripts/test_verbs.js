@@ -7,10 +7,13 @@ const path = require("path");
 const { conjugate } = require("../docs/tools/greek-verbs.js");
 
 const verbs = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/tools/verbs.json"), "utf8"));
-// Example verbs the conjugation patterns page uses that aren't in the word list.
+// Verbs checked below that aren't in the word list: the conjugation patterns page's
+// c3/c4 examples, and passives kept here so the checks don't depend on the sheet.
 const EXTRA = [
   { greek: "αγαπιέμαι", class: "c3", future: "αγαπηθώ", aorist: "αγαπήθηκα" },
   { greek: "θεωρούμαι", class: "c4", future: "θεωρηθώ", aorist: "θεωρήθηκα" },
+  { greek: "γράφομαι", class: "c1", future: "γραφτώ", aorist: "γράφτηκα" },
+  { greek: "βοηθιέμαι", class: "c3", future: "βοηθηθώ", aorist: "βοηθήθηκα" },
 ];
 const byGreek = Object.fromEntries([...verbs, ...EXTRA].map(v => [v.greek, v]));
 
