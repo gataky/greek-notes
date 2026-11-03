@@ -8,6 +8,7 @@ My reference notes for learning Modern Greek.
 - [Adjectives: endings, agreement and comparison](greek-adjectives.md)
 - [Numerals: cardinal, ordinal and nominal numbers](greek-numerals.md)
 - [Conjunctions: the everyday words that join sentences](greek-conjunctions.md)
+- [Prepositions: σε, από, με, για and the place words](greek-prepositions.md)
 - [Passive verbs: when to use them](greek-passive-verbs-when-to-use-them.md)
 
 ## Drills
