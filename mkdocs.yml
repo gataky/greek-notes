@@ -56,6 +56,15 @@ nav:
   - Grammar:
       - Articles: greek-articles.md
       - Adjectives: greek-adjectives.md
+      - Pronouns:
+          - Overview: pronouns/index.md
+          - Personal: pronouns/personal.md
+          - Possessive: pronouns/possessive.md
+          - Demonstrative: pronouns/demonstrative.md
+          - Interrogative: pronouns/interrogative.md
+          - Relative: pronouns/relative.md
+          - Indefinite: pronouns/indefinite.md
+          - Reflexive and emphatic: pronouns/reflexive.md
       - Numerals: greek-numerals.md
       - Conjunctions: greek-conjunctions.md
       - Prepositions: greek-prepositions.md

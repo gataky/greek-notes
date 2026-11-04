@@ -126,6 +126,8 @@
   border-bottom: 2px solid var(--gn-accent);
   padding-bottom: 0.3rem;
 }
+/* A heading row inside the body, starting a second block in the same grid (singular, then plural) */
+.md-typeset table.grid tbody th.group { padding-top: 0.8rem; }
 .md-typeset table.grid th.sub {
   letter-spacing: 0;
   text-transform: none;
