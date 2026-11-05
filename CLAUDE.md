@@ -12,10 +12,11 @@ Tools are pinned in `.tool-versions` (asdf: Python, Node, uv); Python packages i
 make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
-make check     # verb checks + strict build: what CI runs before deploying
-make test      # node scripts/test_verbs.js
+make check     # verb + dictionary checks, then strict build: what CI runs before deploying
+make test      # node scripts/test_verbs.js and scripts/test_dictionary.js
 make dump      # print every verb's conjugations for review
 make sync      # pull verbs from the Google Sheet into docs/tools/verbs.json, then test
+make dictionary  # gzip a new lemma dictionary build into docs/tools/, then test
 make upgrade   # uv lock --upgrade
 ```
 
@@ -43,6 +44,7 @@ The whole site installs as a phone app and works offline:
   - a version stamp: a hash of every listed file plus the worker's own source.
 - A new stamp makes installed apps cache the new copy and delete the old one. The worker also caches the Latin and Greek font subsets, kept across versions.
 - Nothing needs updating when pages are added. Pages are cached under their directory URL (`tools/verb-tables/`), matching how they're linked.
+- Large data files (`*.db.gz`, the dictionary) stay out of the file list and the version stamp. The hook lists them in `DATA` with their own content hash, and the worker keeps them in a separate `data` cache, so a deploy doesn't download them again unless they changed.
 - `mkdocs serve` hands out the unfilled `docs/sw.js`. Its empty file list caches nothing, so dev edits show on reload; keep the template valid JS for that reason.
 
 ## Verb tables (`docs/tools/`)
@@ -57,6 +59,19 @@ Data flows from sheet to JSON to the browser. There is no backend.
    - Forms are strings with `|` between stem and ending (`γράψ|ουμε`). The UI uses this to highlight endings and tests strip it. Cells are arrays of alternatives (μιλάω / μιλώ); `ουν(ε)` notation collapses optional letters.
    - Per-verb exceptions come only from the `overrides` column: `past: ήθελα; imp: έλα, ελάτε; imp-cont: …; no perfective` (`—` means not used). Prefer an override over special-casing a verb in code; only είμαι is hardcoded.
 4. **`verb-grid.js` + `verb-grid.css`** render the shared "two stems" grid: continuous and simple, each with present/dependent and past columns, plus imperative and perfect rows and the θα/να forms written out. It switches to stacked tables below 560px.
-5. **Pages:** `verb-tables-app.html` (search, random, a list grouped by class, URL hash = current verb) and `conjugation-patterns-app.html` (one regular example verb per class; the c3/c4 examples are defined inline because they aren't in the sheet).
+5. **Pages:** `verb-tables-app.html` (search, a list grouped by class, URL hash = current verb) and `conjugation-patterns-app.html` (one regular example verb per class; the c3/c4 examples are defined inline because they aren't in the sheet).
 
 When changing the engine, run `make test` and also diff all generated forms against the previous commit's engine. Most verbs aren't in `EXPECTED`, so the checks alone can miss regressions.
+
+## Dictionary (`docs/tools/dictionary-app.html`)
+
+A Greek ↔ English dictionary that runs entirely in the browser. It's the home page: `docs/index.md` embeds it above the list of notes, so `/#σπίτι` opens a word.
+
+- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 2, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy and its developer guide (`sqlite-database.md`) are in `../dictionary/`. It changes about once a year: `make dictionary`. Never write to the database, and refer to words by spelling (`#σπίτι`), since row ids change between builds.
+- **Engine:** sql.js 1.14.2 is vendored in `docs/tools/vendor/` (no CDN, so it works offline). The app unzips the file with `DecompressionStream` and opens it in memory.
+- **`greek-dictionary.js`** (browser and Node) ports the guide's Python reference: the `norm`/`phonetic`/Greeklish/English keys, Greek and English search, entry lookup. The keys must match the stored ones exactly; `scripts/test_dictionary.js` recomputes them for every form. sql.js has no FTS5, so the English fallback for terms missing from `en_index` scans glosses with `LIKE` instead of using `sense_fts`.
+- **`dictionary-app.html`:** one search box. Greek input searches Greek. Latin input shows English and Greeklish results side by side, since it could be either. The hash is the open headword. Greek words in glosses link to their entries, and verbs in `verbs.json` link to the verb tables.
+- **Verbs not in the sheet** also link to the verb tables, as `verb-tables/#καπνίζω,καπνίσω,κάπνισα`. The verb tables page conjugates those parts and shows a "guessed" note.
+  - `principalParts()` works out the future and aorist from the dictionary's forms, which carry no labels. It tries each candidate pair through `greek-verbs.js` and keeps the one whose generated forms the dictionary also lists.
+  - Candidates are filtered first: the aorist must share the future's consonants (κάπνισα/καπνίσω, not the imperfect κάπνιζα), and the verb's own present and imperfect, variant presents that are headwords, and unaccented forms are skipped.
+  - It returns null when unsure, and then there's no link. `test_dictionary.js` checks it against the sheet's hand-entered parts, so re-run it after changing the engine.

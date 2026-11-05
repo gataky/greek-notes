@@ -30,6 +30,7 @@ jobs:
           version-file: .tool-versions
       - run: uv sync --locked
       - run: node scripts/test_verbs.js
+      - run: node scripts/test_dictionary.js
       - run: uv run mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:

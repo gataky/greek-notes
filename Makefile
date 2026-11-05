@@ -2,12 +2,13 @@
 
 SHEET_URL := https://docs.google.com/spreadsheets/d/1p39Sbnkx3G4swoSPJ2KKVKu-VwteKmaAQ9toFadd5cA/edit
 NODE      := node
+DICT_DB   := ../dictionary/lemma_greek_en.db
 
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade sync test dump serve build check clean sheet
+.PHONY: help install upgrade sync dictionary test dump serve build check clean sheet
 
 help: ## List the targets
-	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
 
 install: ## Create .venv from uv.lock
 	uv sync
@@ -21,8 +22,13 @@ sync: ## Pull verbs from the Google Sheet into verbs.json, then run the checks
 	@git diff --stat -- docs/tools/verbs.json
 	@$(NODE) scripts/test_verbs.js
 
-test: ## Check the conjugation engine against known forms
+dictionary: ## Copy in a new dictionary build (DICT_DB=path/to/lemma_greek_en.db), then check it
+	gzip -9 -n -c "$(DICT_DB)" > docs/tools/lemma_greek_en.db.gz
+	@$(NODE) scripts/test_dictionary.js
+
+test: ## Check the conjugation engine and the dictionary lookup
 	$(NODE) scripts/test_verbs.js
+	$(NODE) scripts/test_dictionary.js
 
 dump: ## Print every verb's conjugations, for reviewing
 	$(NODE) scripts/test_verbs.js --dump

@@ -4,6 +4,9 @@ After every build it fills in site/sw.js (from docs/sw.js) with the list of ever
 the site, the Google Fonts stylesheets the pages use, and a version stamp taken from the
 files' contents, so each deploy that changes anything reaches installed apps.
 
+Large data files (the dictionary, *.db.gz) are kept out of that list and stamp. Each gets
+its own content hash instead, so installed apps download them again only when they change.
+
 Under `mkdocs serve` it does nothing: the dev server hands out docs/sw.js as is, and with
 its empty file list that worker saves no site files, so edits always show up on reload.
 """
@@ -14,6 +17,7 @@ import re
 from pathlib import Path
 
 SKIP = {"sw.js", "sitemap.xml.gz"}
+DATA_SUFFIXES = (".db.gz",)
 LUNR = "assets/javascripts/lunr/"
 FONT_CSS = re.compile(r"https://fonts\.googleapis\.com/css2?\?[^\"' )]+")
 
@@ -49,12 +53,15 @@ def on_post_build(config):
 
     source = worker.read_text(encoding="utf-8")
     # The version covers the worker's own code too, so changing only sw.js still refreshes the cache.
-    files, fonts, digest = [], set(), hashlib.sha256(source.encode())
+    files, data_files, fonts, digest = [], {}, set(), hashlib.sha256(source.encode())
     for path in sorted(p for p in site.rglob("*") if p.is_file()):
         rel = path.relative_to(site).as_posix()
         if path.name.startswith(".") or not _offline(rel, search_langs):
             continue
         data = path.read_bytes()
+        if rel.endswith(DATA_SUFFIXES):
+            data_files[rel] = hashlib.sha256(data).hexdigest()[:12]
+            continue
         digest.update(rel.encode() + b"\0" + data)
         # Pages are linked as directories (tools/verb-tables/), so cache them under that URL.
         if rel.endswith("index.html"):
@@ -67,6 +74,7 @@ def on_post_build(config):
     for marker, value in {
         '"/*__VERSION__*/dev"': json.dumps(digest.hexdigest()[:12]),
         "/*__FILES__*/[]": json.dumps(files, ensure_ascii=False),
+        "/*__DATA__*/{}": json.dumps(data_files, ensure_ascii=False),
         "/*__FONT_CSS__*/[]": json.dumps(sorted(fonts)),
     }.items():
         if marker not in source:

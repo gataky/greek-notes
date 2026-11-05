@@ -1,6 +1,8 @@
 # Modern Greek Notes
 
-My reference notes for learning Modern Greek.
+<iframe class="drill-frame" data-pass-hash src="tools/dictionary-app.html" title="Greek dictionary"></iframe>
+
+Look up any word in Greek, Greeklish or English. The dictionary is a 16 MB download the first time; after that it's kept on the device and works offline.
 
 ## Grammar
 

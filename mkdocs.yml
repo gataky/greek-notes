@@ -52,7 +52,7 @@ markdown_extensions:
       permalink: true
 
 nav:
-  - Home: index.md
+  - Dictionary: index.md
   - Grammar:
       - Articles: greek-articles.md
       - Adjectives: greek-adjectives.md

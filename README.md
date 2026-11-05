@@ -32,3 +32,13 @@ make sync      # pull the verbs into verbs.json and run the checks
 ```
 
 Commit `verbs.json` and push.
+
+## Updating the dictionary
+
+The dictionary page reads `docs/tools/lemma_greek_en.db.gz`, a gzipped copy of the lemma SQLite dictionary. When there's a new build:
+
+```sh
+make dictionary DICT_DB=path/to/lemma_greek_en.db   # default: ../dictionary/lemma_greek_en.db
+```
+
+That gzips it into `docs/` and runs the checks. Commit the `.db.gz` and push. Installed apps download it again only because it changed; other deploys leave it alone.

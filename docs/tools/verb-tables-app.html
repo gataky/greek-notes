@@ -13,7 +13,6 @@
 .picker { position: relative; display: flex; gap: 10px; }
 #search { flex: 1; min-width: 0; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
 #search:focus { border-color: var(--accent); outline: none; }
-.btn { appearance: none; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); font: 600 15px var(--body); padding: 10px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
 #results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 5; margin: 0; padding: 6px; list-style: none;
   background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgb(0 0 0 / .12); max-height: 340px; overflow-y: auto; }
 #results li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
@@ -51,7 +50,6 @@
   <div class="picker">
     <input id="search" type="search" lang="el" autocomplete="off" spellcheck="false" placeholder="Search in Greek or English…"
       role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list" aria-label="Find a verb">
-    <button class="btn" id="random" type="button">Random</button>
     <ul id="results" role="listbox" hidden></ul>
   </div>
 
@@ -73,17 +71,15 @@ const render = verb => { $("card").innerHTML = cardHTML(verb); };
 // ---------- Verb picker ----------
 
 let verbs = [];
-let current = null;
 let matches = [];
 let active = -1;
 
 const fold = s => strip(s.toLowerCase().normalize("NFC")).replace(/ς/g, "σ");
 
 function select(verb, { scroll = false } = {}) {
-  current = verb;
   $("search").value = "";
   closeResults();
-  history.replaceState(null, "", "#" + encodeURIComponent(verb.greek));
+  history.replaceState(null, "", "#" + (verb.guessed ? [verb.greek, verb.future, verb.aorist] : [verb.greek]).map(encodeURIComponent).join(","));
   render(verb);
   document.querySelectorAll("#list a").forEach(a => a.setAttribute("aria-current", String(a.dataset.greek === verb.greek)));
   if (scroll) $("card").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -171,10 +167,17 @@ $("results").addEventListener("mousedown", e => {
 });
 $("search").addEventListener("blur", closeResults);
 
-$("random").addEventListener("click", () => {
-  const others = verbs.filter(v => v !== current);
-  select(others[Math.floor(Math.random() * others.length)]);
-});
+// The hash names a verb from the list (#γράφω), or brings its own principal parts for a verb
+// that isn't in it, as the dictionary's links do (#καπνίζω,καπνίσω,κάπνισα).
+function fromHash() {
+  const [greek, future, aorist] = location.hash.slice(1).split(",").map(decodeURIComponent);
+  const known = verbs.find(v => v.greek === greek);
+  if (known || !future || !aorist) return known;
+  return {
+    greek, future, aorist, english: "", guessed: true,
+    note: `${greek} isn't in the word list. Its future simple (${future}) and aorist (${aorist}) were worked out from the dictionary, so double-check them.`,
+  };
+}
 
 // ---------- Start ----------
 
@@ -183,8 +186,7 @@ fetch("verbs.json")
   .then(data => {
     verbs = data.sort((a, b) => fold(a.greek).localeCompare(fold(b.greek), "el"));
     renderList();
-    const wanted = decodeURIComponent(location.hash.slice(1));
-    select(verbs.find(v => v.greek === wanted) || verbs.find(v => v.greek === "γράφω") || verbs[0]);
+    select(fromHash() || verbs.find(v => v.greek === "γράφω") || verbs[0]);
   })
   .catch(() => {
     $("card").innerHTML = `<p class="note">Couldn't load verbs.json. Open this page through the site (make serve), not straight from disk.</p>`;

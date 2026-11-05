@@ -83,7 +83,7 @@
         <div class="verb-top"><h2 lang="el">${esc(c.greek)}</h2><span class="english">${esc(c.english)}</span></div>
         <div class="tags"><span class="tag">${esc(classTag)}</span>${c.voice ? `<span class="tag">${esc(c.voice)}</span>` : ""}</div>
       </div>`}
-      ${c.notes.map(n => `<p class="note">${esc(n)}</p>`).join("")}
+      ${[verb.note, ...c.notes].filter(Boolean).map(n => `<p class="note">${esc(n)}</p>`).join("")}
       <div class="stacked">${stacked}</div>
       <div class="scroll wide"><table lang="el">
         <thead>

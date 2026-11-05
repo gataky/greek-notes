@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Greek Dictionary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="verb-grid.css">
+<style>
+/* Search box */
+#search { width: 100%; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+#search:focus { border-color: var(--accent); outline: none; }
+#status { color: var(--muted); font-size: 14px; margin: -10px 0 0; }
+#status progress { width: 100%; height: 6px; margin-top: 6px; accent-color: var(--accent); }
+
+/* Results, grouped by how they matched */
+#results { display: flex; flex-direction: column; gap: 14px; }
+.group h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
+.group ul { list-style: none; margin: 0; padding: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.group a, .group .nolink { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+/* .first is what Enter opens */
+.group a:hover, .group a:focus-visible, .group a.first { background: var(--accent-soft); outline: none; }
+.group .g { font-family: var(--display); font-size: 20px; }
+.group .from { font-family: var(--display); font-size: 16px; color: var(--muted); }
+.group .e { flex: 1 1 200px; min-width: 0; color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.group .e b { font-weight: 500; color: var(--accent); }
+.group .nolink .g { color: var(--muted); }
+.empty { color: var(--muted); margin: 0; }
+
+/* Entry */
+.card h2 { overflow-wrap: anywhere; }
+.entry { display: flex; flex-direction: column; gap: 8px; }
+.entry + .entry { border-top: 1px solid var(--line); padding-top: 16px; }
+.entry .head { color: var(--muted); font-size: 15px; margin: 0; }
+.entry ol { margin: 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; }
+.entry li::marker { color: var(--muted); font-size: 14px; }
+.label { color: var(--muted); font-style: italic; font-size: 14px; }
+.ref { color: var(--muted); }
+.ex { display: block; margin-top: 3px; padding-left: 10px; border-left: 2px solid var(--line); }
+.ex .el { display: block; font-family: var(--display); font-size: 18px; }
+.ex .tr { display: block; color: var(--muted); font-size: 14px; }
+.card a { color: var(--accent); }
+a.w { font-family: var(--display); font-size: 1.1em; text-decoration: none; }
+a.w:hover { text-decoration: underline; }
+.card details summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
+.card details p { margin: 8px 0 0; font-size: 15px; }
+.forms { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 8px; font-family: var(--display); font-size: 18px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; font-weight: 600; }
+
+footer { color: var(--muted); font-size: 13px; }
+footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Dictionary</div>
+    <h1>Greek Dictionary</h1>
+    <p class="sub">Type Greek, with or without accents, Greeklish or English. Inflected forms find their dictionary word: είπα finds λέω.</p>
+  </header>
+
+  <input id="search" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="σπίτι, spiti or house…" aria-label="Search the dictionary" aria-controls="results">
+  <div id="status" role="status"></div>
+
+  <div id="results" aria-live="polite"></div>
+
+  <section class="card" id="card" hidden></section>
+
+  <footer>
+    Definitions from <a href="https://en.wiktionary.org/" target="_blank" rel="noopener">English Wiktionary</a> via
+    <a href="https://kaikki.org/" target="_blank" rel="noopener">kaikki.org</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>),
+    compiled by <a href="https://github.com/open-greek/lemma" target="_blank" rel="noopener">lemma</a>, with inflections from Dilemma and word frequencies from FrequencyWords.
+    <span id="build"></span>
+  </footer>
+</div>
+
+<script src="vendor/sql-wasm.js"></script>
+<script src="greek-verbs.js"></script>
+<script src="greek-dictionary.js"></script>
+<script>
+const { isGreek, PHONETIC } = GreekDictionary;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const wordHref = w => "#" + encodeURIComponent(w);
+
+let dict = null;
+let verbs = new Set();  // verbs with a conjugation table
+
+// ---------- Loading ----------
+
+// The database is a gzipped file of about 16 MB. The service worker keeps it, so this
+// downloads once; after that it comes from the phone and only needs unzipping.
+async function download(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url}: ${res.status}`);
+  const total = +res.headers.get("content-length") || 0;
+  const reader = res.body.getReader();
+  const chunks = [];
+  let got = 0, last = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    got += value.length;
+    if (total && performance.now() - last > 100) {
+      last = performance.now();
+      status(`Downloading the dictionary (${Math.round(total / 1e6)} MB, once)…`, Math.min(got / total, 1));
+    }
+  }
+  let bytes = new Uint8Array(got), at = 0;
+  for (const c of chunks) { bytes.set(c, at); at += c.length; }
+  // A server may already have unzipped it (Content-Encoding: gzip); only unzip a gzip file.
+  if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+    status("Opening the dictionary…");
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+  return bytes;
+}
+
+function status(text, fraction) {
+  $("status").hidden = !text;
+  $("status").innerHTML = esc(text) + (fraction == null ? "" : `<progress value="${fraction}"></progress>`);
+}
+
+async function start() {
+  status("Opening the dictionary…");
+  fetch("verbs.json").then(r => r.json()).then(list => { verbs = new Set(list.map(v => v.greek)); }).catch(() => {});
+  try {
+    const [SQL, bytes] = await Promise.all([
+      initSqlJs({ locateFile: file => "vendor/" + file }),
+      download("lemma_greek_en.db.gz"),
+    ]);
+    dict = GreekDictionary.open(new SQL.Database(bytes));
+  } catch (err) {
+    status(`Couldn't open the dictionary (${err.message}). Open this page through the site (make serve), and online the first time.`);
+    return;
+  }
+  status("");
+  const date = dict.meta.extraction_date || dict.meta.build_date;
+  if (date) $("build").textContent = `Wiktionary snapshot of ${date}.`;
+  if (location.hash) showHash();
+  if ($("search").value.trim()) showResults();
+}
+
+// ---------- Search ----------
+
+const GROUP_LIMIT = 8;
+
+// "(figuratively) house" -> the leading labels muted.
+function glossHTML(gloss, { link = false } = {}) {
+  const m = gloss.match(/^(\s*\([^)]*\))+\s*/);
+  const label = m ? `<span class="label">${esc(m[0].trim())}</span> ` : "";
+  const rest = gloss.slice(m ? m[0].length : 0);
+  return label + (link ? linkWords(rest) : esc(rest));
+}
+
+// Greek words that are headwords become links: "alternative form of τρώω".
+function linkWords(text) {
+  return esc(text).replace(/[\p{Script=Greek}̀-ͯ]+/gu, w =>
+    dict.has(w) ? `<a class="w" lang="el" href="${wordHref(w)}">${w}</a>` : `<span lang="el">${w}</span>`);
+}
+
+function greekItem(hit) {
+  const from = hit.matchedForm !== hit.word ? `<span class="from" lang="el">← ${esc(hit.matchedForm)}</span>` : "";
+  return `<li><a href="${wordHref(hit.word)}"><span class="g" lang="el">${esc(hit.word)}</span>${from}<span class="e">${esc(hit.gloss || "")}</span></a></li>`;
+}
+
+function englishItem(hit) {
+  const note = hit.note ? ` <b>[${esc(hit.note)}]</b>` : "";
+  const inner = `<span class="g" lang="el">${esc(hit.greek)}</span><span class="e">${esc(hit.gloss || "")}${note}</span>`;
+  return hit.headwordId == null
+    ? `<li><span class="nolink" title="No full entry for this word">${inner}</span></li>`
+    : `<li><a href="${wordHref(hit.greek)}">${inner}</a></li>`;
+}
+
+const group = (title, items) => items.length ? `<section class="group"><h2>${title}</h2><ul>${items.join("")}</ul></section>` : "";
+
+function showResults() {
+  const query = $("search").value.trim();
+  if (!query || !dict) { $("results").innerHTML = ""; return; }
+  // Whole-word matches first, then words that start with what's typed so far.
+  // Each headword shows once, in the first group that has it.
+  const hits = [...dict.searchGreek(query, 30), ...dict.complete(query, GROUP_LIMIT)];
+  const seen = new Set();
+  const pick = test => hits.filter(h => test(h) && !seen.has(h.headwordId) && seen.add(h.headwordId))
+    .slice(0, GROUP_LIMIT).map(greekItem);
+  const close = pick(h => h.kind < PHONETIC);
+  const sounds = pick(h => h.kind === PHONETIC);
+  let html;
+  if (isGreek(query)) {
+    html = group("Matches", close) + group(close.length ? "Sounds similar" : "Did you mean", sounds);
+  } else {
+    // Latin letters could be English or Greeklish, so show both.
+    const english = dict.searchEnglish(query, GROUP_LIMIT);
+    const indexed = english.filter(h => !h.fullText).map(englishItem);
+    const inGlosses = english.filter(h => h.fullText).map(englishItem);
+    html = group("English → Greek", indexed) + group("Greeklish", sounds) + group("In definitions", inGlosses);
+  }
+  $("results").innerHTML = html || `<p class="empty">Nothing found for “${esc(query)}”.</p>`;
+  $("results").querySelector("a")?.classList.add("first");
+}
+
+$("search").addEventListener("input", showResults);
+$("search").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    const first = $("results").querySelector("a");
+    if (first) { e.preventDefault(); first.click(); }
+  } else if (e.key === "Escape") {
+    $("search").value = "";
+    showResults();
+  }
+});
+
+// Picking a result: clear the search and show the entry (through the hash, so Back works).
+$("results").addEventListener("click", e => {
+  const a = e.target.closest("a[href^='#']");
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  $("search").value = "";
+  $("search").blur();
+  showResults();
+  if (a.getAttribute("href") === location.hash) showHash();  // same word again: hashchange won't fire
+});
+
+// ---------- Entry ----------
+
+function entryHTML(found) {
+  const entries = found.entries.map(entry => {
+    const senses = entry.senses.map(s => {
+      const example = s.example
+        ? `<span class="ex"><span class="el" lang="el">${esc(s.example)}</span>${s.translation ? `<span class="tr">${esc(s.translation)}</span>` : ""}</span>`
+        : "";
+      return `<li${s.isReference ? ' class="ref"' : ""}>${glossHTML(s.gloss, { link: true })}${example}</li>`;
+    }).join("");
+    const etymology = entry.etymology ? `<details><summary>Etymology</summary><p>${linkWords(entry.etymology)}</p></details>` : "";
+    return `<div class="entry">
+      <div class="tags"><span class="tag">${esc(entry.pos)}</span></div>
+      ${entry.head ? `<p class="head">${linkWords(entry.head)}</p>` : ""}
+      <ol>${senses}</ol>${etymology}</div>`;
+  }).join("");
+  const forms = found.forms.length
+    ? `<details><summary>Other forms · ${found.forms.length}</summary><div class="forms" lang="el">${found.forms.map(f => `<span>${esc(f)}</span>`).join("")}</div></details>`
+    : "";
+  const conjugation = conjugationLink(found);
+  const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
+  return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2></div>
+    ${entries}${forms}<div class="links">${conjugation}${wiktionary}</div>`;
+}
+
+// Verbs in the word list link to their table. Other verbs get one too when the dictionary's
+// forms settle their future simple and aorist; the table then says those were guessed.
+function conjugationLink(found) {
+  const link = (hash, label) => `<a href="verb-tables/#${hash}" target="_top">${label} →</a>`;
+  const twin = found.word.endsWith("άω") ? found.word.slice(0, -2) + "ώ" : found.word.endsWith("ώ") ? found.word.slice(0, -1) + "άω" : null;
+  const known = [found.word, twin].find(w => w && verbs.has(w));
+  if (known) return link(encodeURIComponent(known), "Conjugation table");
+  if (!found.entries.some(e => e.pos === "verb")) return "";
+  const parts = dict.principalParts(found.word);
+  return parts ? link([found.word, parts.future, parts.aorist].map(encodeURIComponent).join(","), "Conjugation table (guessed)") : "";
+}
+
+function showHash() {
+  if (!dict) return;
+  const wanted = decodeURIComponent(location.hash.slice(1));
+  if (!wanted) { $("card").hidden = true; return; }
+  // A word that isn't a headword (an old link, a typo) opens its best match.
+  const found = dict.lookup(wanted) || dict.lookup(dict.searchGreek(wanted, 1)[0]?.word ?? "");
+  if (!found) {
+    $("card").hidden = false;
+    $("card").innerHTML = `<p class="empty">No entry for “<span lang="el">${esc(wanted)}</span>”.</p>`;
+    return;
+  }
+  $("card").hidden = false;
+  $("card").innerHTML = entryHTML(found);
+  document.title = `${found.word} · Greek Dictionary`;
+  $("card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+window.addEventListener("hashchange", showHash);
+
+start();
+</script>
+</body>
+</html>
