@@ -122,13 +122,13 @@
 {"greek": "προσεύχομαι", "english": "I pray", "class": "c1", "voice": "deponent", "future": "προσευχηθώ", "aorist": "προσευχήθηκα"},
 {"greek": "κάθομαι", "english": "I sit", "class": "c1", "voice": "deponent", "future": "καθίσω", "aorist": "κάθισα"},
 {"greek": "ετοιμάζομαι", "english": "I get ready, prepare", "class": "c1", "voice": "deponent", "future": "ετοιμαστώ", "aorist": "ετοιμάστηκα"},
-{"greek": "εργάζομαι", "english": "be work", "class": "c1", "voice": "deponent", "future": "εργαστώ", "aorist": "εργάστηκα"},
+{"greek": "εργάζομαι", "english": "I work", "class": "c1", "voice": "deponent", "future": "εργαστώ", "aorist": "εργάστηκα"},
 {"greek": "σκουπίζω", "english": "I wipe", "class": "a1", "voice": "active", "future": "σκουπίσω", "aorist": "σκούπισα"},
 {"greek": "ανεβαίνω", "english": "I go up", "class": "a1", "voice": "active", "future": "ανέβω", "aorist": "ανέβηκα", "overrides": "imp: ανέβα, ανεβείτε"},
 {"greek": "κατεβαίνω", "english": "I go down", "class": "a1", "voice": "active", "future": "κατέβω", "aorist": "κατέβηκα", "overrides": "imp: κατέβα, κατεβείτε"},
 {"greek": "πηγαίνω", "english": "I go", "class": "a1", "voice": "active", "future": "πάω", "aorist": "πήγα", "overrides": "imp: πήγαινε, πηγαίνετε"},
 {"greek": "βουρτσίζω", "english": "I brush", "class": "a1", "voice": "active", "future": "βουρτσίσω", "aorist": "βούρτσισα"},
-{"greek": "κόβω", "english": "Ι cut", "class": "a1", "voice": "active", "future": "κόψω", "aorist": "έκοψα"},
+{"greek": "κόβω", "english": "I cut", "class": "a1", "voice": "active", "future": "κόψω", "aorist": "έκοψα"},
 {"greek": "ξεπλένω", "english": "I rinse", "class": "a1", "voice": "active", "future": "ξεπλύνω", "aorist": "ξέπλυνα"},
 {"greek": "μεγαλώνω", "english": "I grow", "class": "a1", "voice": "active", "future": "μεγαλώσω", "aorist": "μεγάλωσα"},
 {"greek": "ανακατεύω", "english": "I mix", "class": "a1", "voice": "active", "future": "ανακατέψω", "aorist": "ανακάτεψα"},
@@ -149,5 +149,7 @@
 {"greek": "σκουπίζομαι", "english": "I dry myself, wipe myself", "class": "c1", "voice": "passive", "activeForm": "σκουπίζω", "future": "σκουπιστώ", "aorist": "σκουπίστηκα"},
 {"greek": "στεγνώνομαι", "english": "I dry myself", "class": "c1", "voice": "passive", "activeForm": "στεγνώνω", "future": "στεγνωθώ", "aorist": "στεγνώθηκα"},
 {"greek": "φτιάχνομαι", "english": "I am made; I get dolled up", "class": "c1", "voice": "passive", "activeForm": "φτιάχνω", "future": "φτιαχτώ", "aorist": "φτιάχτηκα"},
-{"greek": "ψήνομαι", "english": "I am baked, grilled; (slang) I'm up for it", "class": "c1", "voice": "passive", "activeForm": "ψήνω", "future": "ψηθώ", "aorist": "ψήθηκα", "overrides": "imp: —, —"}
+{"greek": "ψήνομαι", "english": "I am baked, grilled; (slang) I'm up for it", "class": "c1", "voice": "passive", "activeForm": "ψήνω", "future": "ψηθώ", "aorist": "ψήθηκα", "overrides": "imp: —, —"},
+{"greek": "κερδίζω", "english": "I earn", "class": "a1", "voice": "active", "future": "κερδίσω", "aorist": "κέρδισα"},
+{"greek": "δένω", "english": "I tie", "class": "a1", "voice": "active", "future": "δέσω", "aorist": "έδεσα"}
 ]
