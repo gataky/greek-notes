@@ -1,11 +1,21 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Greek Passive Drill</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Active or Passive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
 <style>
-/* Layout: one calm column; a single drill card is the hero, reference tables sit behind a tab. */
+/* One calm column: the drill card is the hero; endings and stats sit around it. */
+@font-face {
+  font-family: "Greek Didot";
+  src: url("../fonts/gfs-didot-greek.woff2") format("woff2");
+  unicode-range: U+0370-03FF;
+  size-adjust: 118%;
+  font-display: swap;
+}
 :root {
   --bg: #f4f7fb;
   --surface: #ffffff;
@@ -20,7 +30,7 @@
   --warn-soft: #fbf0dc;
   --bad: #b23434;
   --bad-soft: #f9e4e4;
-  --display: "GFS Didot", "Noto Serif", Georgia, serif;
+  --display: "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
   --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -38,17 +48,19 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
+  margin: 0;
   background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 28px 48px;
+  padding: 28px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
 }
 .wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.wrap > *, .slip > * { min-width: 0; }
 header { display: flex; flex-direction: column; gap: 4px; }
 .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; }
 .sub { color: var(--muted); margin: 0; max-width: 60ch; }
+.g { font-family: var(--display); }
 
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
 .tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
@@ -57,18 +69,18 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 
 .tab:focus-visible, button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
-.prompt { display: flex; flex-direction: column; gap: 6px; }
+.prompt { display: flex; flex-direction: column; gap: 8px; }
 .prompt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.pattern-tag { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
 .counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.question { font-family: var(--display); font-size: clamp(30px, 7vw, 40px); line-height: 1.15; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
-.question .pron { color: var(--accent); }
-.question .plus { color: var(--muted); font-size: .7em; }
-.gloss { color: var(--muted); font-size: 15px; }
+.english { font-size: clamp(22px, 5vw, 28px); line-height: 1.3; margin: 0; text-wrap: pretty; }
+.pair { font-family: var(--display); font-size: 20px; color: var(--muted); margin: 0; }
+.pair b { color: var(--ink); font-weight: 400; }
+.linkbtn { appearance: none; background: none; border: 0; padding: 0; color: var(--accent); font: 600 14px var(--body); cursor: pointer; align-self: flex-start; }
 
 .answer-row { display: flex; gap: 10px; flex-wrap: wrap; }
-#answer { flex: 1 1 220px; min-width: 0; font: 400 24px var(--display); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+#answer { flex: 1 1 220px; width: 0; min-width: 0; font: 400 24px var(--display); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
 #answer:focus { border-color: var(--accent); outline: none; }
+#answer::placeholder { font: 400 16px var(--body); color: var(--muted); }
 .btn { appearance: none; border: 1.5px solid var(--accent); background: var(--accent); color: var(--surface); font: 600 15px var(--body); padding: 10px 18px; border-radius: 10px; cursor: pointer; }
 .btn.ghost { background: transparent; color: var(--accent); }
 .btn:disabled { opacity: .45; cursor: default; }
@@ -82,71 +94,98 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 
 .feedback.warn { background: var(--warn-soft); color: var(--warn); }
 .feedback.bad { background: var(--bad-soft); color: var(--bad); }
 .feedback strong { font-weight: 700; }
-.feedback .form { font-family: var(--display); font-size: 22px; color: var(--ink); }
-.feedback .form b { color: var(--accent); font-weight: 400; text-decoration: underline; text-underline-offset: 4px; }
-.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.feedback .msg { color: var(--ink); }
+.feedback .fix { font-family: var(--display); font-size: 22px; color: var(--ink); }
+.feedback .fix s { color: var(--bad); text-decoration-thickness: 1.5px; }
+.feedback .fix b { color: var(--good); font-weight: 400; }
 
+.reveal { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+.greek { font-family: var(--display); font-size: clamp(24px, 5.5vw, 30px); line-height: 1.25; margin: 0; }
+.greek b { color: var(--accent); font-weight: 400; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
+.why { display: flex; flex-direction: column; gap: 6px; }
+.reason { align-self: flex-start; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
+.why p { margin: 0; font-size: 15px; }
+.why .note { color: var(--muted); }
+
+table.para { border-collapse: collapse; width: 100%; }
+.para th { text-align: left; font-family: var(--display); font-weight: 400; font-size: 18px; color: var(--muted); padding: 0 8px 6px; }
+.para td { padding: 5px 8px; border-top: 1px solid var(--line); font-family: var(--display); font-size: 19px; }
+.para td.who { color: var(--muted); font-size: 15px; width: 1%; white-space: nowrap; padding-left: 0; }
+.para td span.end { color: var(--accent); }
+.para td.hit { background: var(--accent-soft); }
+.para td.miss { background: var(--bad-soft); }
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
 .stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .stats b { color: var(--ink); font-weight: 600; }
 
-.settings { display: flex; flex-direction: column; gap: 10px; }
-.settings h2, .section h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
+.section .help { font-size: 14px; color: var(--muted); margin: 0; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; cursor: pointer; font-size: 14px; background: var(--surface); user-select: none; }
 .chip input { accent-color: var(--accent); margin: 0; }
 .chip:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
-.chip .g { font-family: var(--display); font-size: 17px; }
 
-.misses { display: flex; flex-wrap: wrap; gap: 8px; }
-.miss { font-family: var(--display); font-size: 17px; background: var(--bad-soft); color: var(--ink); border-radius: 8px; padding: 3px 10px; }
-.empty { color: var(--muted); font-size: 14px; margin: 0; }
+.slip { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px; font-variant-numeric: tabular-nums; }
+.slip .h { font-size: 12px; font-weight: 600; color: var(--muted); align-self: end; }
+.slip .rl { font-family: var(--display); font-size: 17px; color: var(--muted); align-self: center; padding-right: 6px; }
+.cell { border-radius: 10px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+.cell b { font-size: 16px; }
+.cell span { font-size: 12px; color: var(--muted); }
+.cell.lo { background: var(--bad-soft); border-color: transparent; }
+.cell.mid { background: var(--warn-soft); border-color: transparent; }
+.cell.hi { background: var(--good-soft); border-color: transparent; }
+.errs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.errs li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 3px 10px; font-size: 14px; }
 
-.tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
 .tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .tcard h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; }
 .tcard p { margin: 0; font-size: 14px; color: var(--muted); }
 .tcard table { border-collapse: collapse; width: 100%; }
-.tcard td { padding: 5px 0; border-top: 1px solid var(--line); }
-.tcard td:first-child { color: var(--muted); font-size: 14px; width: 34%; }
-.tcard td:last-child { font-family: var(--display); font-size: 20px; }
-.tcard td b { color: var(--accent); font-weight: 400; }
-.verbs { font-size: 14px; color: var(--muted); }
-.verbs span { font-family: var(--display); color: var(--ink); font-size: 16px; }
+.tcard td { padding: 5px 0; border-top: 1px solid var(--line); font-family: var(--display); }
+.tcard td:first-child { color: var(--muted); font-size: 16px; width: 1%; white-space: nowrap; padding-right: 12px; }
+.tcard td:last-child { font-size: 20px; }
+.tcard span.end { color: var(--accent); }
 .tips { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
 .tips ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
-.tips .g { font-family: var(--display); font-size: 17px; }
+.tips .g { font-size: 17px; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .feedback { animation: rise .18s ease-out; }
   @keyframes rise { from { transform: translateY(4px); opacity: .6; } to { transform: none; opacity: 1; } }
 }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Lesson 1 · Present passive</div>
-    <h1>Greek Passive Drill</h1>
-    <p class="sub">Type the correct form of each verb. You'll be told when only the accent is off or when you've used another person's ending, and anything you miss comes back later.</p>
+    <div class="eyebrow">Present tense · active or passive</div>
+    <h1>Active or Passive</h1>
+    <p class="sub">Put the verb in each English sentence into Greek. First decide: does the action pass to something else (active), or come back to the subject (-μαι)? Then match the ending to the subject.</p>
   </header>
 
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
-    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Endings tables</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Endings</button>
   </nav>
 
   <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap" style="gap:22px">
-    <div class="card">
+    <div class="card" id="card">
       <div class="prompt">
         <div class="prompt-top">
-          <span class="pattern-tag" id="ptag">-ομαι</span>
-          <span class="counter" id="counter">Question 1</span>
+          <span class="eyebrow">Type the Greek verb</span>
+          <span class="counter" id="counter"></span>
         </div>
-        <div class="question" aria-live="polite"><span class="pron" id="qpron">εμείς</span><span class="plus">+</span><span id="qverb">έρχομαι</span></div>
-        <div class="gloss" id="qgloss">we · come</div>
+        <p class="english" id="english" aria-live="polite">Loading sentences…</p>
+        <p class="pair" id="pair" lang="el" hidden></p>
+        <button class="linkbtn" type="button" id="hint" hidden>Show the verb</button>
       </div>
 
       <form class="answer-row" id="form" autocomplete="off">
-        <input id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Type the form…" aria-label="Your answer">
-        <button class="btn" id="check" type="submit">Check</button>
+        <input id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Just the verb…" aria-label="Your answer" disabled>
+        <button class="btn" id="check" type="submit" disabled>Check</button>
       </form>
 
       <div class="keys" aria-label="Accented letters">
@@ -156,26 +195,44 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 
 
       <div id="feedback" class="feedback" hidden></div>
 
+      <div class="reveal" id="reveal" hidden>
+        <p class="greek" id="greek" lang="el"></p>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+          <p class="note" id="note" hidden></p>
+        </div>
+        <table class="para" id="para" lang="el"></table>
+      </div>
+
       <div class="actions">
         <div class="stats">
           <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
           <span>Streak <b id="sStreak">0</b></span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn ghost" type="button" id="reveal">Show answer</button>
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
           <button class="btn" type="button" id="next" disabled>Next</button>
         </div>
       </div>
     </div>
 
-    <div class="settings">
-      <h2>Patterns to practise</h2>
-      <div class="chips" id="chips"></div>
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="optPairs"> Active / passive pairs</label>
+        <label class="chip"><input type="checkbox" id="optDeps"> Deponents</label>
+        <label class="chip"><input type="checkbox" id="optPair"> Always show the verb</label>
+      </div>
+      <p class="help" id="bankInfo"></p>
     </div>
 
-    <div class="settings">
-      <h2>Missed this session</h2>
-      <div class="misses" id="misses"><p class="empty">Nothing yet. Missed forms show up here and get asked again.</p></div>
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
     </div>
   </section>
 
@@ -185,194 +242,353 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 
       <div class="tips">
         <strong>Things to watch</strong>
         <ul>
-          <li>In <span class="g">-ομαι</span> verbs the accent moves forward for εμείς: <span class="g">έρχομαι → ερχόμαστε</span>.</li>
-          <li>Every pattern except the first ends in <span class="g">-ούνται</span> for αυτοί: <span class="g">αγαπιούνται, θεωρούνται, θυμούνται</span>.</li>
-          <li>For εσείς you'll also hear <span class="g">ερχόσαστε, αγαπιόσαστε</span> in speech. The drill accepts both.</li>
-          <li>The verb agrees with its subject: <span class="g">η Μαρία αγαπιέται</span>, but <span class="g">οι φίλοι αγαπιούνται</span>.</li>
+          <li>Ask whether the action passes to someone or something else. If it does, use the active: <span class="g">στεγνώνω τα πιάτα</span>. If it comes back to the subject (to yourself, to each other, done to you, happening to you), use -μαι: <span class="g">στεγνώνομαι</span>.</li>
+          <li>Deponents only have the -μαι form but act like active verbs, and many take an object: <span class="g">χρειάζομαι νερό, θυμάμαι το σπίτι, φοβάμαι τον σκύλο</span>.</li>
+          <li>English uses some verbs both ways. Greek doesn't always: <span class="g">το ψωμί ψήνεται</span> (the bread is baking), but things drying on their own stay active: <span class="g">τα πιάτα στεγνώνουν</span>.</li>
+          <li>The -μαι form keeps the active stem's spelling: <span class="g">σηκώνω → σηκώνομαι, σερβίρω → σερβίρομαι</span>.</li>
+          <li>In -ομαι verbs the accent moves forward for εμείς: <span class="g">σηκώνομαι → σηκωνόμαστε</span>. For εσείς both <span class="g">σηκώνεστε</span> and <span class="g">σηκωνόσαστε</span> are right.</li>
+          <li>The verb agrees with its subject: <span class="g">το παιδί βρέχεται</span>, but <span class="g">τα παιδιά βρέχονται</span>.</li>
         </ul>
       </div>
     </div>
   </section>
 </div>
 
+<script src="../tools/greek-verbs.js"></script>
+<script src="voice-drill.js"></script>
 <script>
-const PRON = [
-  { g: "εγώ", e: "I" }, { g: "εσύ", e: "you" }, { g: "αυτός / αυτή", e: "he / she" },
-  { g: "εμείς", e: "we" }, { g: "εσείς", e: "you (pl.)" }, { g: "αυτοί", e: "they" }
-];
-
-// Each pattern builds six [stem, ending] pairs from a verb.
-const PATTERNS = {
-  omai: {
-    label: "-ομαι", head: "γράφομαι", note: "Most verbs, including common deponents.",
-    build: v => [[v.s, "ομαι"], [v.s, "εσαι"], [v.s, "εται"], [v.u, "όμαστε"], [v.s, "εστε"], [v.s, "ονται"]],
-    alt: v => ({ 4: [v.u + "όσαστε"] }),
-    verbs: [
-      { s: "έρχ", u: "ερχ", m: "come" }, { s: "κάθ", u: "καθ", m: "sit" },
-      { s: "σκέφτ", u: "σκεφτ", m: "think" }, { s: "χρειάζ", u: "χρειαζ", m: "need" },
-      { s: "εργάζ", u: "εργαζ", m: "work" }, { s: "ντύν", u: "ντυν", m: "get dressed" },
-      { s: "πλέν", u: "πλεν", m: "wash (oneself)" }, { s: "γράφ", u: "γραφ", m: "be written" },
-      { s: "λέγ", u: "λεγ", m: "be called (named)" }, { s: "βλέπ", u: "βλεπ", m: "be seen / see each other" }
-    ]
-  },
-  iemai: {
-    label: "-ιέμαι", head: "αγαπιέμαι", note: "Most verbs whose active form ends in -άω.",
-    build: v => [[v.s, "ιέμαι"], [v.s, "ιέσαι"], [v.s, "ιέται"], [v.s, "ιόμαστε"], [v.s, "ιέστε"], [v.s, "ιούνται"]],
-    alt: v => ({ 4: [v.s + "ιόσαστε"] }),
-    verbs: [
-      { s: "αγαπ", m: "be loved" }, { s: "ρωτ", m: "be asked" }, { s: "κρατ", m: "be held / hold on" },
-      { s: "φιλ", m: "be kissed / kiss each other" }, { s: "βοηθ", m: "be helped" }, { s: "γελ", m: "be fooled" }
-    ]
-  },
-  oumai: {
-    label: "-ούμαι", head: "θεωρούμαι", note: "A smaller, more formal group from -ώ verbs.",
-    build: v => [[v.s, "ούμαι"], [v.s, "είσαι"], [v.s, "είται"], [v.s, "ούμαστε"], [v.s, "είστε"], [v.s, "ούνται"]],
-    alt: () => ({}),
-    verbs: [
-      { s: "θεωρ", m: "be considered" }, { s: "απασχολ", m: "be busy / employed" },
-      { s: "συγκιν", m: "be moved (emotionally)" }, { s: "αδικ", m: "be wronged" }, { s: "αποτελ", m: "consist (of)" }
-    ]
-  },
-  amai: {
-    label: "-άμαι", head: "θυμάμαι", note: "A few very common deponents.",
-    build: v => [[v.s, "άμαι"], [v.s, "άσαι"], [v.s, "άται"], [v.s, "όμαστε"], [v.s, "άστε"], [v.s, "ούνται"]],
-    alt: v => ({ 4: [v.s + "όσαστε"] }),
-    verbs: [
-      { s: "θυμ", m: "remember" }, { s: "φοβ", m: "be afraid" }, { s: "κοιμ", m: "sleep" }, { s: "λυπ", m: "be sorry" }
-    ]
-  }
-};
-
+"use strict";
+const G = window.GreekVerbs, VD = window.VoiceDrill;
 const $ = id => document.getElementById(id);
+const PRON = { "1sg": "εγώ", "2sg": "εσύ", "3sg": "αυτός", "1pl": "εμείς", "2pl": "εσείς", "3pl": "αυτοί" };
+const REASON = {
+  object: ["Has an object", "Something else receives the action, so it's active."],
+  intransitive: ["Active, no object", "There's no object, but this verb stays active here."],
+  self: ["To oneself", "The subject does it to itself, so it takes the -μαι form."],
+  each: ["To each other", "They do it to each other, so it takes the -μαι form."],
+  done: ["Done to the subject", "The action is done to the subject, so it takes the -μαι form."],
+  happens: ["Happens to the subject", "It happens to the subject, so it takes the -μαι form."],
+  deponent: ["Deponent", "only has the -μαι form, even though its meaning is active."],
+};
+const RESULT = { correct: "Σωστά!", accent: "Almost. Check the accent.", spelling: "Right form, misspelled.",
+  "wrong person": "Right voice, wrong person.", "wrong voice": "Wrong voice.", wrong: "Not quite.", shown: "Answer" };
+
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
 
-let enabled = store.get("gpd-patterns", ["omai", "iemai", "amai"]);
-if (!Array.isArray(enabled) || !enabled.length) enabled = ["omai"];
-let state = { q: 0, correct: 0, total: 0, streak: 0, current: null, answered: false };
-let retry = [];
-let misses = [];
+let settings = { pairs: true, deps: true, showPair: false, ...store.get("gav-settings", {}) };
+let history = store.get("gav-history", []);   // [{ p: person, v: voice, r: result }], newest last
+let seen = new Set(store.get("gav-seen", []));  // sentences already asked, so the bank cycles
+let byVerb = new Map(), pairs = [], deponents = [], bankSize = 0;
+let queue = [], retry = [], recentVerbs = [];
+let item = null, answered = false;
+let session = { q: 0, correct: 0, total: 0, streak: 0 };
 
-const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").normalize("NFC");
-const clean = s => s.trim().toLowerCase().replace(/\s+/g, "").normalize("NFC");
+// ---------- Loading ----------
 
-function formsOf(pkey, verb) { return PATTERNS[pkey].build(verb).map(([a, b]) => a + b); }
+Promise.all([fetch("../tools/verbs.json").then(r => r.json()), fetch("voice-sentences.json").then(r => r.json())])
+  .then(([verbs, bank]) => { build(verbs, bank); renderTables(); renderSlips(); next(); })
+  .catch(() => {
+    $("english").textContent = "Couldn't load the sentences. Open this page through the site (make serve), not straight from disk.";
+  });
 
-function pick() {
-  if (retry.length && Math.random() < 0.4) {
-    const i = Math.floor(Math.random() * retry.length);
-    const it = retry.splice(i, 1)[0];
-    if (enabled.includes(it.p)) return it;
+function build(verbs, bank) {
+  const byGreek = new Map(verbs.map(v => [v.greek, v]));
+  const forms = new Map();
+  const formsOf = g => { if (!forms.has(g)) forms.set(g, VD.present(G, byGreek.get(g))); return forms.get(g); };
+  const pas = verbs.filter(v => v.voice === "passive" && v.activeForm && byGreek.has(v.activeForm));
+  const dep = verbs.filter(v => v.voice === "deponent" && v.greek !== "είμαι");
+  const activeOf = new Map(pas.map(v => [v.activeForm, v]));
+
+  for (const s of bank) {
+    const v = byGreek.get(s.verb);
+    if (!v) continue;
+    const voice = activeOf.has(s.verb) ? "active" : v.voice;
+    const passive = voice === "active" ? activeOf.get(s.verb) : v;
+    const active = voice === "active" ? v : voice === "passive" ? byGreek.get(v.activeForm) : null;
+    const f = { active: active ? formsOf(active.greek) : null, passive: formsOf(passive.greek) };
+    const answer = VD.answersIn(s.el, voice === "active" ? f.active : f.passive, s.person)[0];
+    if (!answer) continue;
+    const it = { ...s, voice, answer, forms: f, active, passive, id: hash(s.el) };
+    if (!byVerb.has(s.verb)) byVerb.set(s.verb, []);
+    byVerb.get(s.verb).push(it);
+    bankSize++;
   }
-  const p = enabled[Math.floor(Math.random() * enabled.length)];
-  const verbs = PATTERNS[p].verbs;
-  let item;
-  do {
-    item = { p, v: Math.floor(Math.random() * verbs.length), n: Math.floor(Math.random() * 6) };
-  } while (state.current && item.p === state.current.p && item.v === state.current.v && item.n === state.current.n);
-  return item;
+  pairs = pas.filter(p => byVerb.has(p.greek) && byVerb.has(p.activeForm)).map(p => ({ active: p.activeForm, passive: p.greek }));
+  deponents = dep.filter(d => byVerb.has(d.greek)).map(d => d.greek);
+  renderOptions();
 }
 
-function ask() {
-  const it = pick();
-  state.current = it; state.answered = false; state.q++;
-  const P = PATTERNS[it.p], verb = P.verbs[it.v];
-  $("ptag").textContent = P.label;
-  $("counter").textContent = "Question " + state.q;
-  $("qpron").textContent = PRON[it.n].g;
-  $("qverb").textContent = formsOf(it.p, verb)[0];
-  $("qgloss").textContent = PRON[it.n].e + " · " + verb.m;
+function hash(s) { let h = 5381; for (const c of s) h = (h * 33 + c.codePointAt(0)) >>> 0; return h.toString(36); }
+
+// ---------- Choosing sentences ----------
+
+// Persons you miss come up more often.
+function personWeights() {
+  const recent = history.slice(-150), w = {};
+  for (const p of VD.PERSONS) {
+    const rows = recent.filter(r => r.p === p);
+    const rate = rows.length ? rows.filter(r => !formRight(r.r)).length / rows.length : 0.3;
+    w[p] = 1 + 3 * rate;
+  }
+  return w;
+}
+const formRight = r => r === "correct" || r === "accent" || r === "spelling";
+const voiceRight = r => formRight(r) || r === "wrong person";
+
+function weighted(list, weight) {
+  let x = Math.random() * list.reduce((s, it) => s + weight(it), 0);
+  for (const it of list) { x -= weight(it); if (x <= 0) return it; }
+  return list[list.length - 1];
+}
+
+// Unseen sentences first; once a verb's sentences have all been asked, they start over.
+function pickSentence(verb, w, notPerson) {
+  let list = byVerb.get(verb) || [];
+  if (notPerson && list.some(s => s.person !== notPerson)) list = list.filter(s => s.person !== notPerson);
+  let fresh = list.filter(s => !seen.has(s.id));
+  if (!fresh.length) { for (const s of byVerb.get(verb)) seen.delete(s.id); fresh = list; }
+  return weighted(fresh, s => w[s.person]);
+}
+
+function pickVerb(list, key) {
+  const fresh = list.filter(v => !recentVerbs.includes(key(v)));
+  const v = (fresh.length ? fresh : list)[Math.floor(Math.random() * (fresh.length || list.length))];
+  recentVerbs = [...recentVerbs, key(v)].slice(-8);
+  return v;
+}
+
+function refill() {
+  const w = personWeights();
+  const usePairs = settings.pairs && pairs.length, useDeps = settings.deps && deponents.length;
+  // Two pair turns (four sentences) for every deponent when both are on.
+  if (usePairs && (!useDeps || Math.random() < 2 / 3)) {
+    // A pair: the same verb once active and once -μαι, back to back.
+    const p = pickVerb(pairs, x => x.passive);
+    const a = pickSentence(p.active, w);
+    const b = pickSentence(p.passive, w, a.person);
+    queue.push(...(Math.random() < 0.5 ? [a, b] : [b, a]));
+  } else if (useDeps) {
+    queue.push(pickSentence(pickVerb(deponents, x => x), w));
+  }
+}
+
+function nextItem() {
+  // A missed sentence comes back after a few others.
+  const due = retry.findIndex(r => r.due <= session.q);
+  if (due >= 0 && (queue.length === 0 || queue.length % 2 === 0)) return retry.splice(due, 1)[0].it;
+  if (!queue.length) refill();
+  return queue.shift();
+}
+
+// ---------- One sentence ----------
+
+function next() {
+  if (!bankSize) return;
+  item = nextItem();
+  if (!item) return;
+  answered = false; session.q++;
+  seen.add(item.id); store.set("gav-seen", [...seen]);
+  $("counter").textContent = "Sentence " + session.q;
+  $("english").textContent = item.en;
+  $("pair").innerHTML = pairHTML(item);
+  $("pair").hidden = !settings.showPair;
+  $("hint").hidden = settings.showPair;
   $("answer").value = ""; $("answer").disabled = false;
-  $("check").disabled = false; $("reveal").disabled = false; $("next").disabled = true;
-  $("feedback").hidden = true;
+  $("check").disabled = false; $("show").disabled = false; $("next").disabled = true;
+  $("feedback").hidden = true; $("reveal").hidden = true;
   $("answer").focus({ preventScroll: true });
 }
 
-function formHTML(pkey, verb, n) {
-  const [a, b] = PATTERNS[pkey].build(verb)[n];
-  return a + "<b>" + b + "</b>";
-}
-
-function show(kind, html) {
-  const f = $("feedback");
-  f.className = "feedback " + kind; f.innerHTML = html; f.hidden = false;
-}
-
-function finish(ok) {
-  state.answered = true; state.total++;
-  if (ok) { state.correct++; state.streak++; } else {
-    state.streak = 0;
-    const it = state.current;
-    retry.push({ ...it });
-    const f = formsOf(it.p, PATTERNS[it.p].verbs[it.v])[it.n];
-    if (!misses.includes(f)) misses.push(f);
-    renderMisses();
-  }
-  $("sCorrect").textContent = state.correct; $("sTotal").textContent = state.total; $("sStreak").textContent = state.streak;
-  $("answer").disabled = true; $("check").disabled = true; $("reveal").disabled = true; $("next").disabled = false;
-  $("next").focus({ preventScroll: true });
+function pairHTML(it) {
+  return it.voice === "deponent"
+    ? `<b>${it.passive.greek}</b> · no active form`
+    : `<b>${it.active.greek}</b> / <b>${it.passive.greek}</b>`;
 }
 
 function check(e) {
   e && e.preventDefault();
-  if (state.answered) { ask(); return; }
-  const raw = clean($("answer").value);
+  if (answered) { next(); return; }
+  const raw = $("answer").value.trim();
   if (!raw) return;
-  const it = state.current, P = PATTERNS[it.p], verb = P.verbs[it.v];
-  const forms = formsOf(it.p, verb);
-  const accepted = [forms[it.n], ...((P.alt(verb)[it.n]) || [])];
-  const right = formHTML(it.p, verb, it.n);
-
-  if (accepted.includes(raw)) {
-    const extra = raw !== forms[it.n] ? `<span>That's the spoken form. The standard written one is <span class="form">${right}</span></span>` : "";
-    show("good", `<strong>Σωστά!</strong><span class="form">${right}</span>${extra}`);
-    finish(true); return;
-  }
-  if (accepted.map(strip).includes(strip(raw))) {
-    show("warn", `<strong>Almost. Check the accent.</strong><span class="form">${right}</span>`);
-    finish(false); return;
-  }
-  const other = forms.findIndex((f, i) => i !== it.n && (f === raw || strip(f) === strip(raw)));
-  if (other >= 0) {
-    show("bad", `<strong>That's the form for ${PRON[other].g}.</strong><span>For ${PRON[it.n].g} you need:</span><span class="form">${right}</span>`);
-    finish(false); return;
-  }
-  show("bad", `<strong>Not quite.</strong><span>The answer is:</span><span class="form">${right}</span>`);
-  finish(false);
+  finish(VD.grade(raw, item), raw);
 }
 
-function reveal() {
-  const it = state.current;
-  show("bad", `<strong>Answer</strong><span class="form">${formHTML(it.p, PATTERNS[it.p].verbs[it.v], it.n)}</span><span>This one will come back later.</span>`);
-  finish(false);
+function finish(g, raw) {
+  answered = true;
+  const result = g ? g.result : "shown";
+  session.total++;
+  if (result === "correct") { session.correct++; session.streak++; }
+  else {
+    session.streak = 0;
+    retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
+  }
+  $("sCorrect").textContent = session.correct; $("sTotal").textContent = session.total; $("sStreak").textContent = session.streak;
+
+  if (g) { history = [...history, { p: item.person, v: item.voice, r: result }].slice(-300); store.set("gav-history", history); renderSlips(); }
+
+  showFeedback(g, raw);
+  showReveal(g);
+  $("pair").hidden = true; $("hint").hidden = true;
+  $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
+  $("next").focus({ preventScroll: true });
 }
 
-function renderMisses() {
-  const m = $("misses");
-  if (!misses.length) { m.innerHTML = '<p class="empty">Nothing yet. Missed forms show up here and get asked again.</p>'; return; }
-  m.innerHTML = misses.map(f => `<span class="miss">${f}</span>`).join("");
+function message(g) {
+  const it = item;
+  switch (g.result) {
+    case "correct": return "";
+    case "accent": return "The letters are right; only the accent is off.";
+    case "spelling":
+      return it.voice === "passive"
+        ? `The -μαι form keeps the active stem's spelling: ${it.active.greek} → ${it.passive.greek}.`
+        : "Close, but check the spelling.";
+    case "wrong person":
+      return `That's the form for ${PRON[g.hit.person]}. The subject here is ${PRON[it.person]}.` + (g.misspelled ? " Check the spelling too." : "");
+    case "wrong voice":
+      if (it.voice === "deponent") return `${it.passive.greek} ${REASON.deponent[1]}`;
+      return REASON[it.reason][1];
+    default: return "";
+  }
 }
 
-function renderChips() {
-  $("chips").innerHTML = Object.entries(PATTERNS).map(([k, P]) =>
-    `<label class="chip" for="pat-${k}"><input type="checkbox" id="pat-${k}" value="${k}" ${enabled.includes(k) ? "checked" : ""}><span class="g">${P.head}</span><span>${P.label}</span></label>`
-  ).join("");
-  $("chips").querySelectorAll("input").forEach(inp => inp.addEventListener("change", () => {
-    const on = [...$("chips").querySelectorAll("input:checked")].map(i => i.value);
-    if (!on.length) { inp.checked = true; return; }
-    enabled = on; store.set("gpd-patterns", enabled);
-    if (!enabled.includes(state.current.p) && !state.answered) { state.q--; ask(); }
-  }));
+function showFeedback(g, raw) {
+  const f = $("feedback");
+  const kind = !g ? "bad" : g.result === "correct" ? "good" : (g.result === "accent" || g.result === "spelling") ? "warn" : "bad";
+  f.className = "feedback " + kind;
+  f.innerHTML = "";
+  const strong = document.createElement("strong"); strong.textContent = RESULT[g ? g.result : "shown"]; f.append(strong);
+  const msg = g ? message(g) : "This one will come back later.";
+  if (msg) { const p = document.createElement("span"); p.className = "msg"; p.textContent = msg; f.append(p); }
+  if (g && g.result !== "correct") {
+    const fix = document.createElement("span"); fix.className = "fix"; fix.lang = "el";
+    const del = document.createElement("s"); del.textContent = g.typed;
+    const ins = document.createElement("b"); ins.textContent = item.answer;
+    fix.append(del, " → ", ins); f.append(fix);
+  }
+  f.hidden = false;
+}
+
+function showReveal(g) {
+  const it = item;
+  // The Greek sentence with the answer underlined.
+  const el = $("greek"); el.textContent = "";
+  let last = 0;
+  for (const m of it.el.matchAll(/[\p{L}\p{M}]+/gu)) {
+    if (VD.lower(m[0]) !== it.answer) continue;
+    el.append(it.el.slice(last, m.index));
+    const b = document.createElement("b"); b.textContent = m[0]; el.append(b);
+    last = m.index + m[0].length;
+    break;
+  }
+  el.append(it.el.slice(last));
+
+  $("reason").textContent = REASON[it.reason][0];
+  $("why").textContent = it.voice === "deponent" ? `${it.passive.greek} ${REASON.deponent[1]}` : REASON[it.reason][1];
+  $("note").textContent = it.note || ""; $("note").hidden = !it.note;
+  renderParadigm(it, g);
+  $("reveal").hidden = false;
+}
+
+// Present tense of both verbs, endings highlighted, the answer and a wrong guess marked.
+function renderParadigm(it, g) {
+  const t = $("para"); t.innerHTML = "";
+  const cols = it.voice === "deponent" ? [["passive", it.passive]] : [["active", it.active], ["passive", it.passive]];
+  const tv = it.voice === "active" ? "active" : "passive";
+  const head = t.insertRow();
+  head.append(document.createElement("th"));
+  for (const [, v] of cols) { const th = document.createElement("th"); th.textContent = v.greek; head.append(th); }
+  const tables = cols.map(([, v]) => G.conjugate(v).indicative.present.continuous);
+  VD.PERSONS.forEach((p, i) => {
+    const tr = t.insertRow();
+    const who = tr.insertCell(); who.className = "who"; who.textContent = PRON[p];
+    cols.forEach(([voice], c) => {
+      const td = tr.insertCell();
+      td.innerHTML = tables[c][i].map(endingHTML).join(" / ");
+      if (voice === tv && p === it.person) td.className = "hit";
+      else if (g && g.hit && g.hit.voice === voice && g.hit.person === p) td.className = "miss";
+    });
+  });
+}
+
+function endingHTML(form) {
+  const [stem, end] = form.includes("|") ? form.split("|") : [form, ""];
+  return esc(stem) + (end ? `<span class="end">${esc(end)}</span>` : "");
+}
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+// ---------- Panels ----------
+
+function renderOptions() {
+  $("optPairs").checked = settings.pairs; $("optDeps").checked = settings.deps; $("optPair").checked = settings.showPair;
+  $("bankInfo").textContent = `${bankSize} sentences: ${pairs.length} verbs with an active partner and ${deponents.length} deponents from your word list.`;
+}
+
+function setOption(key, value) {
+  settings[key] = value;
+  if (!settings.pairs && !settings.deps) { settings[key] = true; renderOptions(); return; }
+  store.set("gav-settings", settings);
+  if (key === "pairs" || key === "deps") queue = [];
+  if (key === "showPair" && !answered && item) { $("pair").hidden = !value; $("hint").hidden = value; }
+}
+
+function renderSlips() {
+  const recent = history.slice(-150);
+  const has = recent.length > 0;
+  $("slipInfo").textContent = has
+    ? `Your last ${recent.length} answer${recent.length === 1 ? "" : "s"} on this device. Persons you miss come up more often.`
+    : "Answer a few sentences and this shows which persons and which mistakes come up most.";
+  $("slip").hidden = !has; $("errs").hidden = !has; $("reset").hidden = !has;
+  if (!has) return;
+
+  const grid = $("slip"); grid.innerHTML = "";
+  const div = (cls, text) => { const d = document.createElement("div"); d.className = cls; d.textContent = text; return d; };
+  grid.append(div("h", ""), div("h", "Singular"), div("h", "Plural"));
+  [["εγώ", "εμείς", "1"], ["εσύ", "εσείς", "2"], ["αυτός", "αυτοί", "3"]].forEach(([sg, pl, n]) => {
+    grid.append(div("rl", `${sg} · ${pl}`));
+    for (const num of ["sg", "pl"]) {
+      const rows = recent.filter(r => r.p === n + num);
+      const right = rows.filter(r => formRight(r.r)).length;
+      const cell = document.createElement("div");
+      const b = document.createElement("b"), s = document.createElement("span");
+      if (rows.length) {
+        const rate = right / rows.length;
+        cell.className = "cell " + (rate < 0.6 ? "lo" : rate < 0.85 ? "mid" : "hi");
+        b.textContent = `${right} of ${rows.length}`; s.textContent = `${Math.round(rate * 100)}% right form`;
+      } else { cell.className = "cell"; b.textContent = "–"; s.textContent = "not drilled yet"; }
+      cell.append(b, s); grid.append(cell);
+    }
+  });
+
+  const errs = $("errs"); errs.innerHTML = "";
+  const li = (label, n) => { const e = document.createElement("li"); e.append(label + ": "); const b = document.createElement("b"); b.textContent = n; e.append(b); errs.append(e); };
+  const count = (r, v) => recent.filter(x => x.r === r && (!v || x.v === v)).length;
+  li("Voice chosen right", `${recent.filter(x => voiceRight(x.r)).length} of ${recent.length}`);
+  if (count("wrong voice", "active")) li("Used -μαι where it's active", count("wrong voice", "active"));
+  if (count("wrong voice", "passive")) li("Used active where it's -μαι", count("wrong voice", "passive"));
+  if (count("wrong voice", "deponent")) li("Gave a deponent an active ending", count("wrong voice", "deponent"));
+  for (const [r, label] of [["wrong person", "Wrong person"], ["spelling", "Spelling"], ["accent", "Accent"], ["wrong", "Other"]]) {
+    if (count(r)) li(label, count(r));
+  }
 }
 
 function renderTables() {
-  $("tables").innerHTML = Object.entries(PATTERNS).map(([k, P]) => {
-    const v = P.verbs.find(x => formsOf(k, x)[0] === P.head) || P.verbs[0];
-    const rows = PRON.map((p, i) => `<tr><td>${p.g}</td><td>${formHTML(k, v, i)}</td></tr>`).join("");
-    const list = P.verbs.map(x => `<span>${formsOf(k, x)[0]}</span> ${x.m}`).join(" · ");
-    return `<div class="tcard"><h3>${P.head}</h3><p>${P.label} · ${P.note}</p><table>${rows}</table><div class="verbs">${list}</div></div>`;
+  // Example verbs from the bank: an active, an -ομαι and an -άμαι verb.
+  const examples = [
+    ["βρέχω", "Active", "Something else receives the action."],
+    ["βρέχομαι", "-ομαι", "Most -μαι verbs, passive and deponent."],
+    ["θυμάμαι", "-άμαι", "A few common deponents."],
+  ];
+  const all = [...byVerb.values()].flat();
+  const verbOf = g => { const s = all.find(x => x.verb === g); return s && (s.verb === s.passive.greek ? s.passive : s.active); };
+  $("tables").innerHTML = examples.map(([g, label, note]) => {
+    const v = verbOf(g);
+    if (!v) return "";
+    const rows = G.conjugate(v).indicative.present.continuous
+      .map((cell, i) => `<tr><td>${PRON[VD.PERSONS[i]]}</td><td>${cell.map(endingHTML).join(" / ")}</td></tr>`).join("");
+    return `<div class="tcard"><h3 lang="el">${esc(v.greek)}</h3><p>${label} · ${note}</p><table lang="el">${rows}</table></div>`;
   }).join("");
 }
 
@@ -380,8 +596,10 @@ function setTab(which) {
   const drill = which === "drill";
   $("tab-drill").setAttribute("aria-selected", drill); $("tab-tables").setAttribute("aria-selected", !drill);
   $("panel-drill").hidden = !drill; $("panel-tables").hidden = drill;
-  if (drill && !state.answered) $("answer").focus({ preventScroll: true });
+  if (drill && !answered) $("answer").focus({ preventScroll: true });
 }
+
+// ---------- Wiring ----------
 
 document.querySelectorAll(".key").forEach(k => k.addEventListener("click", () => {
   const inp = $("answer"); if (inp.disabled) return;
@@ -390,15 +608,18 @@ document.querySelectorAll(".key").forEach(k => k.addEventListener("click", () =>
   inp.focus(); inp.setSelectionRange(s + 1, s + 1);
 }));
 $("form").addEventListener("submit", check);
-$("reveal").addEventListener("click", reveal);
-$("next").addEventListener("click", ask);
+$("show").addEventListener("click", () => { if (!answered && item) finish(null, ""); });
+$("next").addEventListener("click", next);
+$("hint").addEventListener("click", () => { $("pair").hidden = false; $("hint").hidden = true; $("answer").focus({ preventScroll: true }); });
+$("optPairs").addEventListener("change", e => setOption("pairs", e.target.checked));
+$("optDeps").addEventListener("change", e => setOption("deps", e.target.checked));
+$("optPair").addEventListener("change", e => setOption("showPair", e.target.checked));
+$("reset").addEventListener("click", () => { history = []; store.set("gav-history", history); renderSlips(); });
 document.addEventListener("keydown", e => {
-  if (e.key === "Enter" && state.answered && !$("panel-drill").hidden && e.target.tagName !== "BUTTON") { e.preventDefault(); ask(); }
+  if (e.key === "Enter" && answered && !$("panel-drill").hidden && e.target.tagName !== "BUTTON") { e.preventDefault(); next(); }
 });
 $("tab-drill").addEventListener("click", () => setTab("drill"));
 $("tab-tables").addEventListener("click", () => setTab("tables"));
-
-renderChips(); renderTables(); ask();
 </script>
-
-</body></html>
+</body>
+</html>

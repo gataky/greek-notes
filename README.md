@@ -33,6 +33,10 @@ make sync      # pull the verbs into verbs.json and run the checks
 
 Commit `verbs.json` and push.
 
+## Drill sentences
+
+The active or passive drill reads `docs/drills/voice-sentences.json`. Each sentence names its verb and person; the forms come from `verbs.json`. `make test` checks every sentence against the conjugation engine, and `node scripts/test_voice_sentences.js --gaps` lists verb/person pairs that have no sentence yet.
+
 ## Updating the dictionary
 
 The dictionary page reads `docs/tools/lemma_greek_en.db.gz`, a gzipped copy of the lemma SQLite dictionary. When there's a new build:

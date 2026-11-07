@@ -63,6 +63,16 @@ Data flows from sheet to JSON to the browser. There is no backend.
 
 When changing the engine, run `make test` and also diff all generated forms against the previous commit's engine. Most verbs aren't in `EXPECTED`, so the checks alone can miss regressions.
 
+## Active or passive drill (`docs/drills/`)
+
+Present tense: an English sentence, and the learner types the Greek verb, choosing the active or the -μαι form and the person. It replaced an older conjugation-only passive drill and kept its URL (`drills/passive-verbs/`), so links and installed apps still work.
+
+- **Verbs:** the sheet's passives whose `active form` is also in the sheet, those active partners, and the deponents except είμαι.
+- **Sentences:** `voice-sentences.json`, one object per line: `verb` (dictionary form), `person` (`1sg`…`3pl`), `reason`, `en`, `el`, and an optional `note`. Reasons are `object` or `intransitive` for active verbs, `self`, `each`, `done` or `happens` for passives, and `deponent`. Nothing else is stored: the voice, the active partner, which word is the answer and the paradigm all come from `verbs.json` through `greek-verbs.js`. Sentences use only words from the words tab.
+- **`voice-drill.js`** (browser and Node) has the logic the page and the test share: present forms with `ουν(ε)` expanded, finding the answer word in a sentence, and grading (correct, accent, spelling, wrong person, wrong voice).
+- **`scripts/test_voice_sentences.js`** runs in `make test`, `make sync` and CI. It fails when a sentence's Greek doesn't contain exactly one word that is its verb in its person, when the reason doesn't fit the voice, when "you" isn't marked (sg) or (pl), or on duplicates. A changed verb in the sheet can break sentences, which is why `make sync` runs it. `--gaps` lists verb/person pairs with no sentence; βλέπομαι in the singular and most of βάζομαι are left out on purpose.
+- **Page:** pairs come back to back (the same verb once active, once -μαι), unseen sentences come first until a verb's sentences are used up, persons with more misses come up more often, and missed sentences come back a few turns later. Progress is per device, in localStorage (`gav-history`, `gav-seen`, `gav-settings`).
+
 ## Dictionary (`docs/tools/dictionary-app.html`)
 
 A Greek ↔ English dictionary that runs entirely in the browser. It's the home page, so `/#σπίτι` opens a word.
