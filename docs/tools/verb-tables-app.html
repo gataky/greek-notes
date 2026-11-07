@@ -40,6 +40,9 @@
 .list a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .list .g { font-family: var(--display); font-size: 18px; white-space: nowrap; }
 .list .e { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.credit { margin: 0; color: var(--muted); font-size: 13px; }
+.credit a { color: inherit; }
 </style>
 </head>
 <body>
@@ -60,16 +63,25 @@
   <section class="card" id="card" aria-live="polite"></section>
 
   <nav class="list" id="list" aria-label="All verbs"></nav>
+
+  <p class="credit">
+    Forms from <a href="https://en.wiktionary.org/" target="_blank" rel="noopener">English Wiktionary</a> via
+    <a href="https://kaikki.org/" target="_blank" rel="noopener">kaikki.org</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>).
+    Where it has no form, and for the future, subjunctive and perfect, they're generated.
+  </p>
 </div>
 
 <script src="greek-verbs.js"></script>
 <script src="verb-grid.js"></script>
+<script src="verb-forms.js"></script>
 <script>
 const { strip } = GreekVerbs;
+const { withForms } = VerbForms;
 
 const { cardHTML, esc, PATTERN_ENDINGS, CLASS_ORDER } = VerbGrid;
 const $ = id => document.getElementById(id);
-const render = verb => { $("card").innerHTML = cardHTML(verb); };
+let forms = {};  // verb-forms.json: the dictionary's forms, by verb
+const render = verb => { $("card").innerHTML = cardHTML(verb, { conjugation: withForms(verb, forms[verb.greek]) }); };
 
 
 // ---------- Verb picker ----------
@@ -186,9 +198,12 @@ function fromHash() {
 
 // ---------- Start ----------
 
-fetch("verbs.json")
-  .then(r => r.json())
-  .then(data => {
+Promise.all([
+  fetch("verbs.json").then(r => r.json()),
+  fetch("verb-forms.json").then(r => r.json()).catch(() => ({})),  // without it, every form is generated
+])
+  .then(([data, dictionaryForms]) => {
+    forms = dictionaryForms;
     verbs = data.sort((a, b) => fold(a.greek).localeCompare(fold(b.greek), "el"));
     renderList();
     select(fromHash() || verbs.find(v => v.greek === "γράφω") || verbs[0]);

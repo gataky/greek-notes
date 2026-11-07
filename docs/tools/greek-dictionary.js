@@ -1,4 +1,4 @@
-// Greek ↔ English lookup over the lemma dictionary (lemma_greek_en.db, schema version 2),
+// Greek ↔ English lookup over the lemma dictionary (lemma_greek_en.db, schema version 3),
 // opened in the browser or Node with sql.js.
 //
 // The database stores search keys that only code can compute: `norm` (accents and case
@@ -240,7 +240,7 @@
     const value = (sql, params) => rows(sql, params)[0]?.[0] ?? null;
 
     const version = value("SELECT value FROM meta WHERE key = 'schema_version'");
-    if (version !== "2") throw new Error(`expected dictionary schema_version 2, got ${version}`);
+    if (version !== "3") throw new Error(`expected dictionary schema_version 3, got ${version}`);
     const meta = Object.fromEntries(rows("SELECT key, value FROM meta"));
 
     // Greek or Greeklish query -> hits, best first:

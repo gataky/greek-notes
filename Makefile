@@ -2,10 +2,10 @@
 
 SHEET_URL := https://docs.google.com/spreadsheets/d/1p39Sbnkx3G4swoSPJ2KKVKu-VwteKmaAQ9toFadd5cA/edit
 NODE      := node
-DICT_DB   := ../dictionary/lemma_greek_en.db
+DICT_DB   := ../lemma/lemma_greek_en/lemma_greek_en.db
 
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade sync dictionary test dump serve build check clean sheet
+.PHONY: help install upgrade sync dictionary verb-forms test dump serve build check clean sheet
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -26,8 +26,14 @@ dictionary: ## Copy in a new dictionary build (DICT_DB=path/to/lemma_greek_en.db
 	gzip -9 -n -c "$(DICT_DB)" > docs/tools/lemma_greek_en.db.gz
 	@$(NODE) scripts/test_dictionary.js
 
-test: ## Check the conjugation engine and the dictionary lookup
+verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (DICT_DB=path/to/lemma_greek_en.db)
+	uv run python scripts/build_verb_forms.py "$(DICT_DB)"
+	@git diff --stat -- docs/tools/verb-forms.json
+	@$(NODE) scripts/test_verb_forms.js
+
+test: ## Check the conjugation engine, the verb forms and the dictionary lookup
 	$(NODE) scripts/test_verbs.js
+	$(NODE) scripts/test_verb_forms.js
 	$(NODE) scripts/test_dictionary.js
 
 dump: ## Print every verb's conjugations, for reviewing

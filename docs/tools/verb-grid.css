@@ -65,7 +65,8 @@ td .end, .legend .end { color: var(--accent); }
 td .alt { display: block; font-size: 15px; color: var(--muted); }
 td .alt .end { color: inherit; }
 td .dash { color: var(--muted); }
-td .sep { color: var(--muted); margin: 0 6px; }
+td .sep { color: var(--muted); margin: 0 6px; vertical-align: top; }
+td .imp { display: inline-block; vertical-align: top; }  /* keeps each person's alternatives under it */
 
 /* Wide screens get one grid; narrow ones get the two stem groups stacked */
 .stacked { display: none; flex-direction: column; gap: 18px; min-width: 0; }

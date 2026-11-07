@@ -13,10 +13,11 @@ make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
 make check     # verb + dictionary checks, then strict build: what CI runs before deploying
-make test      # node scripts/test_verbs.js and scripts/test_dictionary.js
+make test      # node scripts/test_verbs.js, test_verb_forms.js and test_dictionary.js
 make dump      # print every verb's conjugations for review
 make sync      # pull verbs from the Google Sheet into docs/tools/verbs.json, then test
 make dictionary  # gzip a new lemma dictionary build into docs/tools/, then test
+make verb-forms  # copy our verbs' forms from the dictionary into docs/tools/verb-forms.json, then test
 make upgrade   # uv lock --upgrade
 ```
 
@@ -49,7 +50,7 @@ The whole site installs as a phone app and works offline:
 
 ## Verb tables (`docs/tools/`)
 
-Data flows from sheet to JSON to the browser. There is no backend.
+Data flows from the sheet and the dictionary to JSON to the browser. There is no backend. **The dictionary is the source of truth for forms:** the verb tables page shows its cells, and the engine and sheet only fill what it doesn't have.
 
 1. **Source:** the `words` tab of the owner's Google Sheet (link-shared; ID in `scripts/build_verbs.py` and the Makefile). Rows with part of speech exactly `verb` (not a substring match, which would also catch `adverb`). The fields used are `greek` (dictionary form), `attributes` (class a1/a2/b1/b2/c1–c4/irregular), `voice`, plus three columns the owner added for this: `future simple` (1sg, e.g. γράψω / γραφτώ), `aorist` (1sg, e.g. έγραψα / γράφτηκα) and `overrides`. Other scripts depend on the sheet's column order, so new columns go after the existing ones. Columns are read by header name.
 2. **`scripts/build_verbs.py`** (stdlib only) downloads the CSV export, merges duplicate verbs, and writes `verbs.json` one verb per line. `verbs.json` is committed; the site never contacts the sheet.
@@ -60,6 +61,18 @@ Data flows from sheet to JSON to the browser. There is no backend.
    - Per-verb exceptions come only from the `overrides` column: `past: ήθελα; imp: έλα, ελάτε; imp-cont: …; no perfective` (`—` means not used). Prefer an override over special-casing a verb in code; only είμαι is hardcoded.
 4. **`verb-grid.js` + `verb-grid.css`** render the shared "two stems" grid: continuous and simple, each with present/dependent and past columns, plus imperative and perfect rows and the θα/να forms written out. It switches to stacked tables below 560px.
 5. **Pages:** `verb-tables-app.html` (search, a list grouped by class, URL hash = current verb) and `conjugation-patterns-app.html` (one regular example verb per class; the c3/c4 examples are defined inline because they aren't in the sheet).
+
+6. **`scripts/build_verb_forms.py`** (stdlib `sqlite3`, read-only) copies the grid's cells for the sheet's verbs from the lemma database into the committed `verb-forms.json`, so the page doesn't load the dictionary. `verb-tables-app.html` is the only page that reads it.
+   - Refresh with `make verb-forms` after `make dictionary`, and after `make sync` adds verbs. A verb missing from the file just shows the engine's forms. `DICT_DB` sets the database path.
+   - Finding a table: the headword's own, then `form` (βοηθώ → βοηθάω), then the headword line's `active` link (σηκώνομαι → σηκώνω, whose passive cells are used), then the sheet's `active form`. With several tables, it takes the one listing the verb first.
+   - The voice comes from which voice's present lists the verb, not from the sheet: deponents are tagged `passive`, but είμαι is `active`.
+   - Rows tagged `rare`, `archaic` or `dated` are hidden unless the cell has nothing else. Elisions (`γράφ'`) are left out. The script prints anything it can't read.
+   - A cell is a list, most usual first. `[]` means the form doesn't exist (a dash), `null` that the data doesn't say.
+7. **`verb-forms.js`** (browser and Node) merges those cells over `conjugate()`, keeping its shape, and `cardHTML(verb, { conjugation })` shows the result.
+   - A dictionary cell replaces the engine's, overrides included, and the dictionary's order is kept. The engine and its overrides only show in `null` cells and for the 6 verbs with no table. There's no way yet to correct a dictionary form per verb.
+   - The future, subjunctive and perfect are built from the merged present, dependent and `infinitive-aorist`.
+   - Ending highlights come from the engine's forms in the same cell: same word, else same ending, else same stem, else none.
+   - `conjugation-patterns-app.html`, the drill and `principalParts()` still use the engine alone, so they can differ from the verb tables.
 
 When changing the engine, run `make test` and also diff all generated forms against the previous commit's engine. Most verbs aren't in `EXPECTED`, so the checks alone can miss regressions.
 
@@ -79,7 +92,7 @@ A Greek ↔ English dictionary that runs entirely in the browser. It's the home 
 
 - **Home page:** `docs/index.md` is only the iframe. Its template, `overrides/home.html`, adds a menu button and a `<dialog>` built from `nav` (`docs/javascripts/home.js`). `docs/stylesheets/home.css` hides the site's header and footer with `body:has(.dict-home)`. They stay in the page because instant navigation needs them. The point is that the site looks like a dictionary until you open the menu, so don't add links to the notes there.
 
-- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 2, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy and its developer guide (`sqlite-database.md`) are in `../dictionary/`. It changes about once a year: `make dictionary`. Never write to the database, and refer to words by spelling (`#σπίτι`), since row ids change between builds.
+- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 3, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms`. Never write to the database, and refer to words by spelling (`#σπίτι`), since row ids change between builds.
 - **Engine:** sql.js 1.14.2 is vendored in `docs/tools/vendor/` (no CDN, so it works offline). The app unzips the file with `DecompressionStream` and opens it in memory.
 - **`greek-dictionary.js`** (browser and Node) ports the guide's Python reference: the `norm`/`phonetic`/Greeklish/English keys, Greek and English search, entry lookup. The keys must match the stored ones exactly; `scripts/test_dictionary.js` recomputes them for every form. sql.js has no FTS5, so the English fallback for terms missing from `en_index` scans glosses with `LIKE` instead of using `sense_fts`.
 - **`dictionary-app.html`:** one search box. Greek input searches Greek. Latin input shows English and Greeklish results side by side, since it could be either. The hash is the open headword. Greek words in glosses link to their entries, and verbs in `verbs.json` link to `verb-tables-app.html` inside the same frame, so the notes' sidebar doesn't appear. Its header has a link back to the entry, which the notes page hides along with the header.

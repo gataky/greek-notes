@@ -33,9 +33,10 @@
   const stemOf = cell => (first(cell).includes("|") ? first(cell).split("|")[0] + "-" : "");
 
   // The grid for one verb: heading, the two-stem table, then the θα / να / έχω forms written out.
-  // Pass `heading` to replace the default verb heading (word, meaning, class and voice tags).
-  function cardHTML(verb, { heading } = {}) {
-    const c = conjugate(verb);
+  // Pass `heading` to replace the default verb heading (word, meaning, class and voice tags),
+  // and `conjugation` to show forms other than the engine's (see verb-forms.js).
+  function cardHTML(verb, { heading, conjugation } = {}) {
+    const c = conjugation || conjugate(verb);
     const I = c.indicative;
     const contPresent = I.present.continuous;
     const contPast = I.past.continuous;
@@ -49,7 +50,7 @@
         <td>${cellHTML(contPresent[i])}</td><td>${cellHTML(contPast[i])}</td><td class="gap"></td>
         <td>${cellHTML(simplePresent[i])}</td><td>${cellHTML(simplePast[i])}</td>
       </tr>`).join("");
-    const imperative = pair => (pair.some(r => r.length) ? pair.map(cellHTML).join(`<span class="sep">·</span>`) : `<span class="dash">—</span>`);
+    const imperative = pair => (pair.some(r => r.length) ? pair.map(r => `<span class="imp">${cellHTML(r)}</span>`).join(`<span class="sep">·</span>`) : `<span class="dash">—</span>`);
 
     // Narrow screens: one small table per stem group.
     const stacked = [["Continuous", contPresent, contPast, "present", "Ενεστώτας", "past", "Παρατατικός", c.imperative.continuous],

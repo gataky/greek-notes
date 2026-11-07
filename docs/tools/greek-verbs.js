@@ -135,6 +135,7 @@
   const prefix = (pre, cell) => cell.map(row => row.map(f => pre + f));
   const NONE6 = () => [[], [], [], [], [], []];
   const NONE2 = () => [[], []];
+  const perfectForms = (aux, infinitive) => (infinitive ? table(aux, a => a).map(row => row.map(a => a + " " + infinitive)) : NONE6());
 
   // ---------- Endings ----------
 
@@ -280,8 +281,6 @@
       notes.push("No future simple or aorist in the sheet yet. Fill in those columns and rebuild.");
     }
 
-    const perfectWith = aux => (infinitive ? table(aux, a => a).map(row => row.map(a => a + " " + infinitive)) : NONE6());
-
     // Imperative (εσύ, εσείς)
     let impCont;
     if (ov["imp-cont"]) impCont = parsePair(ov["imp-cont"]);
@@ -308,11 +307,11 @@
       greek, english: verb.english || "", pattern, voice: verb.voice || "", notes,
       future: fut, aorist: aor,
       indicative: {
-        past: { continuous: pastCont, simple: aorist, perfect: perfectWith(HAD) },
-        present: { continuous: present, perfect: perfectWith(HAVE) },
-        future: { continuous: prefix("θα ", present), simple: prefix("θα ", futureSimple), perfect: prefix("θα ", perfectWith(HAVE)) },
+        past: { continuous: pastCont, simple: aorist, perfect: perfectForms(HAD, infinitive) },
+        present: { continuous: present, perfect: perfectForms(HAVE, infinitive) },
+        future: { continuous: prefix("θα ", present), simple: prefix("θα ", futureSimple), perfect: prefix("θα ", perfectForms(HAVE, infinitive)) },
       },
-      subjunctive: { continuous: prefix("να ", present), simple: prefix("να ", futureSimple), perfect: prefix("να ", perfectWith(HAVE)) },
+      subjunctive: { continuous: prefix("να ", present), simple: prefix("να ", futureSimple), perfect: prefix("να ", perfectForms(HAVE, infinitive)) },
       imperative: { continuous: impCont, simple: impSimple },
     };
   }
@@ -333,7 +332,7 @@
     };
   }
 
-  const api = { conjugate, PERSONS, strip, nuclei, placeAccent, recessive };
+  const api = { conjugate, perfectForms, HAVE, HAD, PERSONS, strip, nuclei, placeAccent, recessive };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GreekVerbs = api;
 })(this);

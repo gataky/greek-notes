@@ -28,10 +28,11 @@ Run `make` to see every target. To add a Python package, run `uv add <package>` 
 The verb tables page reads `docs/tools/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns N–O), and **overrides** (P) only for irregular forms. Then:
 
 ```sh
-make sync      # pull the verbs into verbs.json and run the checks
+make sync        # pull the verbs into verbs.json and run the checks
+make verb-forms  # copy their forms from the dictionary into verb-forms.json (needs ../lemma's database)
 ```
 
-Commit `verbs.json` and push.
+Commit `verbs.json` and `verb-forms.json`, and push. The page shows the dictionary's forms wherever it has them. The sheet's columns only count for forms the dictionary doesn't have.
 
 ## Drill sentences
 
