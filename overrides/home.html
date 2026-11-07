@@ -1,0 +1,48 @@
+{% extends "main.html" %}
+
+{# The landing page: the dictionary alone, with everything else behind the menu button.
+   The menu is built from nav in mkdocs.yml. stylesheets/home.css hides the site's own
+   header and footer on this page; they stay in the page because instant navigation
+   expects them. #}
+
+{% macro links(items) %}
+  <ul>
+    {% for item in items %}
+      {% if item.children %}
+        <li>
+          <details>
+            <summary>{{ item.title }}</summary>
+            {{ links(item.children) }}
+          </details>
+        </li>
+      {% else %}
+        <li><a href="{{ item.url | url }}">{{ item.title }}</a></li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% block hero %}
+  <div class="dict-home">
+    <button class="dict-home__open" id="site-menu-open" type="button" aria-label="Menu" aria-haspopup="dialog">
+      {% include ".icons/material/menu.svg" %}
+    </button>
+    <dialog class="dict-home__menu" id="site-menu" aria-label="Menu">
+      <button class="dict-home__close" id="site-menu-close" type="button" aria-label="Close menu">
+        {% include ".icons/material/close.svg" %}
+      </button>
+      <nav>
+        {% for section in nav %}
+          {% if section.children %}
+            <h2>{{ section.title }}</h2>
+            {{ links(section.children) }}
+          {% endif %}
+        {% endfor %}
+      </nav>
+    </dialog>
+  </div>
+{% endblock %}
+
+{% block content %}
+  {{ page.content }}
+{% endblock %}

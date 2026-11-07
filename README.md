@@ -5,7 +5,7 @@ Personal notes for learning Modern Greek, published with [MkDocs Material](https
 ## Adding a note
 
 1. Put the `.md` file in `docs/`.
-2. Add it to `nav` in `mkdocs.yml` and link it from `docs/index.md`.
+2. Add it to `nav` in `mkdocs.yml`. The menu on the home page is built from `nav`.
 3. Commit and push to `main`. The site rebuilds automatically.
 
 ## Installing on a phone

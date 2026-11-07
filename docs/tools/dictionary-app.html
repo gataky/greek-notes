@@ -252,7 +252,7 @@ function entryHTML(found) {
 // Verbs in the word list link to their table. Other verbs get one too when the dictionary's
 // forms settle their future simple and aorist; the table then says those were guessed.
 function conjugationLink(found) {
-  const link = (hash, label) => `<a href="verb-tables/#${hash}" target="_top">${label} →</a>`;
+  const link = (hash, label) => `<a href="verb-tables-app.html#${hash}">${label} →</a>`;
   const twin = found.word.endsWith("άω") ? found.word.slice(0, -2) + "ώ" : found.word.endsWith("ώ") ? found.word.slice(0, -1) + "άω" : null;
   const known = [found.word, twin].find(w => w && verbs.has(w));
   if (known) return link(encodeURIComponent(known), "Conjugation table");

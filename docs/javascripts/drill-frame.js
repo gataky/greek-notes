@@ -11,7 +11,7 @@ function setupFrame(frame) {
   if (!doc || !doc.body) return;
 
   const header = doc.querySelector("header");
-  if (header) header.hidden = true;
+  if (header && !frame.hasAttribute("data-keep-header")) header.hidden = true;
 
   syncTheme(doc);
   new MutationObserver(() => syncTheme(doc)).observe(document.body, {

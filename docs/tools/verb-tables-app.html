@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
 <link rel="stylesheet" href="verb-grid.css">
 <style>
+/* Shown on its own and from the dictionary. The notes page hides the header. */
+.back { align-self: flex-start; margin-bottom: 10px; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: none; }
+
 /* Verb picker */
 .picker { position: relative; display: flex; gap: 10px; }
 #search { flex: 1; min-width: 0; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
@@ -42,6 +45,7 @@
 <body>
 <div class="wrap">
   <header>
+    <a class="back" id="back" href="dictionary-app.html">← Dictionary</a>
     <div class="eyebrow">Verbs</div>
     <h1>Greek Verb Tables</h1>
     <p class="sub">Pick a verb to see its forms. Each verb has two stems, continuous and simple, and each has a present and a past set. Every other tense is built from these.</p>
@@ -80,6 +84,7 @@ function select(verb, { scroll = false } = {}) {
   $("search").value = "";
   closeResults();
   history.replaceState(null, "", "#" + (verb.guessed ? [verb.greek, verb.future, verb.aorist] : [verb.greek]).map(encodeURIComponent).join(","));
+  $("back").href = "dictionary-app.html#" + encodeURIComponent(verb.greek);
   render(verb);
   document.querySelectorAll("#list a").forEach(a => a.setAttribute("aria-current", String(a.dataset.greek === verb.greek)));
   if (scroll) $("card").scrollIntoView({ behavior: "smooth", block: "start" });

@@ -1,7 +1,7 @@
 {
-  "name": "Modern Greek Notes",
-  "short_name": "Greek Notes",
-  "description": "Personal reference notes for learning Modern Greek",
+  "name": "Greek Dictionary",
+  "short_name": "Dictionary",
+  "description": "A Greek and English dictionary that works offline",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

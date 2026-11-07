@@ -1,0 +1,85 @@
+/* The landing page (overrides/home.html): the dictionary fills the page and the notes are
+   behind a menu. Uses :has() so this applies however the page was reached, including
+   instant navigation, which swaps the content but keeps the <body>. */
+
+body:has(.dict-home) { --md-default-bg-color: #f4f7fb; }
+body[data-md-color-scheme="slate"]:has(.dict-home) { --md-default-bg-color: #0c141f; }
+
+body:has(.dict-home) .md-header,
+body:has(.dict-home) .md-tabs,
+body:has(.dict-home) .md-sidebar,
+body:has(.dict-home) .md-top,
+body:has(.dict-home) .md-footer { display: none; }
+
+body:has(.dict-home) .md-grid { max-width: none; margin: 0; }
+body:has(.dict-home) .md-main__inner { margin: 0; }
+body:has(.dict-home) .md-content__inner { margin: 0; padding: 0; }
+body:has(.dict-home) .md-content__inner::before { display: none; }
+body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 0; }
+
+.dict-home__open,
+.dict-home__close {
+  display: flex;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--gn-muted);
+  cursor: pointer;
+}
+.dict-home__open:hover,
+.dict-home__close:hover { color: var(--gn-ink); }
+.dict-home__open svg,
+.dict-home__close svg { width: 24px; height: 24px; fill: currentColor; }
+
+.dict-home__open {
+  position: absolute;
+  z-index: 1;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
+}
+
+.dict-home__menu {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: min(300px, 85vw);
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0 0 max(24px, env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 0px);
+  border: 0;
+  border-right: 1px solid var(--gn-line);
+  background: var(--gn-surface);
+  color: var(--gn-ink);
+  font: 400 16px/1.4 var(--gn-body);
+  overflow-y: auto;
+}
+.dict-home__menu[open] { animation: dict-home-slide 0.2s ease-out; }
+.dict-home__menu::backdrop { background: rgb(0 0 0 / 0.4); }
+@keyframes dict-home-slide { from { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .dict-home__menu[open] { animation: none; }
+}
+
+.dict-home__close { margin: 10px 10px 0 auto; }
+
+.dict-home__menu h2 {
+  margin: 18px 22px 6px;
+  color: var(--gn-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dict-home__menu ul { margin: 0; padding: 0; list-style: none; }
+.dict-home__menu a,
+.dict-home__menu summary { display: block; padding: 8px 22px; cursor: pointer; }
+.dict-home__menu a:hover,
+.dict-home__menu summary:hover { color: var(--gn-accent); }
+.dict-home__menu details a { padding-left: 38px; }
+.dict-home__menu summary::-webkit-details-marker { display: none; }
+.dict-home__menu summary::after {
+  content: "›";
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--gn-muted);
+}
+.dict-home__menu details[open] > summary::after { transform: rotate(90deg); }
