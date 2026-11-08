@@ -108,6 +108,44 @@ initSqlJs().then(SQL => {
   check(`principal parts agree with the sheet (${tally.agree}/${sheet.length})`, tally.agree / sheet.length >= 0.8, true);
   check(`principal parts differ from the sheet (${tally.differ.length})`, tally.differ.length <= 8 || tally.differ, true);
 
+  // ---------- Noun declensions ----------
+
+  const table = (word, i = 0) => dict.declensions(word)[i];
+  const row = (word, c, i = 0) => D.NUMBERS.map(n => table(word, i).cells[c][n]);
+  check("δρόμος is masculine", table("δρόμος").gender, "masculine");
+  check("δρόμος nominative", row("δρόμος", "nominative"), [["δρόμ|ος"], ["δρόμ|οι"]]);
+  check("δρόμος vocative", row("δρόμος", "vocative"), [["δρόμ|ε"], ["δρόμ|οι"]]);
+  check("άνθρωπος: the accent moves, the ending split doesn't", row("άνθρωπος", "genitive"), [["ανθρώπ|ου"], ["ανθρώπ|ων"]]);
+  check("σπίτι: the stem comes from the template (-ι)", row("σπίτι", "genitive"), [["σπιτ|ιού"], ["σπιτ|ιών"]]);
+  check("πόλη is feminine", table("πόλη").gender, "feminine");
+  check("πόλη genitive plural", table("πόλη").cells.genitive.plural, ["πόλ|εων"]);
+  check("a form that doesn't exist is []", table("αβάντα").cells.genitive.plural, []);
+  check("alternatives, most usual first", table("αγγελτήριο").cells.genitive.singular, ["αγγελτηρί|ου", "αγγελτήρι|ου"]);
+  check("a romanization in the cell is dropped", table("βάβω").cells.nominative.plural, ["βάβ|ες"]);
+  check("articles in the cell are dropped, and no single gender", [table("βάτος").gender, table("βάτος").cells.nominative.plural], [null, ["βάτ|οι", "βάτ|α"]]);
+  check("a noun with two tables has both", dict.declensions("άλυσος").map(t => t.gender), ["feminine", "masculine"]);
+  check("a noun with no plural rows has null there", table("αρπα-κόλλα").cells.nominative.plural, null);
+  check("an adjective's table filed under a noun is left out", dict.declensions("απαυτός"), []);
+  check("a verb has no declension", dict.declensions("γράφω"), []);
+  check("articles", ["masculine", "feminine", "neuter"].map(g => D.article(g, "accusative", "plural")), ["τους", "τις", "τα"]);
+  check("no article in the vocative", D.article("masculine", "vocative", "singular"), "");
+
+  // Every 5th noun (all of them take about half a minute): eight cells, each a list of clean forms.
+  const nouns = dict.rows("SELECT DISTINCT h.word FROM headword h JOIN entry e ON e.headword_id = h.id WHERE e.pos = 'noun' ORDER BY h.word").map(r => r[0]);
+  const clean = /^[Ͱ-Ͽἀ-῿|-]+( [Ͱ-Ͽἀ-῿|-]+)*$/;
+  const nounProblems = [];
+  let nounTables = 0;
+  nouns.filter((_, i) => i % 5 === 0).forEach(word => {
+    for (const t of dict.declensions(word)) {
+      nounTables++;
+      for (const c of D.CASES) for (const n of D.NUMBERS) {
+        const cell = t.cells[c][n];
+        if (cell !== null && !(Array.isArray(cell) && cell.every(f => clean.test(f)))) nounProblems.push(`${word} ${c} ${n}: ${JSON.stringify(cell)}`);
+      }
+    }
+  });
+  check(`noun tables read cleanly (${nounTables} tables)`, nounProblems.slice(0, 5), []);
+
   console.log(`\n${checks - failures}/${checks} checks passed (${forms.length} stored forms)`);
   process.exit(failures ? 1 : 0);
 });

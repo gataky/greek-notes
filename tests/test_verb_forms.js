@@ -4,7 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const { conjugate } = require("../docs/javascripts/greek-verbs.js");
-const { withForms, dictionaryVerb } = require("../docs/javascripts/verb-forms.js");
+const { withForms, dictionaryVerb, verbToShow } = require("../docs/javascripts/verb-forms.js");
 
 const read = file => JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/data", file), "utf8"));
 const verbs = read("verbs.json");
@@ -113,6 +113,17 @@ check(JSON.stringify(withForms(guessed, forms.υποθέτω)) === JSON.stringif
 const kapnizo = dictionaryVerb("καπνίζω", forms.καπνίζω);
 check(kapnizo.future === "καπνίσω" && kapnizo.aorist === "κάπνισα" && !kapnizo.guessed, "καπνίζω's principal parts should come from its table");
 check(conj("καπνίζω").notes.length === 0, "a dictionary verb shouldn't get the engine's notes about the sheet");
+
+// verbToShow picks a verb the same way on every page: word list, then dictionary table, then a guess.
+const show_ = (greek, opts = {}) => verbToShow(greek, { sheet: verbs, forms, ...opts });
+check(show_("γράφω").verb === verb("γράφω") && !show_("γράφω").verb.note, "a word-list verb with a table is shown as it is");
+check(/no conjugation table for μεγαλώνω/.test(show_("μεγαλώνω").verb.note), "a word-list verb with no table gets a note");
+check(!show_("μεγαλώνω", { formsLoaded: false }).verb.note, "without verb-forms.json nothing can be said about tables");
+check(show_("καπνίζω").verb.fromDictionary && !show_("καπνίζω").verb.guessed, "a dictionary verb with a table isn't guessed");
+check(show_("καπνίζω", { guess: () => { throw new Error("guessed"); } }) !== null, "a verb with a table never asks for a guess");
+const guessedShow = show_("υποθέτω", { guess: () => ({ future: "υποθέσω", aorist: "υπέθεσα" }) });
+check(guessedShow.verb.guessed && /worked out/.test(guessedShow.verb.note), "a verb with no table is guessed, with a note");
+check(show_("υποθέτω") === null, "a verb with no table and no guess shows nothing");
 
 // Cells the engine filled are flagged for the grid to mark; the dictionary's own cells and the
 // dashes the engine leaves (a sheet's "no perfective") aren't.

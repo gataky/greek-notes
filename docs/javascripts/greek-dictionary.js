@@ -221,6 +221,59 @@
     : w.endsWith("ούμαι") ? [w.slice(0, -5) + "ώ"]
     : w.endsWith("ομαι") ? [w.slice(0, -4) + "ω"] : [];
 
+  // ---------- Noun declensions ----------
+
+  const CASES = ["nominative", "accusative", "genitive", "vocative"];  // display order: genitive after accusative
+  const NUMBERS = ["singular", "plural"];
+  const GENDER_CODES = { M: "masculine", F: "feminine", N: "neuter" };
+  // The definite article by gender, case and number. The vocative takes none.
+  const ARTICLES = {
+    masculine: { nominative: ["ο", "οι"], genitive: ["του", "των"], accusative: ["τον", "τους"] },
+    feminine: { nominative: ["η", "οι"], genitive: ["της", "των"], accusative: ["την", "τις"] },
+    neuter: { nominative: ["το", "τα"], genitive: ["του", "των"], accusative: ["το", "τα"] },
+  };
+  const article = (gender, grammaticalCase, number) => ARTICLES[gender]?.[grammaticalCase]?.[NUMBERS.indexOf(number)] || "";
+  const ARTICLE_WORDS = new Set(["ο", "η", "το", "οι", "τα", "του", "της", "των", "τον", "την", "τη", "τις", "τους"]);
+  const USAGE = ["rare", "archaic", "dated"];
+  const GREEK_WORD = /^[Ͱ-Ͽἀ-῿]+(-[Ͱ-Ͽἀ-῿]+)*$/;  // αρπα-κόλλα
+
+  // One cell's text -> its forms, or "-" when the form doesn't exist. Hand-made tables can hold
+  // several forms, an article or a romanization: "(βάβες (váves))", "η  βάτος (vátos)".
+  function nounForms(text) {
+    const out = [];
+    for (let part of text.normalize("NFC").split(/\s*[,/]\s*|\s+[-‑–]\s+/)) {
+      part = part.replace(/\([^()]*[A-Za-z][^()]*\)/g, "").replace(/[()[\]{}¹²³⁴⁵*†]/g, "").trim();
+      if (/^[-‑–—]$/.test(part)) { out.push("-"); continue; }
+      const words = part.split(/\s+/).filter(w => w && !ARTICLE_WORDS.has(w));
+      if (words.length && words.every(w => GREEK_WORD.test(w))) out.push(words.join(" "));
+    }
+    return out;
+  }
+
+  // Puts "|" between stem and ending so endings can be highlighted like the verb grid's:
+  // άνθρωπ|ος, ανθρώπ|ου, σπίτ|ι, σπιτ|ιού. The template names the nominative singular's ending
+  // (el-nN-ι-ια-2b), which gives the stem; without one, the letters every form shares are the
+  // stem. Accents don't count, and a form that doesn't start with the stem stays whole.
+  function markEndings(cells, template) {
+    const bare = f => Verbs.strip(f.toLowerCase());
+    const all = Object.values(cells).flatMap(c => Object.values(c)).flat().filter(f => f && !f.includes(" "));
+    if (all.length < 2) return cells;
+    let stem = "";
+    const ending = /^el-n[MFN]-([^-]+)-/.exec(template || "");
+    const nominative = cells.nominative.singular && cells.nominative.singular[0];
+    if (ending && nominative && bare(nominative).endsWith(bare(ending[1]))) {
+      stem = bare(nominative).slice(0, -ending[1].length);
+    } else {
+      const forms = all.map(bare);
+      let n = 0;
+      while (n < forms[0].length && forms.every(f => f[n] === forms[0][n])) n++;
+      stem = forms[0].slice(0, n);
+    }
+    if (!stem) return cells;
+    const mark = f => (f.includes(" ") || f.length <= stem.length || !bare(f).startsWith(stem) ? f : f.slice(0, stem.length) + "|" + f.slice(stem.length));
+    return Object.fromEntries(Object.entries(cells).map(([k, c]) => [k, Object.fromEntries(Object.entries(c).map(([num, forms]) => [num, forms && forms.map(mark)]))]));
+  }
+
   const escapeLike = w => w.replace(/[\\%_]/g, "\\$&");
   const escapeRegExp = w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -442,10 +495,52 @@
       return { future: best.future, aorist: best.aorist };
     }
 
-    return { meta, searchGreek, complete, searchEnglish, has, lookup, principalParts, rows };
+    // A noun's declension tables, from its own entries:
+    //   [{ gender, cells: { nominative: { singular: ["δρόμ|ος"], plural: ["δρόμ|οι"] }, ... } }]
+    // A cell is a list of alternatives, most usual first, [] when the form doesn't exist and null
+    // when the table doesn't say. gender ("masculine", "feminine", "neuter") comes from the
+    // table's template (el-nM-ος-οι-2a), else the entry's headword line, else it's null.
+    // Tables declined like adjectives, by gender, are left out.
+    function declensions(word) {
+      const found = rows(`SELECT t.id, t.template, e.head, i.form, g.tags
+        FROM headword h JOIN entry e ON e.headword_id = h.id
+        JOIN inflection_table t ON t.entry_id = e.id
+        JOIN inflection i ON i.table_id = t.id JOIN inflection_tags g ON g.id = i.tags_id
+        WHERE h.word = ? AND e.pos = 'noun' AND t.kind = 'declension' AND t.word IS NULL
+        ORDER BY e.ord, t.ord, i.ord`, [word]);
+      const tables = new Map();
+      for (const [id, template, head, form, tags] of found) {
+        if (!tables.has(id)) tables.set(id, { template, head, rows: [] });
+        tables.get(id).rows.push({ form, tags: new Set(tags.split(" ")) });
+      }
+      const out = [];
+      for (const { template, head, rows: cellRows } of tables.values()) {
+        if (cellRows.some(r => Object.values(GENDER_CODES).some(g => r.tags.has(g)))) continue;
+        const code = /^el-n([MFN])-/.exec(template || "");
+        const fromHead = /^(masculine|feminine|neuter)\b(?! or)/.exec(head || "");
+        const gender = code ? GENDER_CODES[code[1]] : fromHead ? fromHead[1] : null;
+        const cells = {};
+        let any = false;
+        for (const c of CASES) {
+          cells[c] = {};
+          for (const n of NUMBERS) {
+            const matching = cellRows.filter(r => r.tags.has(c) && r.tags.has(n));
+            const usual = matching.filter(r => !USAGE.some(u => r.tags.has(u)));
+            const forms = [...new Set((usual.length ? usual : matching).flatMap(r => nounForms(r.form)))];
+            const real = forms.filter(f => f !== "-");
+            cells[c][n] = real.length ? real : forms.length ? [] : null;
+            if (cells[c][n] !== null) any = true;
+          }
+        }
+        if (any) out.push({ gender, cells: markEndings(cells, template) });
+      }
+      return out;
+    }
+
+    return { meta, searchGreek, complete, searchEnglish, has, lookup, principalParts, declensions, rows };
   }
 
-  const api = { norm, phonetic, queryKeys, isGreek, normalizeTerm, stem, open, EXACT, NORM, PHONETIC };
+  const api = { norm, phonetic, queryKeys, isGreek, normalizeTerm, stem, open, article, nounForms, CASES, NUMBERS, EXACT, NORM, PHONETIC };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GreekDictionary = api;
 })(this);

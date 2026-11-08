@@ -24,9 +24,16 @@
 
 {% block hero %}
   <div class="dict-home">
-    <button class="dict-home__open" id="site-menu-open" type="button" aria-label="Menu" aria-haspopup="dialog">
-      {% include ".icons/material/menu.svg" %}
-    </button>
+    <div class="dict-home__buttons">
+      {# Flips the site's light/dark palette (home.js). Shows the moon in light mode, the sun in dark. #}
+      <button class="dict-home__button dict-home__theme" id="site-theme" type="button" aria-label="Switch between light and dark" title="Switch between light and dark">
+        <span class="dict-home__to-dark">{% include ".icons/material/weather-night.svg" %}</span>
+        <span class="dict-home__to-light">{% include ".icons/material/weather-sunny.svg" %}</span>
+      </button>
+      <button class="dict-home__button dict-home__open" id="site-menu-open" type="button" aria-label="Menu" aria-haspopup="dialog">
+        {% include ".icons/material/menu.svg" %}
+      </button>
+    </div>
     <dialog class="dict-home__menu" id="site-menu" aria-label="Menu">
       <button class="dict-home__close" id="site-menu-close" type="button" aria-label="Close menu">
         {% include ".icons/material/close.svg" %}

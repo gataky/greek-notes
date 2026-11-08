@@ -120,5 +120,5 @@
       <dl class="legend">${legend}</dl>`;
   }
 
-  root.VerbGrid = { cardHTML, esc, PATTERN_ENDINGS, CLASS_ORDER };
+  root.VerbGrid = { cardHTML, cellHTML, esc, PATTERN_ENDINGS, CLASS_ORDER };
 })(this);

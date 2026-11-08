@@ -17,7 +17,7 @@ body:has(.dict-home) .md-content__inner { margin: 0; padding: 0; }
 body:has(.dict-home) .md-content__inner::before { display: none; }
 body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 0; }
 
-.dict-home__open,
+.dict-home__button,
 .dict-home__close {
   display: flex;
   padding: 8px;
@@ -25,17 +25,25 @@ body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 
   color: var(--gn-muted);
   cursor: pointer;
 }
-.dict-home__open:hover,
+.dict-home__button:hover,
 .dict-home__close:hover { color: var(--gn-ink); }
-.dict-home__open svg,
+.dict-home__button svg,
 .dict-home__close svg { width: 24px; height: 24px; fill: currentColor; }
 
-.dict-home__open {
+.dict-home__buttons {
   position: absolute;
   z-index: 1;
   top: max(10px, env(safe-area-inset-top, 0px));
   right: max(10px, env(safe-area-inset-right, 0px));
+  display: flex;
+  gap: 2px;
 }
+
+/* The theme button shows where it goes: the moon in light mode, the sun in dark */
+.dict-home__theme span { display: flex; }
+.dict-home__to-light,
+body[data-md-color-scheme="slate"] .dict-home__to-dark { display: none !important; }
+body[data-md-color-scheme="slate"] .dict-home__to-light { display: flex !important; }
 
 .dict-home__menu {
   position: fixed;

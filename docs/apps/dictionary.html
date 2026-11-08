@@ -38,9 +38,9 @@
 .entry li::marker { color: var(--muted); font-size: 14px; }
 .label { color: var(--muted); font-style: italic; font-size: 14px; }
 .ref { color: var(--muted); }
-.ex { display: block; margin-top: 3px; padding-left: 10px; border-left: 2px solid var(--line); }
-.ex .el { display: block; font-family: var(--display); font-size: 18px; }
-.ex .tr { display: block; color: var(--muted); font-size: 14px; }
+.entry .ex { display: block; margin-top: 3px; padding-left: 10px; border-left: 2px solid var(--line); }
+.entry .ex .el { display: block; font-family: var(--display); font-size: 18px; }
+.entry .ex .tr { display: block; color: var(--muted); font-size: 14px; }
 .card a { color: var(--accent); }
 a.w { font-family: var(--display); font-size: 1.1em; text-decoration: none; }
 a.w:hover { text-decoration: underline; }
@@ -48,6 +48,13 @@ a.w:hover { text-decoration: underline; }
 .card details p { margin: 8px 0 0; font-size: 15px; }
 .forms { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 8px; font-family: var(--display); font-size: 18px; }
 .links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; font-weight: 600; }
+
+/* A verb's conjugation (verb-grid.js) and a noun's declension, inside the entry */
+.conjugation, .declension { display: flex; flex-direction: column; gap: 14px; min-width: 0; border-top: 1px solid var(--line); padding-top: 16px; }
+.conjugation h3, .declension h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.card-tag { margin-left: 8px; letter-spacing: 0; text-transform: none; }
+.declension table { width: auto; }
+.declension td:not(.who) { padding-right: 32px; }
 
 footer { color: var(--muted); font-size: 13px; }
 footer a { color: inherit; }
@@ -79,6 +86,8 @@ footer a { color: inherit; }
 <script src="../vendor/sql.js/sql-wasm.js"></script>
 <script src="../javascripts/greek-verbs.js"></script>
 <script src="../javascripts/greek-dictionary.js"></script>
+<script src="../javascripts/verb-grid.js"></script>
+<script src="../javascripts/verb-forms.js"></script>
 <script>
 const { isGreek, PHONETIC } = GreekDictionary;
 const $ = id => document.getElementById(id);
@@ -86,8 +95,9 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const wordHref = w => "#" + encodeURIComponent(w);
 
 let dict = null;
-let verbs = new Set();   // the word list's verbs (verbs.json)
-let tables = new Set();  // verbs with a conjugation table in the dictionary (verb-forms.json)
+let sheet = [];             // the word list's verbs (verbs.json)
+let forms = {};             // the dictionary's verb forms (verb-forms.json)
+let formsLoaded = false;
 
 // ---------- Loading ----------
 
@@ -128,10 +138,11 @@ function status(text, fraction) {
 
 async function start() {
   status("Opening the dictionary…");
-  // Which verbs have a table. Waited for below, so a verb's link is never shown as guessed by mistake.
+  // The verbs' forms, for the conjugation in an entry. Waited for below, so a verb is never drawn
+  // from guessed parts when the dictionary has its table.
   const verbLists = Promise.all([
-    fetch("../data/verbs.json").then(r => r.json()).then(list => { verbs = new Set(list.map(v => v.greek)); }),
-    fetch("../data/verb-forms.json").then(r => r.json()).then(forms => { tables = new Set(Object.keys(forms)); }),
+    fetch("../data/verbs.json").then(r => r.json()).then(list => { sheet = list; }),
+    fetch("../data/verb-forms.json").then(r => r.json()).then(f => { forms = f; formsLoaded = true; }),
   ]).catch(() => {});
   try {
     const [SQL, bytes] = await Promise.all([
@@ -246,27 +257,46 @@ function entryHTML(found) {
       ${entry.head ? `<p class="head">${linkWords(entry.head)}</p>` : ""}
       <ol>${senses}</ol>${etymology}</div>`;
   }).join("");
-  const forms = found.forms.length
+  const otherForms = found.forms.length
     ? `<details><summary>Other forms · ${found.forms.length}</summary><div class="forms" lang="el">${found.forms.map(f => `<span>${esc(f)}</span>`).join("")}</div></details>`
     : "";
-  const conjugation = conjugationLink(found);
   const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
   return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2></div>
-    ${entries}${forms}<div class="links">${conjugation}${wiktionary}</div>`;
+    ${entries}${conjugationHTML(found)}${declensionHTML(found)}${otherForms}<div class="links">${wiktionary}</div>`;
 }
 
-// Verbs in the word list link to their table, and so do verbs with a conjugation table in the
-// dictionary (verb-forms.json). Only a verb with neither is guessed: its future simple and aorist
-// are worked out from its unlabelled forms, and the table says so.
-function conjugationLink(found) {
-  const link = (hash, label) => `<a href="verb-tables.html#${hash}">${label} →</a>`;
+// A noun's declension tables, straight from the dictionary (declensions() in greek-dictionary.js),
+// with the article before each form. A number the table has nothing for (a noun with no plural)
+// is left out; a form that doesn't exist shows as a dash.
+function declensionHTML(found) {
+  const { CASES, NUMBERS, article } = GreekDictionary;
+  return dict.declensions(found.word).map(({ gender, cells }) => {
+    const numbers = NUMBERS.filter(n => CASES.some(c => cells[c][n] !== null));
+    const withArticle = (c, n, f) => (article(gender, c, n) && !f.includes(" ") ? article(gender, c, n) + " " + f : f);
+    const rows = CASES.map(c => `<tr><td class="who">${c}</td>${numbers.map(n =>
+      `<td>${VerbGrid.cellHTML((cells[c][n] || []).map(f => withArticle(c, n, f)))}</td>`).join("")}</tr>`).join("");
+    const tag = gender ? `<span class="tag card-tag">${gender}</span>` : "";
+    return `<section class="declension"><h3>Declension${tag}</h3>
+      <div class="scroll"><table lang="el"><thead><tr><th></th>${numbers.map(n => `<th class="sub">${n}</th>`).join("")}</tr></thead>
+      <tbody>${rows}</tbody></table></div></section>`;
+  }).join("");
+}
+
+// A verb's conjugation grid, the same one the verb tables page draws (verbToShow in verb-forms.js):
+// the word list's verb, else the dictionary's own table, else principal parts guessed from the
+// dictionary's unlabelled forms, with a note saying so.
+function conjugationHTML(found) {
+  // The word list may spell it the other way: ξεχνώ for ξεχνάω.
   const twin = found.word.endsWith("άω") ? found.word.slice(0, -2) + "ώ" : found.word.endsWith("ώ") ? found.word.slice(0, -1) + "άω" : null;
-  const known = [found.word, twin].find(w => w && verbs.has(w));
-  if (known) return link(encodeURIComponent(known), "Conjugation table");
-  if (!found.entries.some(e => e.pos === "verb")) return "";
-  if (tables.has(found.word)) return link(encodeURIComponent(found.word), "Conjugation table");
-  const parts = dict.principalParts(found.word);
-  return parts ? link([found.word, parts.future, parts.aorist].map(encodeURIComponent).join(","), "Conjugation table (guessed)") : "";
+  const listed = [found.word, twin].find(w => w && sheet.some(v => v.greek === w));
+  if (!listed && !found.entries.some(e => e.pos === "verb")) return "";
+  const shown = VerbForms.verbToShow(listed || found.word, { sheet, forms, formsLoaded, guess: () => dict.principalParts(found.word) });
+  if (!shown) return "";
+  const { verb, conjugation } = shown;
+  const pattern = VerbGrid.PATTERN_ENDINGS[conjugation.pattern];
+  const tag = pattern ? `<span class="tag card-tag">${esc(conjugation.pattern)} · ${esc(pattern)}</span>` : "";
+  const heading = `<h3>Conjugation${listed && listed !== found.word ? ` <span lang="el">· ${esc(listed)}</span>` : ""}${tag}</h3>`;
+  return `<section class="conjugation">${VerbGrid.cardHTML(verb, { heading, conjugation })}</section>`;
 }
 
 function showHash() {
