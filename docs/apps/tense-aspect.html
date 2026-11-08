@@ -84,10 +84,6 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 
 .btn { appearance: none; border: 1.5px solid var(--accent); background: var(--accent); color: var(--surface); font: 600 15px var(--body); padding: 10px 18px; border-radius: 10px; cursor: pointer; }
 .btn.ghost { background: transparent; color: var(--accent); }
 .btn:disabled { opacity: .45; cursor: default; }
-.keys { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.keys span { font-size: 12px; color: var(--muted); margin-right: 4px; }
-.key { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 400 18px var(--display); width: 38px; height: 36px; border-radius: 8px; cursor: pointer; }
-.key:hover { border-color: var(--accent); }
 
 .feedback { border-radius: 10px; padding: 12px 14px; font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
 .feedback.good { background: var(--good-soft); color: var(--good); }
@@ -194,11 +190,6 @@ table.para { border-collapse: collapse; width: 100%; }
         <input id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="The verb, with θα or να if it takes one…" aria-label="Your answer" disabled>
         <button class="btn" id="check" type="submit" disabled>Check</button>
       </form>
-
-      <div class="keys" aria-label="Accented letters">
-        <span>Accents</span>
-        <button class="key" type="button">ά</button><button class="key" type="button">έ</button><button class="key" type="button">ή</button><button class="key" type="button">ί</button><button class="key" type="button">ό</button><button class="key" type="button">ύ</button><button class="key" type="button">ώ</button><button class="key" type="button">ς</button>
-      </div>
 
       <div id="feedback" class="feedback" hidden></div>
 
@@ -628,18 +619,6 @@ function setTab(which) {
 
 // ---------- Wiring ----------
 
-// Accent keys don't take focus from the box, so an open keyboard stays open (and a closed
-// one stays closed) instead of closing and popping back up.
-document.querySelectorAll(".key").forEach(k => {
-  k.addEventListener("mousedown", e => e.preventDefault());
-  k.addEventListener("click", () => {
-    const inp = $("answer"); if (inp.disabled) return;
-    const typing = document.activeElement === inp;
-    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
-    inp.value = inp.value.slice(0, s) + k.textContent + inp.value.slice(e);
-    if (typing || AUTO_FOCUS) { inp.focus(); inp.setSelectionRange(s + 1, s + 1); }
-  });
-});
 $("form").addEventListener("submit", check);
 $("show").addEventListener("click", () => { if (!answered && item) finish(null); });
 $("next").addEventListener("click", next);
