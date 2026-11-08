@@ -260,6 +260,11 @@ table.para { border-collapse: collapse; width: 100%; }
 "use strict";
 const G = window.GreekVerbs, VD = window.VoiceDrill;
 const $ = id => document.getElementById(id);
+// Move focus to the answer box only with a mouse or trackpad. On a phone that would open the
+// on-screen keyboard on every new sentence and make the page jump, so there the learner
+// taps the box when ready.
+const AUTO_FOCUS = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const focusAnswer = () => { if (AUTO_FOCUS) $("answer").focus({ preventScroll: true }); };
 const PRON = { "1sg": "εγώ", "2sg": "εσύ", "3sg": "αυτός", "1pl": "εμείς", "2pl": "εσείς", "3pl": "αυτοί" };
 const REASON = {
   object: ["Has an object", "Something else receives the action, so it's active."],
@@ -399,7 +404,7 @@ function next() {
   $("answer").value = ""; $("answer").disabled = false;
   $("check").disabled = false; $("show").disabled = false; $("next").disabled = true;
   $("feedback").hidden = true; $("reveal").hidden = true;
-  $("answer").focus({ preventScroll: true });
+  focusAnswer();
 }
 
 function pairHTML(it) {
@@ -433,7 +438,7 @@ function finish(g, raw) {
   showReveal(g);
   $("pair").hidden = true; $("hint").hidden = true;
   $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
-  $("next").focus({ preventScroll: true });
+  if (AUTO_FOCUS) $("next").focus({ preventScroll: true });
 }
 
 function message(g) {
@@ -596,21 +601,27 @@ function setTab(which) {
   const drill = which === "drill";
   $("tab-drill").setAttribute("aria-selected", drill); $("tab-tables").setAttribute("aria-selected", !drill);
   $("panel-drill").hidden = !drill; $("panel-tables").hidden = drill;
-  if (drill && !answered) $("answer").focus({ preventScroll: true });
+  if (drill && !answered) focusAnswer();
 }
 
 // ---------- Wiring ----------
 
-document.querySelectorAll(".key").forEach(k => k.addEventListener("click", () => {
-  const inp = $("answer"); if (inp.disabled) return;
-  const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
-  inp.value = inp.value.slice(0, s) + k.textContent + inp.value.slice(e);
-  inp.focus(); inp.setSelectionRange(s + 1, s + 1);
-}));
+// Accent keys don't take focus from the box, so an open keyboard stays open (and a closed
+// one stays closed) instead of closing and popping back up.
+document.querySelectorAll(".key").forEach(k => {
+  k.addEventListener("mousedown", e => e.preventDefault());
+  k.addEventListener("click", () => {
+    const inp = $("answer"); if (inp.disabled) return;
+    const typing = document.activeElement === inp;
+    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+    inp.value = inp.value.slice(0, s) + k.textContent + inp.value.slice(e);
+    if (typing || AUTO_FOCUS) { inp.focus(); inp.setSelectionRange(s + 1, s + 1); }
+  });
+});
 $("form").addEventListener("submit", check);
 $("show").addEventListener("click", () => { if (!answered && item) finish(null, ""); });
 $("next").addEventListener("click", next);
-$("hint").addEventListener("click", () => { $("pair").hidden = false; $("hint").hidden = true; $("answer").focus({ preventScroll: true }); });
+$("hint").addEventListener("click", () => { $("pair").hidden = false; $("hint").hidden = true; focusAnswer(); });
 $("optPairs").addEventListener("change", e => setOption("pairs", e.target.checked));
 $("optDeps").addEventListener("change", e => setOption("deps", e.target.checked));
 $("optPair").addEventListener("change", e => setOption("showPair", e.target.checked));
