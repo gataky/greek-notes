@@ -77,4 +77,4 @@ Use them where a weak pronoun can't go, or to stress who you mean.
 | Who did you see? Him. | Ποιον είδες; **Αυτόν**. | Alone |
 | It's you I want, not him. | **Εσένα** θέλω, όχι **αυτόν**. | Contrast |
 | *I* like it. | **Εμένα** μου αρέσει. | Emphasis, doubled |
-| This is for you. | Αυτό είναι για **σένα**. | After a [preposition](../greek-prepositions.md#pronouns-after-a-preposition) |
+| This is for you. | Αυτό είναι για **σένα**. | After a [preposition](../prepositions.md#pronouns-after-a-preposition) |

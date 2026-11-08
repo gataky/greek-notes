@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
-<link rel="stylesheet" href="verb-grid.css">
+<link rel="stylesheet" href="../stylesheets/verb-grid.css">
 <style>
 /* Jump links to each class */
 .jump { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -38,8 +38,8 @@
   <div class="wrap" id="patterns"></div>
 </div>
 
-<script src="greek-verbs.js"></script>
-<script src="verb-grid.js"></script>
+<script src="../javascripts/greek-verbs.js"></script>
+<script src="../javascripts/verb-grid.js"></script>
 <script>
 const { cardHTML, esc } = VerbGrid;
 const $ = id => document.getElementById(id);
@@ -87,7 +87,7 @@ $("jump").addEventListener("click", e => {
 });
 
 const fold = s => GreekVerbs.strip(s.toLowerCase());
-fetch("verbs.json")
+fetch("../data/verbs.json")
   .then(r => r.json())
   .then(verbs => render(verbs.sort((a, b) => fold(a.greek).localeCompare(fold(b.greek), "el"))))
   .catch(() => render([]));

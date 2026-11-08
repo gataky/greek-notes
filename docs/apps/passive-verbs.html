@@ -254,8 +254,8 @@ table.para { border-collapse: collapse; width: 100%; }
   </section>
 </div>
 
-<script src="../tools/greek-verbs.js"></script>
-<script src="voice-drill.js"></script>
+<script src="../javascripts/greek-verbs.js"></script>
+<script src="../javascripts/voice-drill.js"></script>
 <script>
 "use strict";
 const G = window.GreekVerbs, VD = window.VoiceDrill;
@@ -288,7 +288,7 @@ let session = { q: 0, correct: 0, total: 0, streak: 0 };
 
 // ---------- Loading ----------
 
-Promise.all([fetch("../tools/verbs.json").then(r => r.json()), fetch("voice-sentences.json").then(r => r.json())])
+Promise.all([fetch("../data/verbs.json").then(r => r.json()), fetch("../data/voice-sentences.json").then(r => r.json())])
   .then(([verbs, bank]) => { build(verbs, bank); renderTables(); renderSlips(); next(); })
   .catch(() => {
     $("english").textContent = "Couldn't load the sentences. Open this page through the site (make serve), not straight from disk.";

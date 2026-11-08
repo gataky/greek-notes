@@ -83,7 +83,7 @@ Only these change form, and they agree with the noun like adjectives. Every othe
 <tr><td class="who">neu<span class="full">ter</span><span class="abbr">.</span></td><td>έν<span class="end">α</span></td><td class="gap"></td><td>έν<span class="end">α</span></td><td class="gap"></td><td>εν<span class="end">ός</span></td></tr>
 </tbody>
 </table>
-<p class="grid-note">The same word as the <a href="../greek-articles/#indefinite-article-a-an">indefinite article</a>. The feminine is also spelled <strong>μια, μιας</strong>, but μία is more usual for the number. In compounds it stays singular: είκοσι <strong>ένας</strong> άντρες.</p>
+<p class="grid-note">The same word as the <a href="../articles/#indefinite-article-a-an">indefinite article</a>. The feminine is also spelled <strong>μια, μιας</strong>, but μία is more usual for the number. In compounds it stays singular: είκοσι <strong>ένας</strong> άντρες.</p>
 </div>
 
 ### τρεις and τέσσερις (three and four)
@@ -157,7 +157,7 @@ Each part that declines agrees with the noun being counted, except the number in
 
 ## Ordinal numbers
 
-Every ordinal declines like [ψηλός](greek-adjectives.md): ο πρώτος, η πρώτη, το πρώτο. στον **τρίτο** όροφο (on the third floor), η **δεύτερη** φορά (the second time).
+Every ordinal declines like [ψηλός](adjectives.md): ο πρώτος, η πρώτη, το πρώτο. στον **τρίτο** όροφο (on the third floor), η **δεύτερη** φορά (the second time).
 
 | | Ordinal | | Ordinal |
 | --- | --- | --- | --- |

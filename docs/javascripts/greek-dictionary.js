@@ -4,7 +4,7 @@
 // The database stores search keys that only code can compute: `norm` (accents and case
 // dropped), `phonetic` (how the word sounds, so σπήτι finds σπίτι) and normalized English
 // terms. The key functions below are a port of the Python reference in the dictionary's
-// guide (itself a port of lemma's Rust code); scripts/test_dictionary.js checks them
+// guide (itself a port of lemma's Rust code); tests/test_dictionary.js checks them
 // against every stored form. The database is a build artifact: never write to it, and
 // remember words by their spelling, since row ids change between builds.
 

@@ -23,7 +23,7 @@ These refer to no one in particular: *someone, nothing, everyone*. They pair up 
 
 ## κανένας, τίποτα: no one, nothing
 
-κανένας is built on [ένας](../greek-numerals.md#which-cardinals-decline) and has no plural. τίποτα (also τίποτε) never changes.
+κανένας is built on [ένας](../numerals.md#which-cardinals-decline) and has no plural. τίποτα (also τίποτε) never changes.
 
 | | Masculine | Feminine | Neuter |
 | --- | --- | --- | --- |
@@ -43,7 +43,7 @@ These refer to no one in particular: *someone, nothing, everyone*. They pair up 
 
 - **The verb still needs δεν or μην**, so Greek says "I didn't see nobody": **δεν** είδα **κανέναν**.
 - **In a question they mean "any"**, with no negative word: Θέλεις **τίποτα**; **κάτι** asks more neutrally: Θέλεις **κάτι**;
-- **Before a number, καμιά is "about"**: **καμιά** δεκαριά (about ten). See [numerals](../greek-numerals.md).
+- **Before a number, καμιά is "about"**: **καμιά** δεκαριά (about ten). See [numerals](../numerals.md).
 
 ## Each, all, other
 

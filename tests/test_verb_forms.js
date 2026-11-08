@@ -1,12 +1,12 @@
 // Checks the verb tables' forms: dictionary cells from verb-forms.json, with the engine filling gaps.
-//   node scripts/test_verb_forms.js
+//   node tests/test_verb_forms.js
 
 const fs = require("fs");
 const path = require("path");
-const { conjugate } = require("../docs/tools/greek-verbs.js");
-const { withForms, dictionaryVerb } = require("../docs/tools/verb-forms.js");
+const { conjugate } = require("../docs/javascripts/greek-verbs.js");
+const { withForms, dictionaryVerb } = require("../docs/javascripts/verb-forms.js");
 
-const read = file => JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/tools", file), "utf8"));
+const read = file => JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/data", file), "utf8"));
 const verbs = read("verbs.json");
 const forms = read("verb-forms.json");
 const verb = greek => verbs.find(v => v.greek === greek);

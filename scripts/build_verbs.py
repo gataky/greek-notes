@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build docs/tools/verbs.json from the verbs on the words tab of the Google Sheet.
+"""Build docs/data/verbs.json from the verbs on the words tab of the Google Sheet.
 
 Usage:
     python3 scripts/build_verbs.py            # download the sheet (it must be link-shared)
     python3 scripts/build_verbs.py --csv FILE # use a CSV export instead
 
 Columns are found by their header, so their position in the sheet doesn't matter.
-The conjugation itself happens in the browser (docs/tools/greek-verbs.js); this
+The conjugation itself happens in the browser (docs/javascripts/greek-verbs.js); this
 script only copies the per-verb facts the rules can't work out.
 """
 
@@ -21,7 +21,7 @@ from pathlib import Path
 SHEET_ID = "1p39Sbnkx3G4swoSPJ2KKVKu-VwteKmaAQ9toFadd5cA"
 WORDS_GID = "833818589"
 URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={WORDS_GID}"
-OUT = Path(__file__).resolve().parent.parent / "docs" / "tools" / "verbs.json"
+OUT = Path(__file__).resolve().parent.parent / "docs" / "data" / "verbs.json"
 
 # JSON key -> sheet header
 FIELDS = {

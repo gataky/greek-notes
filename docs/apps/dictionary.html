@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
-<link rel="stylesheet" href="verb-grid.css">
+<link rel="stylesheet" href="../stylesheets/verb-grid.css">
 <style>
 /* Search box */
 #search { width: 100%; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
@@ -76,9 +76,9 @@ footer a { color: inherit; }
   </footer>
 </div>
 
-<script src="vendor/sql-wasm.js"></script>
-<script src="greek-verbs.js"></script>
-<script src="greek-dictionary.js"></script>
+<script src="../vendor/sql.js/sql-wasm.js"></script>
+<script src="../javascripts/greek-verbs.js"></script>
+<script src="../javascripts/greek-dictionary.js"></script>
 <script>
 const { isGreek, PHONETIC } = GreekDictionary;
 const $ = id => document.getElementById(id);
@@ -130,13 +130,13 @@ async function start() {
   status("Opening the dictionary…");
   // Which verbs have a table. Waited for below, so a verb's link is never shown as guessed by mistake.
   const verbLists = Promise.all([
-    fetch("verbs.json").then(r => r.json()).then(list => { verbs = new Set(list.map(v => v.greek)); }),
-    fetch("verb-forms.json").then(r => r.json()).then(forms => { tables = new Set(Object.keys(forms)); }),
+    fetch("../data/verbs.json").then(r => r.json()).then(list => { verbs = new Set(list.map(v => v.greek)); }),
+    fetch("../data/verb-forms.json").then(r => r.json()).then(forms => { tables = new Set(Object.keys(forms)); }),
   ]).catch(() => {});
   try {
     const [SQL, bytes] = await Promise.all([
-      initSqlJs({ locateFile: file => "vendor/" + file }),
-      download("lemma_greek_en.db.gz"),
+      initSqlJs({ locateFile: file => "../vendor/sql.js/" + file }),
+      download("../data/lemma_greek_en.db.gz"),
     ]);
     dict = GreekDictionary.open(new SQL.Database(bytes));
   } catch (err) {
@@ -259,7 +259,7 @@ function entryHTML(found) {
 // dictionary (verb-forms.json). Only a verb with neither is guessed: its future simple and aorist
 // are worked out from its unlabelled forms, and the table says so.
 function conjugationLink(found) {
-  const link = (hash, label) => `<a href="verb-tables-app.html#${hash}">${label} →</a>`;
+  const link = (hash, label) => `<a href="verb-tables.html#${hash}">${label} →</a>`;
   const twin = found.word.endsWith("άω") ? found.word.slice(0, -2) + "ώ" : found.word.endsWith("ώ") ? found.word.slice(0, -1) + "άω" : null;
   const known = [found.word, twin].find(w => w && verbs.has(w));
   if (known) return link(encodeURIComponent(known), "Conjugation table");

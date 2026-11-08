@@ -1,6 +1,6 @@
-// Checks the active or passive drill's sentence bank (docs/drills/voice-sentences.json).
-//   node scripts/test_voice_sentences.js            run the checks
-//   node scripts/test_voice_sentences.js --gaps     also list verb/person pairs with no sentence
+// Checks the active or passive drill's sentence bank (docs/data/voice-sentences.json).
+//   node tests/test_voice_sentences.js            run the checks
+//   node tests/test_voice_sentences.js --gaps     also list verb/person pairs with no sentence
 //
 // Every sentence must name a verb the drill uses (a passive or deponent in verbs.json,
 // or a passive's active form), a reason that fits its voice, and a Greek sentence
@@ -8,12 +8,12 @@
 
 const fs = require("fs");
 const path = require("path");
-const GreekVerbs = require("../docs/tools/greek-verbs.js");
-const VD = require("../docs/drills/voice-drill.js");
+const GreekVerbs = require("../docs/javascripts/greek-verbs.js");
+const VD = require("../docs/javascripts/voice-drill.js");
 
 const read = p => JSON.parse(fs.readFileSync(path.join(__dirname, "..", p), "utf8"));
-const verbs = read("docs/tools/verbs.json");
-const bank = read("docs/drills/voice-sentences.json");
+const verbs = read("docs/data/verbs.json");
+const bank = read("docs/data/voice-sentences.json");
 
 const byGreek = new Map(verbs.map(v => [v.greek, v]));
 const passives = verbs.filter(v => v.voice === "passive" && v.activeForm && byGreek.has(v.activeForm));

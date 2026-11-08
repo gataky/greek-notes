@@ -22,7 +22,7 @@
 <tr><td class="who">gen<span class="full">itive</span><span class="abbr">.</span></td><td>αυτ<span class="end">ών</span></td><td>αυτ<span class="end">ών</span></td><td>αυτ<span class="end">ών</span></td></tr>
 </tbody>
 </table>
-<p class="grid-note"><strong>εκείνος</strong> has the same endings but keeps the accent on -κεί-: εκείνος, εκείνη, εκείνο, εκείνου, εκείνων. The -ν of αυτή(ν) follows <a href="../../greek-articles/#definite-article-the">the same rule as the article</a>.</p>
+<p class="grid-note"><strong>εκείνος</strong> has the same endings but keeps the accent on -κεί-: εκείνος, εκείνη, εκείνο, εκείνου, εκείνων. The -ν of αυτή(ν) follows <a href="../../articles/#definite-article-the">the same rule as the article</a>.</p>
 </div>
 
 | English | Greek |

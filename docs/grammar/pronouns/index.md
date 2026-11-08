@@ -14,6 +14,6 @@ Pronouns stand in for a noun: *I, this, who, someone*. Greek has the same kinds 
 
 Three things hold across all of them:
 
-- **Most decline like adjectives**, agreeing in gender, number and case: ποι**ος** άντρας, ποι**α** γυναίκα, ποι**ο** παιδί. See [adjectives](../greek-adjectives.md).
+- **Most decline like adjectives**, agreeing in gender, number and case: ποι**ος** άντρας, ποι**α** γυναίκα, ποι**ο** παιδί. See [adjectives](../adjectives.md).
 - **Most work alone or with a noun**: **αυτό** είναι καλό (this is good), **αυτό** το κρασί (this wine).
 - **Masculine covers mixed groups**: **αυτοί** είναι οι γονείς μου (these are my parents).

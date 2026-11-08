@@ -27,7 +27,7 @@ It's a masculine singular noun whoever it refers to. The article and ending chan
 | Do you believe in yourself? | Πιστεύεις **στον εαυτό σου**; |
 | I'm not myself today. | Δεν είμαι **ο εαυτός μου** σήμερα. |
 
-**Everyday actions use a passive verb instead**: **πλένομαι** (I wash myself), **ντύνομαι** (I get dressed). See [passive verbs](../greek-passive-verbs-when-to-use-them.md#type-2-reflexive).
+**Everyday actions use a passive verb instead**: **πλένομαι** (I wash myself), **ντύνομαι** (I get dressed). See [passive verbs](../passive-verbs.md#type-2-reflexive).
 
 ## ο ίδιος: myself, the same
 
@@ -54,7 +54,7 @@ It's a masculine singular noun whoever it refers to. The article and ending chan
 
 ## Each other
 
-Many verbs use a passive form: **βλεπόμαστε** (we see each other). See [passive verbs](../greek-passive-verbs-when-to-use-them.md#type-3-reciprocal). Otherwise, use **ο ένας τον άλλο**. Each part agrees with the people involved.
+Many verbs use a passive form: **βλεπόμαστε** (we see each other). See [passive verbs](../passive-verbs.md#type-3-reciprocal). Otherwise, use **ο ένας τον άλλο**. Each part agrees with the people involved.
 
 | English | Greek |
 | --- | --- |

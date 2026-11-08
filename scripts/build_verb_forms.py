@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build docs/tools/verb-forms.json: the labelled forms of every verb in the lemma dictionary.
+"""Build docs/data/verb-forms.json: the labelled forms of every verb in the lemma dictionary.
 
 Usage:
     python3 scripts/build_verb_forms.py path/to/lemma_greek_en.db   (or: make verb-forms)
 
 The verb tables page can't load the 22 MB dictionary, so this copies out just the cells its
 grid shows, for the sheet's verbs (keyed by the sheet's spelling) and every verb headword with a
-table. The database is the source of truth: docs/tools/verb-forms.js shows these forms and only
+table. The database is the source of truth: docs/javascripts/verb-forms.js shows these forms and only
 falls back to the conjugation engine for cells that aren't here. The dictionary links a verb
 missing from this file as "guessed".
 
@@ -25,8 +25,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-VERBS = ROOT / "docs" / "tools" / "verbs.json"
-OUT = ROOT / "docs" / "tools" / "verb-forms.json"
+VERBS = ROOT / "docs" / "data" / "verbs.json"
+OUT = ROOT / "docs" / "data" / "verb-forms.json"
 
 SIX = [("first-person", "singular"), ("second-person", "singular"), ("third-person", "singular"),
        ("first-person", "plural"), ("second-person", "plural"), ("third-person", "plural")]

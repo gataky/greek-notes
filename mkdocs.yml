@@ -4,7 +4,7 @@ site_description: A Greek and English dictionary that works offline
 theme:
   name: material
   custom_dir: overrides
-  favicon: app/icon-192.png
+  favicon: icons/icon-192.png
   language: en
   font:
     text: Noto Serif
@@ -56,21 +56,21 @@ markdown_extensions:
 nav:
   - Dictionary: index.md
   - Grammar:
-      - Articles: greek-articles.md
-      - Adjectives: greek-adjectives.md
+      - Articles: grammar/articles.md
+      - Adjectives: grammar/adjectives.md
       - Pronouns:
-          - Overview: pronouns/index.md
-          - Personal: pronouns/personal.md
-          - Possessive: pronouns/possessive.md
-          - Demonstrative: pronouns/demonstrative.md
-          - Interrogative: pronouns/interrogative.md
-          - Relative: pronouns/relative.md
-          - Indefinite: pronouns/indefinite.md
-          - Reflexive and emphatic: pronouns/reflexive.md
-      - Numerals: greek-numerals.md
-      - Conjunctions: greek-conjunctions.md
-      - Prepositions: greek-prepositions.md
-      - Passive verbs: greek-passive-verbs-when-to-use-them.md
+          - Overview: grammar/pronouns/index.md
+          - Personal: grammar/pronouns/personal.md
+          - Possessive: grammar/pronouns/possessive.md
+          - Demonstrative: grammar/pronouns/demonstrative.md
+          - Interrogative: grammar/pronouns/interrogative.md
+          - Relative: grammar/pronouns/relative.md
+          - Indefinite: grammar/pronouns/indefinite.md
+          - Reflexive and emphatic: grammar/pronouns/reflexive.md
+      - Numerals: grammar/numerals.md
+      - Conjunctions: grammar/conjunctions.md
+      - Prepositions: grammar/prepositions.md
+      - Passive verbs: grammar/passive-verbs.md
   - Drills:
       - Passive verbs: drills/passive-verbs.md
   - Tools:

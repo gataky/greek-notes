@@ -1,5 +1,5 @@
-// Active or passive drill: the logic shared by passive-verbs-app.html and
-// scripts/test_voice_sentences.js.
+// Active or passive drill: the logic shared by apps/passive-verbs.html and
+// tests/test_voice_sentences.js.
 //
 // A sentence in voice-sentences.json names only its verb (dictionary form) and
 // person. Everything else comes from verbs.json through greek-verbs.js: the voice,

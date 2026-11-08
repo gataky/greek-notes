@@ -15,7 +15,7 @@ Greek doesn't separate being somewhere from going there: **στο** σπίτι i
 | Singular | στον | στη(ν) | στο |
 | Plural | στους | στις | στα |
 
-στη keeps its ν by the same rule as [the article](greek-articles.md#definite-article-the): **στην** Αθήνα, but **στη** θάλασσα. Before a vowel, speech shortens σε to σ': **σ'** ένα μαγαζί.
+στη keeps its ν by the same rule as [the article](articles.md#definite-article-the): **στην** Αθήνα, but **στη** θάλασσα. Before a vowel, speech shortens σε to σ': **σ'** ένα μαγαζί.
 
 | English | Greek |
 | --- | --- |
@@ -41,7 +41,7 @@ Greek doesn't separate being somewhere from going there: **στο** σπίτι i
 | from nine to five | **από** τις εννιά **μέχρι** τις πέντε |
 
 - **"Since" takes the present** when it's still going on: μένω εδώ **από** το 2020 (I've lived here since 2020). For a length of time up to now, use **εδώ και**: μένω στην Αθήνα **εδώ και** δύο χρόνια (I've lived in Athens for two years).
-- **"By" follows a [passive verb](greek-passive-verbs-when-to-use-them.md).**
+- **"By" follows a [passive verb](passive-verbs.md).**
 - In speech από often shortens before an article: **απ' το** σπίτι.
 
 ## με: with, by
@@ -69,7 +69,7 @@ Greek doesn't separate being somewhere from going there: **στο** σπίτι i
 | forever | **για** πάντα |
 
 - **για + a place, with no article, is "headed for"**: το πλοίο **για** Πειραιά.
-- **Before a verb, use για να**: ήρθα **για να** σε δω. See [conjunctions](greek-conjunctions.md#in-order-to-without-instead-of).
+- **Before a verb, use για να**: ήρθα **για να** σε δω. See [conjunctions](conjunctions.md#in-order-to-without-instead-of).
 
 ## The others
 
@@ -86,7 +86,7 @@ Greek doesn't separate being somewhere from going there: **στο** σπίτι i
 | προς | towards | **προς** το κέντρο (towards the centre) |
 
 - **μετά and πριν take από before a length of time**: **μετά από** δύο μέρες (after two days), **πριν από** δύο χρόνια (two years ago).
-- **Before a verb these become conjunctions**: χωρίς να, πριν (να), μέχρι να, αντί να. See [conjunctions](greek-conjunctions.md#when-before-until).
+- **Before a verb these become conjunctions**: χωρίς να, πριν (να), μέχρι να, αντί να. See [conjunctions](conjunctions.md#when-before-until).
 - **ως** means the same as μέχρι and is common too.
 
 ## Pronouns after a preposition

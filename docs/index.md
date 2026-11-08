@@ -6,4 +6,4 @@ hide:
   - path
 ---
 
-<iframe class="drill-frame" data-pass-hash data-keep-header src="tools/dictionary-app.html" title="Greek dictionary"></iframe>
+<iframe class="drill-frame" data-pass-hash data-keep-header src="apps/dictionary.html" title="Greek dictionary"></iframe>

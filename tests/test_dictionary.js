@@ -1,13 +1,13 @@
-// Checks the dictionary lookup (docs/tools/greek-dictionary.js) against the database.
-//   node scripts/test_dictionary.js
+// Checks the dictionary lookup (docs/javascripts/greek-dictionary.js) against the database.
+//   node tests/test_dictionary.js
 // The search keys must match the ones stored in the database exactly, so besides the
 // examples from the dictionary's guide this recomputes norm and phonetic for every form.
 
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
-const initSqlJs = require("../docs/tools/vendor/sql-wasm.js");
-const D = require("../docs/tools/greek-dictionary.js");
+const initSqlJs = require("../docs/vendor/sql.js/sql-wasm.js");
+const D = require("../docs/javascripts/greek-dictionary.js");
 
 let failures = 0, checks = 0;
 const check = (label, got, expected) => {
@@ -47,7 +47,7 @@ for (const [word, s] of Object.entries({ houses: "house", cities: "city", boxes:
 // ---------- Against the database ----------
 
 initSqlJs().then(SQL => {
-  const gz = fs.readFileSync(path.join(__dirname, "../docs/tools/lemma_greek_en.db.gz"));
+  const gz = fs.readFileSync(path.join(__dirname, "../docs/data/lemma_greek_en.db.gz"));
   const db = new SQL.Database(zlib.gunzipSync(gz));
   const dict = D.open(db);
 
@@ -97,7 +97,7 @@ initSqlJs().then(SQL => {
   // Against the sheet's hand-entered parts: a wrong guess is worse than none, which only
   // means no link. When this build was added: 121 agree, 7 differ (mostly real variants
   // such as κάτσω for καθίσω), 19 no guess.
-  const sheet = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/tools/verbs.json"), "utf8")).filter(v => v.future && v.aorist);
+  const sheet = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/data/verbs.json"), "utf8")).filter(v => v.future && v.aorist);
   const tally = { agree: 0, differ: [], none: 0 };
   for (const v of sheet) {
     const got = dict.principalParts(v.greek);

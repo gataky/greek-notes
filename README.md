@@ -4,7 +4,7 @@ Personal notes for learning Modern Greek, published with [MkDocs Material](https
 
 ## Adding a note
 
-1. Put the `.md` file in `docs/`.
+1. Put the `.md` file in `docs/grammar/`.
 2. Add it to `nav` in `mkdocs.yml`. The menu on the home page is built from `nav`.
 3. Commit and push to `main`. The site rebuilds automatically.
 
@@ -25,7 +25,7 @@ Run `make` to see every target. To add a Python package, run `uv add <package>` 
 
 ## Updating the verb tables
 
-The verb tables page reads `docs/tools/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns N–O), and **overrides** (P) only for irregular forms. Then:
+The verb tables page reads `docs/data/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns N–O), and **overrides** (P) only for irregular forms. Then:
 
 ```sh
 make sync        # pull the verbs into verbs.json and run the checks
@@ -36,14 +36,15 @@ Commit `verbs.json` and `verb-forms.json`, and push. The page shows the dictiona
 
 ## Drill sentences
 
-The active or passive drill reads `docs/drills/voice-sentences.json`. Each sentence names its verb and person; the forms come from `verbs.json`. `make test` checks every sentence against the conjugation engine, and `node scripts/test_voice_sentences.js --gaps` lists verb/person pairs that have no sentence yet.
+The active or passive drill reads `docs/data/voice-sentences.json`. Each sentence names its verb and person; the forms come from `verbs.json`. `make test` checks every sentence against the conjugation engine, and `node tests/test_voice_sentences.js --gaps` lists verb/person pairs that have no sentence yet.
 
 ## Updating the dictionary
 
-The dictionary page reads `docs/tools/lemma_greek_en.db.gz`, a gzipped copy of the lemma SQLite dictionary. When there's a new build:
+The dictionary page reads `docs/data/lemma_greek_en.db.gz`, a gzipped copy of the lemma SQLite dictionary. When there's a new build:
 
 ```sh
-make dictionary DICT_DB=path/to/lemma_greek_en.db   # default: ../dictionary/lemma_greek_en.db
+make dictionary DICT_DB=path/to/lemma_greek_en.db   # default: ../lemma/lemma_greek_en/lemma_greek_en.db
+make verb-forms                                      # then refresh the verb tables' forms from it
 ```
 
-That gzips it into `docs/` and runs the checks. Commit the `.db.gz` and push. Installed apps download it again only because it changed; other deploys leave it alone.
+That gzips it into `docs/data/`, updates `docs/data/verb-forms.json` and runs the checks. Commit both and push. Installed apps download it again only because it changed; other deploys leave it alone.

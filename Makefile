@@ -19,25 +19,27 @@ upgrade: ## Update Python packages to the newest allowed versions (rewrites uv.l
 
 sync: ## Pull verbs from the Google Sheet into verbs.json, then run the checks
 	uv run python scripts/build_verbs.py
-	@git diff --stat -- docs/tools/verbs.json
-	@$(NODE) scripts/test_verbs.js
+	@git diff --stat -- docs/data/verbs.json
+	@$(NODE) tests/test_verbs.js
+	@$(NODE) tests/test_voice_sentences.js
 
 dictionary: ## Copy in a new dictionary build (DICT_DB=path/to/lemma_greek_en.db), then check it
-	gzip -9 -n -c "$(DICT_DB)" > docs/tools/lemma_greek_en.db.gz
-	@$(NODE) scripts/test_dictionary.js
+	gzip -9 -n -c "$(DICT_DB)" > docs/data/lemma_greek_en.db.gz
+	@$(NODE) tests/test_dictionary.js
 
 verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (DICT_DB=path/to/lemma_greek_en.db)
 	uv run python scripts/build_verb_forms.py "$(DICT_DB)"
-	@git diff --stat -- docs/tools/verb-forms.json
-	@$(NODE) scripts/test_verb_forms.js
+	@git diff --stat -- docs/data/verb-forms.json
+	@$(NODE) tests/test_verb_forms.js
 
-test: ## Check the conjugation engine, the verb forms and the dictionary lookup
-	$(NODE) scripts/test_verbs.js
-	$(NODE) scripts/test_verb_forms.js
-	$(NODE) scripts/test_dictionary.js
+test: ## Check the conjugation engine, the verb forms, the drill sentences and the dictionary lookup
+	$(NODE) tests/test_verbs.js
+	$(NODE) tests/test_verb_forms.js
+	$(NODE) tests/test_voice_sentences.js
+	$(NODE) tests/test_dictionary.js
 
 dump: ## Print every verb's conjugations, for reviewing
-	$(NODE) scripts/test_verbs.js --dump
+	$(NODE) tests/test_verbs.js --dump
 
 serve: ## Preview the site at http://127.0.0.1:8000 with live reload
 	uv run mkdocs serve

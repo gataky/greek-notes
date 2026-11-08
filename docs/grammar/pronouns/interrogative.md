@@ -25,7 +25,7 @@ Three words ask nearly every pronoun question: **ποιος** (who, which), **τ
 <p class="grid-note">For "whose", speech mostly uses <strong>τίνος</strong> for any gender: <strong>Τίνος</strong> είναι αυτό; You'll also see the shorter written forms ποιου, ποιας, ποιων.</p>
 </div>
 
-πόσος, πόση, πόσο declines like [ψηλός](../greek-adjectives.md#full-forms-of-the-most-common-group).
+πόσος, πόση, πόσο declines like [ψηλός](../adjectives.md#full-forms-of-the-most-common-group).
 
 ## Examples
 

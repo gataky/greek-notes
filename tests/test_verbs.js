@@ -1,12 +1,12 @@
 // Checks the conjugation engine against hand-checked forms.
-//   node scripts/test_verbs.js          run the checks
-//   node scripts/test_verbs.js --dump   also print every verb's forms (for reviewing)
+//   node tests/test_verbs.js          run the checks
+//   node tests/test_verbs.js --dump   also print every verb's forms (for reviewing)
 
 const fs = require("fs");
 const path = require("path");
-const { conjugate } = require("../docs/tools/greek-verbs.js");
+const { conjugate } = require("../docs/javascripts/greek-verbs.js");
 
-const verbs = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/tools/verbs.json"), "utf8"));
+const verbs = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/data/verbs.json"), "utf8"));
 // Verbs checked below that aren't in the word list: the conjugation patterns page's
 // c3/c4 examples, and passives kept here so the checks don't depend on the sheet.
 const EXTRA = [

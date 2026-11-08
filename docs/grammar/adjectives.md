@@ -23,7 +23,7 @@ Adjectives describe nouns and almost always change to **agree** with them in gen
 
 ## Full forms of the most common group
 
-The endings follow the same pattern as the [articles](greek-articles.md) and nouns.
+The endings follow the same pattern as the [articles](articles.md) and nouns.
 
 **ψηλός, ψηλή, ψηλό (tall)**
 

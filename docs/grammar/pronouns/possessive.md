@@ -22,7 +22,7 @@ Greek has no separate word for "my". It puts the weak genitive pronoun after the
 
 ## δικός: mine, my own
 
-δικός declines like [ψηλός](../greek-adjectives.md#full-forms-of-the-most-common-group) and agrees with the thing owned. The pronoun after it shows the owner.
+δικός declines like [ψηλός](../adjectives.md#full-forms-of-the-most-common-group) and agrees with the thing owned. The pronoun after it shows the owner.
 
 | | Masculine | Feminine | Neuter |
 | --- | --- | --- | --- |

@@ -131,7 +131,7 @@ The conjunctions you hear in everyday speech. Their formal twins are [listed at 
 | όταν, αν… about the past | A past tense | όταν **ήρθε**, φάγαμε |
 | Everything else: και, αλλά, γιατί, πως, οπότε… | Whatever you'd say on its own | γιατί **θα αργήσω** |
 
-The simple form is the "after θα / να" column of the [verb tables](tools/verb-tables.md). είμαι has none, so use the present: όταν **είσαι** έτοιμος.
+The simple form is the "after θα / να" column of the [verb tables](../tools/verb-tables.md). είμαι has none, so use the present: όταν **είσαι** έτοιμος.
 
 ## Formal words and what people say instead
 
