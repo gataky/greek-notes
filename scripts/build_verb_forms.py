@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Build docs/tools/verb-forms.json: the labelled forms of our verbs from the lemma dictionary.
+"""Build docs/tools/verb-forms.json: the labelled forms of every verb in the lemma dictionary.
 
 Usage:
     python3 scripts/build_verb_forms.py path/to/lemma_greek_en.db   (or: make verb-forms)
 
 The verb tables page can't load the 22 MB dictionary, so this copies out just the cells its
-grid shows. The database is the source of truth: docs/tools/verb-forms.js shows these forms
-and only falls back to the conjugation engine for cells that aren't here.
+grid shows, for the sheet's verbs (keyed by the sheet's spelling) and every verb headword with a
+table. The database is the source of truth: docs/tools/verb-forms.js shows these forms and only
+falls back to the conjugation engine for cells that aren't here. The dictionary links a verb
+missing from this file as "guessed".
 
 Each verb has six-person columns (present, imperfect, past, dependent), two-person imperatives
 (impCont, impSimple) and the infinitive-aorist. A cell is a list of alternatives, most usual
@@ -111,6 +113,11 @@ class Dictionary:
         if version != "3":
             sys.exit(f"expected dictionary schema_version 3, got {version}")
 
+    def verb_headwords(self):
+        return [nfc(w) for w, in self.db.execute(
+            """SELECT DISTINCT h.word FROM headword h JOIN entry e ON e.headword_id = h.id
+               WHERE e.pos = 'verb' ORDER BY h.word""")]
+
     def tables(self, word):
         """The headword's own conjugation tables, as lists of (text, tags)."""
         found = self.db.execute(
@@ -185,15 +192,22 @@ def main():
             found[nfc(verb["greek"])] = verb_forms(verb, *match, problems)
         else:
             missing.append(verb["greek"])
+    in_sheet = len(found)
+    headwords = dictionary.verb_headwords()
+    for word in headwords:
+        if word not in found:
+            match = dictionary.find({"greek": word})
+            if match:
+                found[word] = verb_forms({"greek": word}, *match, defaultdict(list))
 
-    lines = [f"{json.dumps(greek, ensure_ascii=False)}: {json.dumps(forms, ensure_ascii=False)}" for greek, forms in found.items()]
+    lines = [f"{json.dumps(greek, ensure_ascii=False)}: {json.dumps(found[greek], ensure_ascii=False)}" for greek in sorted(found)]
     OUT.write_text("{\n" + ",\n".join(lines) + "\n}\n", encoding="utf-8")
 
-    routes = Counter("own table" if forms["table"] == greek else "another headword's table" for greek, forms in found.items())
-    print(f"Wrote {OUT.relative_to(ROOT)}: {dict(routes)}")
-    print(f"No table, so generated: {', '.join(missing) or 'none'}")
-    for kind, items in problems.items():
-        print(f"{kind}: {len(items)}")
+    print(f"Wrote {OUT.relative_to(ROOT)}: {len(found)} verbs")
+    print(f"  sheet: {in_sheet} of {len(verbs)}. No table, so generated: {', '.join(missing) or 'none'}")
+    print(f"  dictionary: {len(found) - in_sheet} more, of {len(headwords)} verb headwords. The rest are linked as guessed.")
+    for kind, items in problems.items():  # the sheet's verbs only; the rest would bury them
+        print(f"{kind} (sheet verbs): {len(items)}")
         for item in items:
             print(f"  {item}")
 

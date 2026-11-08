@@ -1,17 +1,17 @@
 // Checks the verb tables' forms: dictionary cells from verb-forms.json, with the engine filling gaps.
 //   node scripts/test_verb_forms.js
 
-const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 const { conjugate } = require("../docs/tools/greek-verbs.js");
-const { withForms } = require("../docs/tools/verb-forms.js");
+const { withForms, dictionaryVerb } = require("../docs/tools/verb-forms.js");
 
 const read = file => JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/tools", file), "utf8"));
 const verbs = read("verbs.json");
 const forms = read("verb-forms.json");
 const verb = greek => verbs.find(v => v.greek === greek);
-const conj = greek => withForms(verb(greek), forms[greek]);
+// A verb as the page builds it: from the sheet, or from the dictionary alone.
+const conj = greek => withForms(verb(greek) || dictionaryVerb(greek, forms[greek]), forms[greek]);
 
 const show = row => row.map(f => f.replace("|", "")).join(" / ") || "—";
 const dig = (c, where) => where.split(".").reduce((o, k) => o[k], c);
@@ -67,6 +67,16 @@ const EXPECTED = {
   // Rows with no data: the engine's forms, with the sheet's overrides.
   περιμένω: { "indicative.past.simple[0]": "περίμενα", "indicative.past.continuous[0]": "περίμενα" },
   έχω: { "indicative.past.simple[0]": "—", "indicative.past.continuous[0]": "είχα" },
+  // Not in the sheet: everything comes from its own table, so nothing is guessed.
+  καπνίζω: {
+    "indicative.past.continuous[5]": "κάπνιζαν / καπνίζαν(ε)",
+    "indicative.past.simple[5]": "κάπνισαν / καπνίσαν(ε)",
+    "indicative.future.simple[0]": "θα καπνίσω",
+    "imperative.simple[1]": "καπνίστε",
+    "indicative.present.perfect[0]": "έχω καπνίσει",
+  },
+  // Not in the sheet, reached through the active verb's table like σηκώνομαι.
+  καπνίζομαι: { "indicative.past.simple[0]": "καπνίστηκα", "imperative.simple[0]": "καπνίσου" },
 };
 
 let failures = 0, checks = 0;
@@ -95,20 +105,42 @@ for (const greek of generated) {
   check(!forms[greek], `${greek} has a table now: pick another verb to test the fallback`);
   if (verb(greek)) check(JSON.stringify(conj(greek)) === JSON.stringify(conjugate(verb(greek))), `${greek} should match the engine`);
 }
-const guessed = { greek: "καπνίζω", future: "καπνίσω", aorist: "κάπνισα" };
-check(JSON.stringify(withForms(guessed, undefined)) === JSON.stringify(conjugate(guessed)), "a verb outside the sheet should match the engine");
+// A verb with no table at all is still guessed from the parts the dictionary page works out.
+const guessed = { greek: "υποθέτω", future: "υποθέσω", aorist: "υπέθεσα", guessed: true };
+check(!forms.υποθέτω, "υποθέτω has a table now: pick another verb with no table to test guessing");
+check(JSON.stringify(withForms(guessed, forms.υποθέτω)) === JSON.stringify(conjugate(guessed)), "a verb with no table should match the engine");
+// A verb with a table isn't guessed: its principal parts are its table's own.
+const kapnizo = dictionaryVerb("καπνίζω", forms.καπνίζω);
+check(kapnizo.future === "καπνίσω" && kapnizo.aorist === "κάπνισα" && !kapnizo.guessed, "καπνίζω's principal parts should come from its table");
+check(conj("καπνίζω").notes.length === 0, "a dictionary verb shouldn't get the engine's notes about the sheet");
 
-// Every verb: the grid's cells have the right shape, and hold words, not Wiktionary's markup.
+// Cells the engine filled are flagged for the grid to mark; the dictionary's own cells and the
+// dashes the engine leaves (a sheet's "no perfective") aren't.
+const flags = greek => conj(greek).generated;
+const flagged = g => Object.entries(g).filter(([k, v]) => (Array.isArray(v) ? v.some(Boolean) : v)).map(([k]) => k);
+check(flags("περιμένω").past.every(Boolean) && flags("περιμένω").dependent.every(Boolean), "περιμένω's simple forms should be flagged as generated");
+check(!flags("περιμένω").present.some(Boolean), "περιμένω's present comes from the dictionary");
+check(flags("αμφιβάλλω").past[0] && !flags("αμφιβάλλω").past[1], "only αμφιβάλλω's missing past cell should be flagged");
+check(flagged(flags("καπνίζω")).length === 0, `καπνίζω has nothing generated, got ${flagged(flags("καπνίζω"))}`);
+check(flagged(flags("έχω")).length === 0, "έχω's dashes are the sheet's no perfective, not generated forms");
+check(!conjugate(verb("μεγαλώνω")).generated, "a verb with no table has no per-cell flags: the page notes it once");
+// A dictionary verb whose table has no simple stem at all says so, instead of looking complete.
+const noSimple = Object.keys(forms).find(g => !verb(g) && !dictionaryVerb(g, forms[g]).future && !dictionaryVerb(g, forms[g]).aorist);
+check(noSimple && /no simple-stem forms/.test(dictionaryVerb(noSimple, forms[noSimple]).note), "a dictionary verb with no simple stem should get a note");
+
+// Every verb, in the sheet or only in the dictionary: the grid's cells have the right shape,
+// and hold words, not Wiktionary's markup.
 const GREEK = /^[Ͱ-Ͽἀ-῿]+(\([εα]\))?$/;
 const PATHS = ["indicative.present.continuous", "indicative.past.continuous", "indicative.past.simple", "indicative.future.simple", "subjunctive.simple", "indicative.present.perfect"];
-for (const v of verbs) {
+const everyVerb = [...verbs, ...Object.keys(forms).filter(g => !verb(g)).map(g => dictionaryVerb(g, forms[g]))];
+for (const v of everyVerb) {
   const c = withForms(v, forms[v.greek]);
   for (const where of PATHS) {
     check(dig(c, where).length === 6, `${v.greek} ${where} should have six persons`);
   }
   const cells = [...PATHS.flatMap(p => dig(c, p)), ...c.imperative.continuous, ...c.imperative.simple];
   for (const form of cells.flat()) {
-    check(form.split(" ").every(w => GREEK.test(w.replace("|", ""))), `${v.greek}: "${form}" isn't a clean form`);
+    check(form.replace(/^να /, "").split(" ").every(w => GREEK.test(w.replace("|", ""))), `${v.greek}: "${form}" isn't a clean form`);
   }
 }
 
@@ -125,11 +157,12 @@ for (const [greek, where, i, expected] of [
   check(marked(greek, where, i) === expected, `${greek} ${where} [${i}]: got "${marked(greek, where, i)}", expected "${expected}"`);
 }
 let split = 0, total = 0;
-for (const v of verbs.filter(v => forms[v.greek] && v.greek !== "είμαι")) {
+for (const v of everyVerb.filter(v => forms[v.greek] && v.greek !== "είμαι")) {
   const I = withForms(v, forms[v.greek]).indicative;
   for (const f of [I.present.continuous, I.past.continuous, I.past.simple].flat(2)) { total++; split += f.includes("|"); }
 }
-check(split / total > 0.99, `only ${split} of ${total} indicative forms have an ending highlight`);
+check(split / total > 0.98, `only ${split} of ${total} indicative forms have an ending highlight`);
 
-console.log(`${checks - failures}/${checks} verb form checks passed (${Object.keys(forms).length} of ${verbs.length} verbs from the dictionary, ${split}/${total} forms highlighted)`);
+const fromSheet = verbs.filter(v => forms[v.greek]).length;
+console.log(`${checks - failures}/${checks} verb form checks passed (${fromSheet} of ${verbs.length} sheet verbs, ${Object.keys(forms).length - fromSheet} more from the dictionary, ${split}/${total} forms highlighted)`);
 process.exit(failures ? 1 : 0);

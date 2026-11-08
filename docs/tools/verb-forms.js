@@ -46,10 +46,17 @@
   const column = (cells, engine, related = () => []) => cells.map((cell, i) =>
     cell === null ? engine[i] : collapse(cell.map(f => markEnding(f, splits([...engine[i], ...related(i)])))));
 
+  // Which cells the engine filled because the dictionary says nothing there. A cell the engine
+  // leaves blank isn't counted: for a word-list verb that dash is the sheet saying the form isn't
+  // used (έχω's past), and a dictionary verb with no perfective at all gets a note instead.
+  const filled = (cells, engine) => cells.map((cell, i) => cell === null && engine[i].length > 0);
+
   const prefix = (pre, cell) => cell.map(row => row.map(f => pre + f));
   const unprefixed = cell => cell.map(row => row.map(f => f.replace(/^θα /, "")));
 
   // The same shape as conjugate(). `forms` is the verb's entry in verb-forms.json, if it has one.
+  // Then `generated` also says which cells the engine filled in, so the grid can mark them:
+  // present, imperfect, dependent and past (six persons), impCont and impSimple (two), perfect.
   function withForms(verb, forms) {
     const c = conjugate(verb);
     if (!forms) return c;
@@ -71,6 +78,7 @@
 
     return {
       ...c,
+      notes: verb.fromDictionary ? [] : c.notes,  // the engine's notes are about the sheet's columns
       indicative: {
         past: { continuous: imperfect, simple: aorist, perfect: perfectForms(HAD, infinitive) },
         present: { continuous: present, perfect },
@@ -78,10 +86,31 @@
       },
       subjunctive: { continuous: prefix("να ", present), simple: prefix("να ", dependent), perfect: prefix("να ", perfect) },
       imperative: { continuous: impCont, simple: impSimple },
+      generated: {
+        present: filled(forms.present, I.present.continuous),
+        imperfect: filled(forms.imperfect, I.past.continuous),
+        dependent: filled(forms.dependent, I.future.simple),
+        past: filled(forms.past, I.past.simple),
+        impCont: filled(forms.impCont, c.imperative.continuous),
+        impSimple: filled(forms.impSimple, c.imperative.simple),
+        perfect: forms.infinitive === null && !!engineInfinitive,
+      },
     };
   }
 
-  const api = { withForms };
+  // A verb that isn't in the sheet, from its dictionary entry alone. Its principal parts come
+  // from its own table; they only matter for the engine's ending splits and any missing cells.
+  function dictionaryVerb(greek, forms) {
+    const first = cells => (cells && cells[0] && cells[0][0]) || "";
+    const future = first(forms.dependent), aorist = first(forms.past);
+    const verb = { greek, english: "", future, aorist, overrides: future || aorist ? "" : "no perfective", fromDictionary: true };
+    // Without either there's nothing to build the simple stem from, so it shows as dashes. That
+    // means the table doesn't list them, not that they don't exist (περιμένω's doesn't either).
+    if (!future && !aorist) verb.note = `The dictionary lists no simple-stem forms for ${greek} (future simple, aorist), so those are blank.`;
+    return verb;
+  }
+
+  const api = { withForms, dictionaryVerb };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.VerbForms = api;
 })(this);

@@ -62,17 +62,19 @@ Data flows from the sheet and the dictionary to JSON to the browser. There is no
 4. **`verb-grid.js` + `verb-grid.css`** render the shared "two stems" grid: continuous and simple, each with present/dependent and past columns, plus imperative and perfect rows and the θα/να forms written out. It switches to stacked tables below 560px.
 5. **Pages:** `verb-tables-app.html` (search, a list grouped by class, URL hash = current verb) and `conjugation-patterns-app.html` (one regular example verb per class; the c3/c4 examples are defined inline because they aren't in the sheet).
 
-6. **`scripts/build_verb_forms.py`** (stdlib `sqlite3`, read-only) copies the grid's cells for the sheet's verbs from the lemma database into the committed `verb-forms.json`, so the page doesn't load the dictionary. `verb-tables-app.html` is the only page that reads it.
-   - Refresh with `make verb-forms` after `make dictionary`, and after `make sync` adds verbs. A verb missing from the file just shows the engine's forms. `DICT_DB` sets the database path.
+6. **`scripts/build_verb_forms.py`** (stdlib `sqlite3`, read-only) copies the grid's cells from the lemma database into the committed `verb-forms.json` (about 2,500 verbs, 2.9 MB, 320 KB gzipped), so the verb tables page doesn't load the dictionary. It has the sheet's verbs, keyed by the sheet's spelling, and every other verb headword it can find a table for. The verb tables page reads the forms; the dictionary page only reads which verbs are there.
+   - Refresh with `make verb-forms` (about a minute) after `make dictionary`, and after `make sync` adds verbs. A verb missing from the file just shows the engine's forms. `DICT_DB` sets the database path.
    - Finding a table: the headword's own, then `form` (βοηθώ → βοηθάω), then the headword line's `active` link (σηκώνομαι → σηκώνω, whose passive cells are used), then the sheet's `active form`. With several tables, it takes the one listing the verb first.
    - The voice comes from which voice's present lists the verb, not from the sheet: deponents are tagged `passive`, but είμαι is `active`.
    - Rows tagged `rare`, `archaic` or `dated` are hidden unless the cell has nothing else. Elisions (`γράφ'`) are left out. The script prints anything it can't read.
    - A cell is a list, most usual first. `[]` means the form doesn't exist (a dash), `null` that the data doesn't say.
 7. **`verb-forms.js`** (browser and Node) merges those cells over `conjugate()`, keeping its shape, and `cardHTML(verb, { conjugation })` shows the result.
-   - A dictionary cell replaces the engine's, overrides included, and the dictionary's order is kept. The engine and its overrides only show in `null` cells and for the 6 verbs with no table. There's no way yet to correct a dictionary form per verb.
+   - A dictionary cell replaces the engine's, overrides included, and the dictionary's order is kept. The engine and its overrides only show in `null` cells and for the 6 sheet verbs with no table. There's no way yet to correct a dictionary form per verb.
+   - `dictionaryVerb()` makes the verb object for a verb that isn't in the sheet: its principal parts are its table's 1st singular dependent and past (or `no perfective` without either), and the engine's notes about sheet columns are dropped.
    - The future, subjunctive and perfect are built from the merged present, dependent and `infinitive-aorist`.
+   - The result's `generated` flags the cells the engine filled where the dictionary had nothing, and the grid marks them with an orange `*` and a footnote. Blank engine cells aren't flagged. A sheet verb with no table, and a dictionary verb with no simple stem at all, get one note each above the grid instead.
    - Ending highlights come from the engine's forms in the same cell: same word, else same ending, else same stem, else none.
-   - `conjugation-patterns-app.html`, the drill and `principalParts()` still use the engine alone, so they can differ from the verb tables.
+   - `conjugation-patterns-app.html` and the drill still use the engine alone, so they can differ from the verb tables.
 
 When changing the engine, run `make test` and also diff all generated forms against the previous commit's engine. Most verbs aren't in `EXPECTED`, so the checks alone can miss regressions.
 
@@ -96,7 +98,9 @@ A Greek ↔ English dictionary that runs entirely in the browser. It's the home 
 - **Engine:** sql.js 1.14.2 is vendored in `docs/tools/vendor/` (no CDN, so it works offline). The app unzips the file with `DecompressionStream` and opens it in memory.
 - **`greek-dictionary.js`** (browser and Node) ports the guide's Python reference: the `norm`/`phonetic`/Greeklish/English keys, Greek and English search, entry lookup. The keys must match the stored ones exactly; `scripts/test_dictionary.js` recomputes them for every form. sql.js has no FTS5, so the English fallback for terms missing from `en_index` scans glosses with `LIKE` instead of using `sense_fts`.
 - **`dictionary-app.html`:** one search box. Greek input searches Greek. Latin input shows English and Greeklish results side by side, since it could be either. The hash is the open headword. Greek words in glosses link to their entries, and verbs in `verbs.json` link to `verb-tables-app.html` inside the same frame, so the notes' sidebar doesn't appear. Its header has a link back to the entry, which the notes page hides along with the header.
-- **Verbs not in the sheet** also link to the verb tables, as `verb-tables-app.html#καπνίζω,καπνίσω,κάπνισα`. The verb tables page conjugates those parts and shows a "guessed" note.
+- **Verbs not in the sheet** also link to the verb tables. Before the first render the page waits for `verbs.json` and the keys of `verb-forms.json`, so the link is never wrongly "guessed".
+  - A verb with a table in `verb-forms.json` links as `#καπνίζω` and shows the dictionary's own forms. Never call these guessed.
+  - Only a verb with no table at all (about 700, like υποθέτω) is guessed: it links as `verb-tables-app.html#υποθέτω,υποθέσω,υπέθεσα`, and the verb tables page conjugates those parts with the engine and shows a "guessed" note. Older links of that shape for verbs that do have a table open the table.
   - `principalParts()` works out the future and aorist from the dictionary's forms, which carry no labels. It tries each candidate pair through `greek-verbs.js` and keeps the one whose generated forms the dictionary also lists.
   - Candidates are filtered first: the aorist must share the future's consonants (κάπνισα/καπνίσω, not the imperfect κάπνιζα), and the verb's own present and imperfect, variant presents that are headwords, and unaccented forms are skipped.
   - It returns null when unsure, and then there's no link. `test_dictionary.js` checks it against the sheet's hand-entered parts, so re-run it after changing the engine.

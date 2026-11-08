@@ -86,7 +86,8 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const wordHref = w => "#" + encodeURIComponent(w);
 
 let dict = null;
-let verbs = new Set();  // verbs with a conjugation table
+let verbs = new Set();   // the word list's verbs (verbs.json)
+let tables = new Set();  // verbs with a conjugation table in the dictionary (verb-forms.json)
 
 // ---------- Loading ----------
 
@@ -127,7 +128,11 @@ function status(text, fraction) {
 
 async function start() {
   status("Opening the dictionary…");
-  fetch("verbs.json").then(r => r.json()).then(list => { verbs = new Set(list.map(v => v.greek)); }).catch(() => {});
+  // Which verbs have a table. Waited for below, so a verb's link is never shown as guessed by mistake.
+  const verbLists = Promise.all([
+    fetch("verbs.json").then(r => r.json()).then(list => { verbs = new Set(list.map(v => v.greek)); }),
+    fetch("verb-forms.json").then(r => r.json()).then(forms => { tables = new Set(Object.keys(forms)); }),
+  ]).catch(() => {});
   try {
     const [SQL, bytes] = await Promise.all([
       initSqlJs({ locateFile: file => "vendor/" + file }),
@@ -138,6 +143,7 @@ async function start() {
     status(`Couldn't open the dictionary (${err.message}). Open this page through the site (make serve), and online the first time.`);
     return;
   }
+  await verbLists;
   status("");
   const date = dict.meta.extraction_date || dict.meta.build_date;
   if (date) $("build").textContent = `Wiktionary snapshot of ${date}.`;
@@ -249,14 +255,16 @@ function entryHTML(found) {
     ${entries}${forms}<div class="links">${conjugation}${wiktionary}</div>`;
 }
 
-// Verbs in the word list link to their table. Other verbs get one too when the dictionary's
-// forms settle their future simple and aorist; the table then says those were guessed.
+// Verbs in the word list link to their table, and so do verbs with a conjugation table in the
+// dictionary (verb-forms.json). Only a verb with neither is guessed: its future simple and aorist
+// are worked out from its unlabelled forms, and the table says so.
 function conjugationLink(found) {
   const link = (hash, label) => `<a href="verb-tables-app.html#${hash}">${label} →</a>`;
   const twin = found.word.endsWith("άω") ? found.word.slice(0, -2) + "ώ" : found.word.endsWith("ώ") ? found.word.slice(0, -1) + "άω" : null;
   const known = [found.word, twin].find(w => w && verbs.has(w));
   if (known) return link(encodeURIComponent(known), "Conjugation table");
   if (!found.entries.some(e => e.pos === "verb")) return "";
+  if (tables.has(found.word)) return link(encodeURIComponent(found.word), "Conjugation table");
   const parts = dict.principalParts(found.word);
   return parts ? link([found.word, parts.future, parts.aorist].map(encodeURIComponent).join(","), "Conjugation table (guessed)") : "";
 }
