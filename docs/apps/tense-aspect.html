@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tense and Aspect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<style>
+/* One calm column: the drill card is the hero; endings and stats sit around it. */
+@font-face {
+  font-family: "Greek Didot";
+  src: url("../fonts/gfs-didot-greek.woff2") format("woff2");
+  unicode-range: U+0370-03FF;
+  size-adjust: 118%;
+  font-display: swap;
+}
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --ink: #10233f;
+  --muted: #5a6a80;
+  --line: #d6dee9;
+  --accent: #1f5fa8;
+  --accent-soft: #e2ecf8;
+  --good: #2b7a48;
+  --good-soft: #e3f3e8;
+  --warn: #9a620e;
+  --warn-soft: #fbf0dc;
+  --bad: #b23434;
+  --bad-soft: #f9e4e4;
+  --display: "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
+  --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
+    --accent: #80b3ee; --accent-soft: #1a2d46;
+    --good: #6cc68e; --good-soft: #15301f; --warn: #e3ad58; --warn-soft: #33270f; --bad: #ef8585; --bad-soft: #3a1b1b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
+  --accent: #80b3ee; --accent-soft: #1a2d46;
+  --good: #6cc68e; --good-soft: #15301f; --warn: #e3ad58; --warn-soft: #33270f; --bad: #ef8585; --bad-soft: #3a1b1b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
+  padding: 28px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.wrap > *, .slip > * { min-width: 0; }
+header { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; max-width: 60ch; }
+.g { font-family: var(--display); }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+  font: 600 15px var(--body); padding: 10px 14px; cursor: pointer; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:focus-visible, button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+.prompt { display: flex; flex-direction: column; gap: 8px; }
+.prompt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.english { font-size: clamp(22px, 5vw, 28px); line-height: 1.3; margin: 0; text-wrap: pretty; }
+.pair { font-family: var(--display); font-size: 20px; color: var(--muted); margin: 0; }
+.pair b { color: var(--ink); font-weight: 400; }
+.linkbtn { appearance: none; background: none; border: 0; padding: 0; color: var(--accent); font: 600 14px var(--body); cursor: pointer; align-self: flex-start; }
+
+.answer-row { display: flex; gap: 10px; flex-wrap: wrap; }
+#answer { flex: 1 1 220px; width: 0; min-width: 0; font: 400 24px var(--display); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+#answer:focus { border-color: var(--accent); outline: none; }
+#answer::placeholder { font: 400 16px var(--body); color: var(--muted); }
+.btn { appearance: none; border: 1.5px solid var(--accent); background: var(--accent); color: var(--surface); font: 600 15px var(--body); padding: 10px 18px; border-radius: 10px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+.keys { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.keys span { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.key { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 400 18px var(--display); width: 38px; height: 36px; border-radius: 8px; cursor: pointer; }
+.key:hover { border-color: var(--accent); }
+
+.feedback { border-radius: 10px; padding: 12px 14px; font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
+.feedback.good { background: var(--good-soft); color: var(--good); }
+.feedback.warn { background: var(--warn-soft); color: var(--warn); }
+.feedback.bad { background: var(--bad-soft); color: var(--bad); }
+.feedback strong { font-weight: 700; }
+.feedback .msg { color: var(--ink); }
+.feedback .fix { font-family: var(--display); font-size: 22px; color: var(--ink); }
+.feedback .fix s { color: var(--bad); text-decoration-thickness: 1.5px; }
+.feedback .fix b { color: var(--good); font-weight: 400; }
+
+.reveal { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+.greek { font-family: var(--display); font-size: clamp(24px, 5.5vw, 30px); line-height: 1.25; margin: 0; }
+.greek b { color: var(--accent); font-weight: 400; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
+.why { display: flex; flex-direction: column; gap: 6px; }
+.reason { align-self: flex-start; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
+.why p { margin: 0; font-size: 15px; }
+.why .note { color: var(--muted); }
+
+table.para { border-collapse: collapse; width: 100%; }
+.para th { text-align: left; font-family: var(--display); font-weight: 400; font-size: 18px; color: var(--muted); padding: 0 8px 6px; }
+.para td { padding: 5px 8px; border-top: 1px solid var(--line); font-family: var(--display); font-size: 19px; }
+.para td.who { color: var(--muted); font-size: 15px; width: 1%; white-space: nowrap; padding-left: 0; }
+.para td span.end { color: var(--accent); }
+.para td.hit { background: var(--accent-soft); }
+.para td.miss { background: var(--bad-soft); }
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 600; }
+
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
+.section .help { font-size: 14px; color: var(--muted); margin: 0; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; cursor: pointer; font-size: 14px; background: var(--surface); user-select: none; }
+.chip input { accent-color: var(--accent); margin: 0; }
+.chip:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+
+.slip { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px; font-variant-numeric: tabular-nums; }
+.slip .h { font-size: 12px; font-weight: 600; color: var(--muted); align-self: end; }
+.slip .rl { font-family: var(--display); font-size: 17px; color: var(--muted); align-self: center; padding-right: 6px; }
+.cell { border-radius: 10px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+.cell b { font-size: 16px; }
+.cell span { font-size: 12px; color: var(--muted); }
+.cell.lo { background: var(--bad-soft); border-color: transparent; }
+.cell.mid { background: var(--warn-soft); border-color: transparent; }
+.cell.hi { background: var(--good-soft); border-color: transparent; }
+.errs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.errs li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 3px 10px; font-size: 14px; }
+
+.tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+.tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tcard h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; }
+.tcard p { margin: 0; font-size: 14px; color: var(--muted); }
+.tcard table { border-collapse: collapse; width: 100%; }
+.tcard td { padding: 5px 0; border-top: 1px solid var(--line); font-family: var(--display); }
+.tcard td:first-child { color: var(--muted); font-size: 16px; width: 1%; white-space: nowrap; padding-right: 12px; }
+.tcard td:last-child { font-size: 20px; }
+.tcard span.end { color: var(--accent); }
+.tips { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.tips ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.tips .g { font-size: 17px; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .feedback { animation: rise .18s ease-out; }
+  @keyframes rise { from { transform: translateY(4px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+.english b { font-weight: 600; color: var(--accent); }
+.para th.cur { color: var(--ink); }
+.para td span.pre, .tcard span.pre { color: var(--muted); }
+.cell.none { background: transparent; border-style: dashed; }
+.stems th { text-align: left; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0 0 6px; }
+.tcard .stems td { width: auto; font-size: 19px; }
+.tcard .stems td:first-child { font-family: var(--body); font-size: 14px; width: 1%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Active verbs · tense and aspect</div>
+    <h1>Tense and Aspect</h1>
+    <p class="sub">Put the marked verb in each English sentence into Greek. Decide the tense (present, past, future, or after να), then the stem: continuous for something in progress or repeated, simple for one complete action. Type θα or να too when the form needs it.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">How to choose</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap" style="gap:22px">
+    <div class="card" id="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="eyebrow">Type the Greek verb</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <p class="english" id="english" aria-live="polite">Loading sentences…</p>
+        <p class="pair" id="pair" lang="el" hidden></p>
+        <button class="linkbtn" type="button" id="hint" hidden>Show the verb</button>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off">
+        <input id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="The verb, with θα or να if it takes one…" aria-label="Your answer" disabled>
+        <button class="btn" id="check" type="submit" disabled>Check</button>
+      </form>
+
+      <div class="keys" aria-label="Accented letters">
+        <span>Accents</span>
+        <button class="key" type="button">ά</button><button class="key" type="button">έ</button><button class="key" type="button">ή</button><button class="key" type="button">ί</button><button class="key" type="button">ό</button><button class="key" type="button">ύ</button><button class="key" type="button">ώ</button><button class="key" type="button">ς</button>
+      </div>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="reveal" id="reveal" hidden>
+        <p class="greek" id="greek" lang="el"></p>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+          <p class="note" id="note" hidden></p>
+        </div>
+        <table class="para" id="para" lang="el"></table>
+      </div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="opt-present"> Present</label>
+        <label class="chip"><input type="checkbox" id="opt-past"> Past</label>
+        <label class="chip"><input type="checkbox" id="opt-future"> Future</label>
+        <label class="chip"><input type="checkbox" id="opt-na"> After να</label>
+        <label class="chip"><input type="checkbox" id="opt-showVerb"> Always show the verb</label>
+      </div>
+      <p class="help" id="bankInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tables" id="tables"></div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li>Every verb has two stems. The continuous one (<span class="g">γράφ-</span>) is for an action in progress or one that happens again and again. The simple one (<span class="g">γράψ-</span>) is for one action, seen as complete.</li>
+          <li>In the past: <span class="g">έγραφα</span> is "I was writing" or "I used to write"; <span class="g">έγραψα</span> is "I wrote" (once, and it's done).</li>
+          <li>In the future: <span class="g">θα γράφω</span> is "I'll be writing" or "I'll write (every day)"; <span class="g">θα γράψω</span> is "I'll write (it, once)".</li>
+          <li>After <span class="g">θέλω να, μπορώ να, προτιμώ να</span>: <span class="g">να γράψω</span> for one action, which is most of the time; <span class="g">να γράφω</span> for a habit or an ability (<span class="g">ξέρεις να κολυμπάς;</span>).</li>
+          <li>The present only has the continuous stem: <span class="g">γράφω</span> is both "I write" and "I'm writing".</li>
+          <li>Clue words for the continuous: <span class="g">κάθε πρωί, κάθε Σάββατο, συνήθως, συχνά, πάντα</span>, and a background action with <span class="g">όταν</span> ("I was reading when you phoned"). For the simple: <span class="g">χθες, αύριο, απόψε, αμέσως, αυτή τη φορά</span>, when the action happens once.</li>
+          <li>Object pronouns and <span class="g">δεν / μην</span> go between θα or να and the verb: <span class="g">θα το γράψω, να μην το πεις</span>.</li>
+          <li>A few verbs have one form for both aspects (<span class="g">κάνω, περιμένω, σερβίρω, προσφέρω</span>), and <span class="g">έχω</span> and <span class="g">ξέρω</span> have no simple stem at all.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../javascripts/greek-verbs.js"></script>
+<script src="../javascripts/verb-forms.js"></script>
+<script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/aspect-drill.js"></script>
+<script>
+"use strict";
+const AD = window.AspectDrill, VD = window.VoiceDrill, VF = window.VerbForms;
+const $ = id => document.getElementById(id);
+const PRON = { "1sg": "εγώ", "2sg": "εσύ", "3sg": "αυτός", "1pl": "εμείς", "2pl": "εσείς", "3pl": "αυτοί" };
+const TENSE = { present: "Present", past: "Past", future: "Future", na: "After να" };
+const REASON = {
+  ongoing: ["In progress", "The action is in progress, or a state that lasts, so it takes the continuous stem."],
+  repeated: ["Repeated", "The action happens again and again, so it takes the continuous stem."],
+  once: ["Once, complete", "It's one action, seen as complete, so it takes the simple stem."],
+};
+const TENSE_WHY = {
+  present: "It's happening now, or usually, so it's the present.",
+  past: "It's in the past.",
+  future: "It's in the future, so it takes θα.",
+  na: "It follows a verb like θέλω or μπορώ, so it takes να.",
+};
+const RESULT = { correct: "Σωστά!", accent: "Almost. Check the accent.", spelling: "Right form, misspelled.",
+  particle: "Right verb form, check θα / να.", "wrong person": "Right form, wrong person.",
+  "wrong aspect": "Wrong aspect.", "wrong tense": "Wrong tense.", wrong: "Not quite.", shown: "Answer" };
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+let settings = { present: true, past: true, future: true, na: true, showVerb: false, ...store.get("gta-settings", {}) };
+let history = store.get("gta-history", []);   // [{ t: tense, a: aspect, p: person, r: result }], newest last
+let seen = new Set(store.get("gta-seen", []));  // sentences already asked, so the bank cycles
+let groups = { present: [], past: [], future: [], na: [] };  // per tense: [{ verb, continuous: [items], simple: [items] }]
+let all = [], conjugations = new Map(), sheetVerbs = new Map();
+let queue = [], retry = [], recentVerbs = [];
+let item = null, answered = false;
+let session = { q: 0, correct: 0, total: 0, streak: 0 };
+
+// ---------- Loading ----------
+
+Promise.all(["verbs", "verb-forms", "aspect-sentences"].map(n => fetch(`../data/${n}.json`).then(r => r.json())))
+  .then(([sheet, forms, bank]) => { build(sheet, forms, bank); renderTables(); renderSlips(); next(); })
+  .catch(() => {
+    $("english").textContent = "Couldn't load the sentences. Open this page through the site (make serve), not straight from disk.";
+  });
+
+function build(sheet, forms, bank) {
+  sheetVerbs = new Map(sheet.filter(v => v.voice === "active").map(v => [v.greek, v]));
+  const conjugationOf = g => {
+    if (!conjugations.has(g)) conjugations.set(g, VF.verbToShow(g, { sheet, forms }).conjugation);
+    return conjugations.get(g);
+  };
+  const byGroup = new Map();
+  for (const s of bank) {
+    if (!sheetVerbs.has(s.verb)) continue;
+    const cell = AD.cellOf(s.tense, s.aspect);
+    if (!cell) continue;
+    const conj = conjugationOf(s.verb), f = AD.formsOf(conj);
+    const answer = AD.answersIn(s.el, f, cell, s.person)[0];
+    if (!answer) continue;
+    const it = { ...s, cell, answer, forms: f, conj, id: hash(s.el) };
+    const key = s.tense + " " + s.verb;
+    if (!byGroup.has(key)) {
+      const g = { verb: s.verb, continuous: [], simple: [] };
+      byGroup.set(key, g); groups[s.tense].push(g);
+    }
+    byGroup.get(key)[cell.aspect].push(it);
+    all.push(it);
+  }
+  renderOptions();
+}
+
+function hash(s) { let h = 5381; for (const c of s) h = (h * 33 + c.codePointAt(0)) >>> 0; return h.toString(36); }
+
+// ---------- Choosing sentences ----------
+
+const formRight = r => r === "correct" || r === "accent" || r === "spelling";
+
+// Tenses you miss come up more often.
+function tenseWeights() {
+  const recent = history.slice(-150), w = {};
+  for (const t of AD.TENSES) {
+    const rows = recent.filter(r => r.t === t);
+    const rate = rows.length ? rows.filter(r => !formRight(r.r)).length / rows.length : 0.3;
+    w[t] = settings[t] && groups[t].length ? (1 + 3 * rate) * Math.sqrt(groups[t].length) : 0;
+  }
+  return w;
+}
+
+function weighted(list, weight) {
+  let x = Math.random() * list.reduce((s, it) => s + weight(it), 0);
+  for (const it of list) { x -= weight(it); if (x <= 0) return it; }
+  return list[list.length - 1];
+}
+
+// Unseen sentences first; once a list has all been asked, it starts over.
+function pickSentence(list, notPerson) {
+  let pool = notPerson && list.some(s => s.person !== notPerson) ? list.filter(s => s.person !== notPerson) : list;
+  let fresh = pool.filter(s => !seen.has(s.id));
+  if (!fresh.length) { for (const s of list) seen.delete(s.id); fresh = pool; }
+  return fresh[Math.floor(Math.random() * fresh.length)];
+}
+
+function pickGroup(list) {
+  const fresh = list.filter(g => !recentVerbs.includes(g.verb));
+  const g = (fresh.length ? fresh : list)[Math.floor(Math.random() * (fresh.length || list.length))];
+  recentVerbs = [...recentVerbs, g.verb].slice(-8);
+  return g;
+}
+
+function refill() {
+  const w = tenseWeights();
+  const tenses = AD.TENSES.filter(t => w[t] > 0);
+  if (!tenses.length) return;
+  const tense = weighted(tenses, t => w[t]);
+  const g = pickGroup(groups[tense]);
+  // Both aspects of the same verb back to back, when the bank has both.
+  if (g.continuous.length && g.simple.length) {
+    const a = pickSentence(g.continuous), b = pickSentence(g.simple, a.person);
+    queue.push(...(Math.random() < 0.5 ? [a, b] : [b, a]));
+  } else {
+    queue.push(pickSentence(g.continuous.length ? g.continuous : g.simple));
+  }
+}
+
+function nextItem() {
+  // A missed sentence comes back after a few others, if its tense is still on.
+  const due = retry.findIndex(r => r.due <= session.q && settings[r.it.tense]);
+  if (due >= 0 && (queue.length === 0 || queue.length % 2 === 0)) return retry.splice(due, 1)[0].it;
+  if (!queue.length) refill();
+  return queue.shift();
+}
+
+// ---------- One sentence ----------
+
+function next() {
+  if (!all.length) return;
+  item = nextItem();
+  if (!item) return;
+  answered = false; session.q++;
+  seen.add(item.id); store.set("gta-seen", [...seen]);
+  $("counter").textContent = "Sentence " + session.q;
+  const [before, verb, after] = AD.target(item.en);
+  const b = document.createElement("b"); b.textContent = verb;
+  $("english").replaceChildren(before, b, after);
+  const v = sheetVerbs.get(item.verb);
+  $("pair").innerHTML = `<b>${esc(item.verb)}</b>${v && v.english ? ` · <span lang="en">${esc(v.english)}</span>` : ""}`;
+  $("pair").hidden = !settings.showVerb;
+  $("hint").hidden = settings.showVerb;
+  $("answer").value = ""; $("answer").disabled = false;
+  $("check").disabled = false; $("show").disabled = false; $("next").disabled = true;
+  $("feedback").hidden = true; $("reveal").hidden = true;
+  $("answer").focus({ preventScroll: true });
+}
+
+function check(e) {
+  e && e.preventDefault();
+  if (answered) { next(); return; }
+  const raw = $("answer").value.trim();
+  if (!raw) return;
+  finish(AD.grade(raw, item));
+}
+
+function finish(g) {
+  answered = true;
+  const result = g ? g.result : "shown";
+  session.total++;
+  if (result === "correct") { session.correct++; session.streak++; }
+  else {
+    session.streak = 0;
+    retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
+  }
+  $("sCorrect").textContent = session.correct; $("sTotal").textContent = session.total; $("sStreak").textContent = session.streak;
+
+  if (g) {
+    history = [...history, { t: item.tense, a: item.cell.aspect, p: item.person, r: result }].slice(-300);
+    store.set("gta-history", history); renderSlips();
+  }
+
+  showFeedback(g);
+  showReveal(g);
+  $("pair").hidden = true; $("hint").hidden = true;
+  $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
+  $("next").focus({ preventScroll: true });
+}
+
+function message(g) {
+  const it = item, cell = it.cell;
+  const alsoPerson = g.hit && g.hit.person !== it.person ? " Check the person too." : "";
+  switch (g.result) {
+    case "accent": return "The letters are right; only the accent is off.";
+    case "spelling": return "Close, but check the spelling.";
+    case "particle":
+      return (cell.particle
+        ? `This one needs ${cell.particle} in front. ${TENSE_WHY[it.tense]}`
+        : `No θα or να here: it's the ${cell.label}.`) + (g.accent ? " Check the accent too." : "");
+    case "wrong person":
+      return `That's the form for ${PRON[g.hit.person]}. The subject here is ${PRON[it.person]}.` + (g.misspelled ? " Check the spelling too." : "");
+    case "wrong aspect":
+      return `That's the ${g.hit.cell.label}. ${REASON[it.reason][1]}` + alsoPerson;
+    case "wrong tense":
+      return `That's the ${g.hit.cell.label}. ${TENSE_WHY[it.tense]}` + alsoPerson;
+    default: return "";
+  }
+}
+
+function showFeedback(g) {
+  const f = $("feedback");
+  const kind = !g ? "bad" : g.result === "correct" ? "good" : ["accent", "spelling", "particle"].includes(g.result) ? "warn" : "bad";
+  f.className = "feedback " + kind;
+  f.innerHTML = "";
+  const strong = document.createElement("strong"); strong.textContent = RESULT[g ? g.result : "shown"]; f.append(strong);
+  const msg = g ? message(g) : "This one will come back later.";
+  if (msg) { const p = document.createElement("span"); p.className = "msg"; p.textContent = msg; f.append(p); }
+  if (g && g.result !== "correct") {
+    const fix = document.createElement("span"); fix.className = "fix"; fix.lang = "el";
+    const del = document.createElement("s"); del.textContent = g.typed;
+    const ins = document.createElement("b"); ins.textContent = item.answer;
+    fix.append(del, " → ", ins); f.append(fix);
+  }
+  f.hidden = false;
+}
+
+function showReveal(g) {
+  const it = item;
+  // The Greek sentence with the answer underlined, from θα / να to the verb.
+  const el = $("greek"); el.textContent = "";
+  const words = [...it.el.matchAll(/[\p{L}\p{M}]+/gu)];
+  const toks = words.map(m => VD.lower(m[0]).replace(/σ$/, "ς"));
+  const verbWord = it.answer.split(" ").pop();
+  const i = toks.findIndex((t, k) => t === verbWord && AD.particleBefore(toks, k) === it.cell.particle);
+  if (i >= 0) {
+    let start = i;
+    if (it.cell.particle) while (start > 0 && toks[start] !== it.cell.particle) start--;
+    const from = words[start].index, to = words[i].index + words[i][0].length;
+    const b = document.createElement("b"); b.textContent = it.el.slice(from, to);
+    el.append(it.el.slice(0, from), b, it.el.slice(to));
+  } else el.textContent = it.el;
+
+  $("reason").textContent = `${TENSE[it.tense]} · ${it.tense === "present" ? "continuous" : REASON[it.reason][0]}`;
+  $("why").textContent = it.tense === "present" ? "The present only has the continuous stem." : REASON[it.reason][1];
+  $("note").textContent = it.note || ""; $("note").hidden = !it.note;
+  renderParadigm(it, g);
+  $("reveal").hidden = false;
+}
+
+// The verb's forms for this tense, both aspects side by side, the answer and a wrong guess marked.
+function renderParadigm(it, g) {
+  const t = $("para"); t.innerHTML = "";
+  const cells = AD.CELLS.filter(c => c.tense === it.tense);
+  const head = t.insertRow();
+  head.append(document.createElement("th"));
+  for (const c of cells) {
+    const th = document.createElement("th");
+    th.textContent = it.tense === "present" ? it.verb : c.aspect;
+    if (c === it.cell) th.className = "cur";
+    head.append(th);
+  }
+  const tables = cells.map(c => c.forms(it.conj));
+  AD.PERSONS.forEach((p, i) => {
+    const tr = t.insertRow();
+    const who = tr.insertCell(); who.className = "who"; who.textContent = PRON[p];
+    cells.forEach((c, k) => {
+      const td = tr.insertCell();
+      td.innerHTML = tables[k][i].map(f => formHTML(c.particle, f)).join(" / ") || "–";
+      if (c === it.cell && p === it.person) td.className = "hit";
+      else if (g && g.hit && g.hit.cell === c && g.hit.person === p) td.className = "miss";
+    });
+  });
+}
+
+function formHTML(particle, form) {
+  const [stem, end] = form.includes("|") ? form.split("|") : [form, ""];
+  return (particle ? `<span class="pre">${particle}</span> ` : "") + esc(stem) + (end ? `<span class="end">${esc(end)}</span>` : "");
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+// ---------- Panels ----------
+
+function renderOptions() {
+  for (const k of [...AD.TENSES, "showVerb"]) $("opt-" + k).checked = settings[k];
+  const n = t => groups[t].reduce((s, g) => s + g.continuous.length + g.simple.length, 0);
+  $("bankInfo").textContent = `${all.length} sentences for ${sheetVerbs.size} active verbs from your word list: ` +
+    `${n("present")} present, ${n("past")} past, ${n("future")} future and ${n("na")} after να.`;
+}
+
+function setOption(key, value) {
+  settings[key] = value;
+  if (AD.TENSES.includes(key) && !AD.TENSES.some(t => settings[t])) { settings[key] = true; renderOptions(); return; }
+  store.set("gta-settings", settings);
+  if (AD.TENSES.includes(key)) queue = queue.filter(it => settings[it.tense]);
+  if (key === "showVerb" && !answered && item) { $("pair").hidden = !value; $("hint").hidden = value; }
+}
+
+function renderSlips() {
+  const recent = history.slice(-150);
+  const has = recent.length > 0;
+  $("slipInfo").textContent = has
+    ? `Your last ${recent.length} answer${recent.length === 1 ? "" : "s"} on this device. Tenses you miss come up more often.`
+    : "Answer a few sentences and this shows which tenses, aspects and mistakes come up most.";
+  $("slip").hidden = !has; $("errs").hidden = !has; $("reset").hidden = !has;
+  if (!has) return;
+
+  const grid = $("slip"); grid.innerHTML = "";
+  const div = (cls, text) => { const d = document.createElement("div"); d.className = cls; d.textContent = text; return d; };
+  grid.append(div("h", ""), div("h", "Continuous"), div("h", "Simple"));
+  for (const t of AD.TENSES) {
+    grid.append(div("rl", TENSE[t]));
+    for (const a of ["continuous", "simple"]) {
+      const cell = document.createElement("div");
+      const b = document.createElement("b"), s = document.createElement("span");
+      if (t === "present" && a === "simple") { cell.className = "cell none"; b.textContent = "–"; s.textContent = "no simple present"; cell.append(b, s); grid.append(cell); continue; }
+      const rows = recent.filter(r => r.t === t && r.a === a);
+      const right = rows.filter(r => formRight(r.r)).length;
+      if (rows.length) {
+        const rate = right / rows.length;
+        cell.className = "cell " + (rate < 0.6 ? "lo" : rate < 0.85 ? "mid" : "hi");
+        b.textContent = `${right} of ${rows.length}`; s.textContent = `${Math.round(rate * 100)}% right form`;
+      } else { cell.className = "cell"; b.textContent = "–"; s.textContent = "not drilled yet"; }
+      cell.append(b, s); grid.append(cell);
+    }
+  }
+
+  const errs = $("errs"); errs.innerHTML = "";
+  const li = (label, n) => { const e = document.createElement("li"); e.append(label + ": "); const b = document.createElement("b"); b.textContent = n; e.append(b); errs.append(e); };
+  const count = (r, a) => recent.filter(x => x.r === r && (!a || x.a === a)).length;
+  const aspectAsked = recent.filter(x => x.t !== "present");
+  li("Aspect chosen right", `${aspectAsked.filter(x => x.r !== "wrong aspect").length} of ${aspectAsked.length}`);
+  if (count("wrong aspect", "continuous")) li("Used simple where it's continuous", count("wrong aspect", "continuous"));
+  if (count("wrong aspect", "simple")) li("Used continuous where it's simple", count("wrong aspect", "simple"));
+  for (const [r, label] of [["wrong tense", "Wrong tense"], ["particle", "θα / να"], ["wrong person", "Wrong person"], ["spelling", "Spelling"], ["accent", "Accent"], ["wrong", "Other"]]) {
+    if (count(r)) li(label, count(r));
+  }
+}
+
+function renderTables() {
+  // One verb's two stems across the four tenses, 1st singular.
+  const examples = [["γράφω", "A regular verb: the simple stem adds σ (ψ, ξ)."], ["τρώω", "An irregular one: the simple stem is a different word."]];
+  $("tables").innerHTML = examples.map(([g, note]) => {
+    const conj = conjugations.get(g) || (all.find(x => x.verb === g) || {}).conj;
+    if (!conj) return "";
+    const form = c => c ? c.forms(conj)[0].map(f => formHTML(c.particle, f)).join(" / ") || "–" : "–";
+    const rows = AD.TENSES.map(t => `<tr><td>${TENSE[t]}</td><td>${form(AD.CELLS.find(c => c.tense === t && c.aspect === "continuous"))}</td>` +
+      `<td>${t === "present" ? "–" : form(AD.CELLS.find(c => c.tense === t && c.aspect === "simple"))}</td></tr>`).join("");
+    return `<div class="tcard"><h3 lang="el">${esc(g)}</h3><p>${note}</p><table class="stems" lang="el"><tr><th></th><th>Continuous</th><th>Simple</th></tr>${rows}</table></div>`;
+  }).join("");
+}
+
+function setTab(which) {
+  const drill = which === "drill";
+  $("tab-drill").setAttribute("aria-selected", drill); $("tab-tables").setAttribute("aria-selected", !drill);
+  $("panel-drill").hidden = !drill; $("panel-tables").hidden = drill;
+  if (drill && !answered) $("answer").focus({ preventScroll: true });
+}
+
+// ---------- Wiring ----------
+
+document.querySelectorAll(".key").forEach(k => k.addEventListener("click", () => {
+  const inp = $("answer"); if (inp.disabled) return;
+  const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+  inp.value = inp.value.slice(0, s) + k.textContent + inp.value.slice(e);
+  inp.focus(); inp.setSelectionRange(s + 1, s + 1);
+}));
+$("form").addEventListener("submit", check);
+$("show").addEventListener("click", () => { if (!answered && item) finish(null); });
+$("next").addEventListener("click", next);
+$("hint").addEventListener("click", () => { $("pair").hidden = false; $("hint").hidden = true; $("answer").focus({ preventScroll: true }); });
+for (const k of [...AD.TENSES, "showVerb"]) $("opt-" + k).addEventListener("change", e => setOption(k, e.target.checked));
+$("reset").addEventListener("click", () => { history = []; store.set("gta-history", history); renderSlips(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && answered && !$("panel-drill").hidden && e.target.tagName !== "BUTTON") { e.preventDefault(); next(); }
+});
+$("tab-drill").addEventListener("click", () => setTab("drill"));
+$("tab-tables").addEventListener("click", () => setTab("tables"));
+</script>
+</body>
+</html>

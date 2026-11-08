@@ -3,3 +3,6 @@ site/
 .DS_Store
 .direnv/
 __pycache__/
+# Downloaded by make fetch-dictionary from a GitHub release (see the Makefile)
+docs/data/lemma_greek_en.db.gz
+docs/data/lemma_greek_en.db.gz.part

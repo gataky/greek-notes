@@ -29,9 +29,12 @@ jobs:
         with:
           version-file: .tool-versions
       - run: uv sync --locked
+      # The dictionary isn't in git: download the build the Makefile pins, checking its SHA-256.
+      - run: make fetch-dictionary
       - run: node tests/test_verbs.js
       - run: node tests/test_verb_forms.js
       - run: node tests/test_voice_sentences.js
+      - run: node tests/test_aspect_sentences.js
       - run: node tests/test_dictionary.js
       - run: uv run mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3

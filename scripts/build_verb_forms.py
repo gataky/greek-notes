@@ -110,8 +110,8 @@ class Dictionary:
     def __init__(self, path):
         self.db = sqlite3.connect(f"{Path(path).resolve().as_uri()}?mode=ro", uri=True)
         version = self.db.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()[0]
-        if version != "3":
-            sys.exit(f"expected dictionary schema_version 3, got {version}")
+        if version != "4":
+            sys.exit(f"expected dictionary schema_version 4, got {version}")
 
     def verb_headwords(self):
         return [nfc(w) for w, in self.db.execute(
@@ -136,9 +136,11 @@ class Dictionary:
         line names the active verb (σηκώνομαι → σηκώνω)."""
         greek = nfc(verb["greek"])
         yield [greek]
+        # A spelling can belong to several headwords: its main owner first, then the more frequent.
         yield [w for w, in self.db.execute(
-            """SELECT DISTINCT h.word FROM form f JOIN headword h ON h.id = f.headword_id
-               WHERE f.form = ? AND h.word <> ?""", (greek, greek))]
+            """SELECT h.word FROM form f JOIN headword h ON h.id = f.headword_id
+               WHERE f.form = ? AND h.word <> ?
+               GROUP BY h.word ORDER BY MAX(f.is_primary) DESC, MAX(h.frequency) DESC, h.word""", (greek, greek))]
         yield [nfc(w) for w, in self.db.execute(
             """SELECT r.form FROM inflection_row r
                JOIN entry e ON e.id = r.entry_id JOIN headword h ON h.id = e.headword_id

@@ -1,4 +1,4 @@
-// Greek ↔ English lookup over the lemma dictionary (lemma_greek_en.db, schema version 3),
+// Greek ↔ English lookup over the lemma dictionary (lemma_greek_en.db, schema version 4),
 // opened in the browser or Node with sql.js.
 //
 // The database stores search keys that only code can compute: `norm` (accents and case
@@ -157,7 +157,7 @@
 
   const EXACT = 0, NORM = 1, PHONETIC = 2;
 
-  const SELECT_FORMS = `SELECT f.headword_id, f.form, h.word, h.frequency, f.phonetic
+  const SELECT_FORMS = `SELECT f.headword_id, f.form, h.word, h.frequency, f.phonetic, f.is_primary
     FROM form f JOIN headword h ON h.id = f.headword_id`;
   const PREFER_HEADWORD = " ORDER BY f.form = h.word DESC";
   // One meaning to show next to a headword in a list, skipping "plural of …" when possible.
@@ -293,20 +293,23 @@
     const value = (sql, params) => rows(sql, params)[0]?.[0] ?? null;
 
     const version = value("SELECT value FROM meta WHERE key = 'schema_version'");
-    if (version !== "3") throw new Error(`expected dictionary schema_version 3, got ${version}`);
+    if (version !== "4") throw new Error(`expected dictionary schema_version 4, got ${version}`);
     const meta = Object.fromEntries(rows("SELECT key, value FROM meta"));
 
     // Greek or Greeklish query -> hits, best first:
-    // { headwordId, word, matchedForm, kind (EXACT/NORM/PHONETIC), penalty, frequency, gloss }
+    // { headwordId, word, matchedForm, kind (EXACT/NORM/PHONETIC), penalty, isPrimary, frequency, gloss }
+    // A spelling several headwords share ranks its main owner first (is_primary): πήγα finds
+    // πηγαίνω before πάω, though πάω is more frequent.
     function searchGreek(query, limit = 10) {
       query = query.trim();
       const best = new Map();
+      const rank = h => [h.kind, h.penalty, h.isPrimary ? 0 : 1];
+      const before = (a, b) => { const x = rank(a), y = rank(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] < y[i]; return false; };
       const keep = (row, kind, penalty) => {
-        const [headwordId, matchedForm, word, frequency] = row;
+        const [headwordId, matchedForm, word, frequency, , isPrimary] = row;
+        const hit = { headwordId, word, matchedForm, frequency, kind, penalty, isPrimary: !!isPrimary };
         const cur = best.get(headwordId);
-        if (!cur || kind < cur.kind || (kind === cur.kind && penalty < cur.penalty)) {
-          best.set(headwordId, { headwordId, word, matchedForm, frequency, kind, penalty });
-        }
+        if (!cur || before(hit, cur)) best.set(headwordId, hit);
       };
 
       if (isGreek(query)) {
@@ -324,7 +327,7 @@
 
       const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
       return [...best.values()]
-        .sort((a, b) => a.kind - b.kind || a.penalty - b.penalty || b.frequency - a.frequency || cmp(a.word, b.word))
+        .sort((a, b) => a.kind - b.kind || a.penalty - b.penalty || b.isPrimary - a.isPrimary || b.frequency - a.frequency || cmp(a.word, b.word))
         .slice(0, limit)
         .map(hit => ({ ...hit, gloss: value(FIRST_GLOSS, [hit.headwordId]) }));
     }
@@ -341,14 +344,16 @@
       // One letter matches a huge share of the forms: slow, and it narrows nothing.
       if ([...query].length < 2) return [];
       const MAX_CHAR = "\u{10ffff}";
-      // Of a word's matching forms, show its own spelling if that matches, otherwise any form
-      // (SQLite takes the bare f.form from the row that won MAX).
+      // Of a word's matching forms, show its own spelling if that matches, else a spelling it
+      // is the main owner of (is_primary), else any (SQLite takes the bare f.form from the row
+      // that won the single MAX, so both go into it: 3 own, 1 main owner, 0 shared).
+      // Words matched only by a form rank main owners first: λεπτά -> λεπτός before λεπτό.
       const select = (where, params) => rows(`SELECT f.headword_id, f.form, h.word, h.frequency,
-          MAX(f.form = h.word) AS own FROM form f JOIN headword h ON h.id = f.headword_id
+          MAX((f.form = h.word) * 2 + f.is_primary) AS fit FROM form f JOIN headword h ON h.id = f.headword_id
         WHERE ${where}
         GROUP BY f.headword_id
-        ORDER BY CASE WHEN own AND h.frequency > 0 THEN 0 WHEN NOT own THEN 1 ELSE 2 END,
-          instr(h.word, ' ') > 0, h.frequency DESC
+        ORDER BY CASE WHEN fit >= 2 AND h.frequency > 0 THEN 0 WHEN fit < 2 THEN 1 ELSE 2 END,
+          instr(h.word, ' ') > 0, fit DESC, h.frequency DESC
         LIMIT ?`, [...params, limit]);
       const range = (column, keys) => ({
         where: keys.map(() => `(f.${column} >= ? AND f.${column} < ?)`).join(" OR "),
@@ -435,9 +440,11 @@
 
     // ---------- Principal parts ----------
 
-    const formsOf = word => {
+    // A headword's forms, or only those it is the main owner of (a spelling several headwords
+    // share is primary for one: απάγω lists all of κλέβω's forms, but none as primary).
+    const formsOf = (word, primaryOnly = false) => {
       const found = rows(HEADWORD, [norm(word), word])[0];
-      return found ? rows("SELECT form FROM form WHERE headword_id = ?", [found[0]]).map(r => r[0]) : [];
+      return found ? rows("SELECT form FROM form WHERE headword_id = ?" + (primaryOnly ? " AND is_primary = 1" : ""), [found[0]]).map(r => r[0]) : [];
     };
 
     // A verb's future simple and aorist (1sg), worked out from the dictionary's forms so a
@@ -451,24 +458,30 @@
       if (!Verbs) return null;
       // αγαπάω and αγαπώ are separate headwords; pool their forms.
       const twin = word.endsWith("άω") ? word.slice(0, -2) + "ώ" : word.endsWith("ώ") ? word.slice(0, -1) + "άω" : null;
-      const own = [...formsOf(word), ...(twin ? formsOf(twin) : [])];
-      const found = own.length ? bestParts(word, own, false) : null;
+      // Every form counts as evidence, but the future and aorist must be spellings the verb
+      // is the main owner of, so another verb's forms listed under it can't win.
+      const pool = words => {
+        const forms = words.flatMap(w => formsOf(w)), main = words.flatMap(w => formsOf(w, true));
+        return { forms, main };
+      };
+      const own = pool(twin ? [word, twin] : [word]);
+      const found = own.forms.length ? bestParts(word, own.forms, own.main, false) : null;
       if (found) return found;
       // A passive's perfective forms are often listed under the active verb (δόθηκα under δίνω).
-      const borrowed = activeTwins(word).flatMap(formsOf);
-      return borrowed.length ? bestParts(word, [...own, ...borrowed], true) : null;
+      const borrowed = pool(activeTwins(word));
+      return borrowed.forms.length ? bestParts(word, [...own.forms, ...borrowed.forms], [...own.main, ...borrowed.main], true) : null;
     }
 
-    function bestParts(word, forms, passiveOnly) {
+    function bestParts(word, forms, mainForms, passiveOnly) {
       // Skip capitalised entries and unaccented spellings (καπνιστω), which the data also has.
       forms = forms.filter(f => !/\p{Lu}/u.test(f) && (/[άέήίόύώΐΰ]/.test(f) || Verbs.nuclei(f).length < 2));
-      const listed = new Set(forms);
+      const listed = new Set(forms), main = new Set(mainForms);
       const active = !/μαι$/.test(word);
       // The verb's own present and imperfect are not its future or aorist (κάπνιζα, αγαπούσα).
       const own = new Set(continuousForms(word));
-      const futures = forms.filter(f => /[ωώ]$/.test(f) && !own.has(f) && !PRESENT_ONLY.test(f) && !has(f)
+      const futures = forms.filter(f => main.has(f) && /[ωώ]$/.test(f) && !own.has(f) && !PRESENT_ONLY.test(f) && !has(f)
         && !(active && PASSIVE_FUTURE.test(f)) && !(passiveOnly && !f.endsWith("ώ")));
-      const aorists = forms.filter(f => f.endsWith("α") && !own.has(f) && !f.endsWith("ούσα")
+      const aorists = forms.filter(f => main.has(f) && f.endsWith("α") && !own.has(f) && !f.endsWith("ούσα")
         && !(active && PASSIVE_AORIST.test(f)) && !(passiveOnly && !f.endsWith("ηκα")));
 
       const scored = [];

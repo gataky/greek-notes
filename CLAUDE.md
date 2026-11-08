@@ -14,7 +14,7 @@ docs/                   the site (MkDocs serves everything here)
   apps/                 standalone HTML apps, embedded by the pages above
   javascripts/          all JS: site-wide scripts (listed in mkdocs.yml) and the apps' modules
   stylesheets/          all CSS: site-wide (listed in mkdocs.yml) and verb-grid.css for the apps
-  data/                 JSON and the gzipped dictionary the apps fetch
+  data/                 JSON the apps fetch, and the gzipped dictionary (downloaded, not in git)
   vendor/sql.js/        third-party code, vendored for offline use
   fonts/, icons/        self-hosted Greek font, app icons
   manifest.webmanifest, sw.js   must stay at the site root (service worker scope)
@@ -36,10 +36,12 @@ make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
 make check     # all tests, then strict build: what CI runs before deploying
-make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js and test_dictionary.js
+make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js and test_dictionary.js
 make dump      # print every verb's conjugations for review
 make sync      # pull verbs from the Google Sheet into docs/data/verbs.json, then test
+make fetch-dictionary  # download the pinned dictionary into docs/data/ (build, serve and test do this)
 make dictionary  # gzip a new lemma dictionary build into docs/data/, then test
+make publish-dictionary  # upload docs/data's dictionary as a GitHub release and pin the Makefile to it
 make verb-forms  # copy our verbs' forms from the dictionary into docs/data/verb-forms.json, then test
 make upgrade   # uv lock --upgrade
 ```
@@ -111,13 +113,48 @@ Present tense: an English sentence, and the learner types the Greek verb, choosi
 - **`tests/test_voice_sentences.js`** runs in `make test`, `make sync` and CI. It fails when a sentence's Greek doesn't contain exactly one word that is its verb in its person, when the reason doesn't fit the voice, when "you" isn't marked (sg) or (pl), or on duplicates. A changed verb in the sheet can break sentences, which is why `make sync` runs it. `--gaps` lists verb/person pairs with no sentence; βλέπομαι in the singular and most of βάζομαι are left out on purpose.
 - **Page:** pairs come back to back (the same verb once active, once -μαι), unseen sentences come first until a verb's sentences are used up, persons with more misses come up more often, and missed sentences come back a few turns later. Progress is per device, in localStorage (`gav-history`, `gav-seen`, `gav-settings`).
 
+## Tense and aspect drill (`docs/drills/tense-aspect.md`, `docs/apps/tense-aspect.html`)
+
+Active verbs only, since the owner hasn't learned the passive past yet. The learner reads an English sentence with one verb marked, `*like this*`, and types the Greek, with θα or να when the form takes one. Seven cells are drilled: the present, the past (continuous/simple), the future (θα + continuous/simple) and after να (continuous/simple).
+
+- **Sentences:** `aspect-sentences.json`, one object per line, with these fields:
+  - `verb`: an active verb in verbs.json.
+  - `person`, `en`, `el`, and an optional `note`.
+  - `tense`: `present`, `past`, `future` or `na`.
+  - `aspect`: `continuous` or `simple`. The present is always `continuous`.
+  - `reason`: `ongoing` or `repeated` for the continuous, `once` for the simple.
+
+  Use only words from the words tab. Write a verb's two aspects in the same tense where both are natural, so the page can pair them. Verbs with one form for both aspects get one sentence per tense: κάνω, περιμένω, σερβίρω, προσφέρω, and πάω (whose continuous sentences are under πηγαίνω). έχω and ξέρω get continuous sentences only.
+- **Forms come from the verb tables' merge** (`verbToShow()` in `verb-forms.js`, so the dictionary's cells), not from the engine alone. A change to `verb-forms.json` can therefore break sentences, which is why `make verb-forms` and `make sync` run the test.
+- **`aspect-drill.js`** (browser and Node) holds what the page and the test share:
+  - `CELLS`: each cell's particle, and where its forms are in `conjugate()`'s shape.
+  - `answersIn()` finds the answer in a sentence: the form, with its particle in front. Object pronouns and μη(ν) may stand between: θα το γράψω.
+  - `grade()` returns one of: correct, accent, particle (right verb form, θα or να missing or wrong), spelling, wrong person, wrong aspect, wrong tense, wrong. It reuses `voice-drill.js`'s helpers.
+- **`tests/test_aspect_sentences.js`** fails in these cases:
+  - a sentence's Greek doesn't contain exactly one matching form;
+  - the verb has no form for that cell;
+  - the reason doesn't fit the aspect;
+  - the English doesn't mark the verb once;
+  - "you" isn't marked (sg) or (pl);
+  - a sentence is a duplicate;
+  - an active verb has no sentences.
+
+  `--gaps` lists the verb/cell pairs with no sentence.
+- **Page:**
+  - A verb's two aspects in one tense come back to back.
+  - Tenses with more misses come up more often, and missed sentences come back a few turns later.
+  - Chips turn each tense on or off.
+  - Progress is per device, in localStorage (`gta-history`, `gta-seen`, `gta-settings`).
+
 ## Dictionary (`docs/apps/dictionary.html`)
 
 A Greek ↔ English dictionary that runs entirely in the browser. It's the home page, so `/#σπίτι` opens a word.
 
 - **Home page:** `docs/index.md` is only the iframe. Its template, `overrides/home.html`, adds a menu button and a `<dialog>` built from `nav`, and a light/dark button (both in `docs/javascripts/home.js`). The theme button picks the next palette through Material's own radio inputs, still in the hidden header, so the choice is saved for every page and `drill-frame.js` passes it into the dictionary. It reads the current palette from `body[data-md-color-scheme]`, because on a first visit neither input is checked. `docs/stylesheets/home.css` hides the site's header and footer with `body:has(.dict-home)`. They stay in the page because instant navigation needs them. The point is that the site looks like a dictionary until you open the menu, so don't add links to the notes there.
 
-- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 3, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms`. Never write to the database, and refer to words by spelling (`#σπίτι`), since row ids change between builds.
+- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 4, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms`, then `make publish-dictionary`.
+  - **It isn't in git** (23 MB; ignored). It's an asset on a GitHub release of this repo (`dictionary-YYYYMMDD`). The Makefile pins it by `DICT_URL` and `DICT_SHA256`, and `make fetch-dictionary` downloads it when missing; `build`, `serve`, `test` and CI run that first. A local file that isn't the pinned build is left alone, with a note, so a fresh `make dictionary` isn't overwritten. `publish-dictionary` creates the release with `gh` and rewrites the two pin lines; commit the Makefile after. Older copies remain in git history (before 2026-11-07); history was deliberately not rewritten.
+  - Never write to the database, and refer to words by spelling (`#σπίτι`), since row ids change between builds.
 - **Engine:** sql.js 1.14.2 is vendored in `docs/vendor/sql.js/` (no CDN, so it works offline). The app unzips the file with `DecompressionStream` and opens it in memory.
 - **`greek-dictionary.js`** (browser and Node) ports the guide's Python reference: the `norm`/`phonetic`/Greeklish/English keys, Greek and English search, entry lookup. The keys must match the stored ones exactly; `tests/test_dictionary.js` recomputes them for every form. sql.js has no FTS5, so the English fallback for terms missing from `en_index` scans glosses with `LIKE` instead of using `sense_fts`.
 - **`apps/dictionary.html`:** one search box. Greek input searches Greek. Latin input shows English and Greeklish results side by side, since it could be either. The hash is the open headword. Greek words in glosses link to their entries.

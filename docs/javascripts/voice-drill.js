@@ -116,7 +116,7 @@
     return { result: "wrong", typed: t };
   }
 
-  const api = { PERSONS, lower, strip, expand, present, tokens, answersIn, grade };
+  const api = { PERSONS, lower, strip, expand, present, tokens, answersIn, lev, grade };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.VoiceDrill = api;
 })(this);

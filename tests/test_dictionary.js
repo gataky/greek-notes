@@ -73,6 +73,10 @@ initSqlJs().then(SQL => {
   check("search είπα", [top("είπα", 1)[0], dict.searchGreek("είπα")[0].matchedForm], ["λέω", "είπα"]);
   check("search ἄνθρωπος", top("ἄνθρωπος", 1), ["άνθρωπος"]);
   check("search xeri", top("xeri", 3), ["χέρι", "χαίρω", "ξέρω"]);
+  // A spelling several headwords share ranks its main owner (is_primary) first, ahead of frequency.
+  check("search πήγα (πηγαίνω owns it, πάω shares it)", top("πήγα", 2), ["πηγαίνω", "πάω"]);
+  check("search λεπτά finds both owners", top("λεπτά", 2), ["λεπτός", "λεπτό"]);
+  check("complete λεπτά (main owner first)", dict.complete("λεπτά").slice(0, 2).map(h => h.word), ["λεπτός", "λεπτό"]);
   check("search bank", dict.searchEnglish("bank").slice(0, 2).map(h => [h.greek, h.note]), [["τράπεζα", "institution"], ["όχθη", "edge of river or lake"]]);
   check("search salt water", dict.searchEnglish("salt water")[0].greek, "αλατόνερο");
   // Not in the English index, so this goes through the gloss search ("oil pressed from olives").
@@ -94,9 +98,11 @@ initSqlJs().then(SQL => {
     ["αγωνίζομαι", "αγωνιστώ", "αγωνίστηκα"], ["δίνομαι", "δοθώ", "δόθηκα"],
   ]) check(`principal parts of ${verb}`, dict.principalParts(verb), { future, aorist });
   check("principal parts of a noun", dict.principalParts("σπίτι"), null);
+  // απάγω lists all of κλέβω's forms too, but κλέβω owns them, so they can't be its parts.
+  check("principal parts only from forms the verb owns", dict.principalParts("απάγω"), { future: "απαγάγω", aorist: "απήγαγα" });
   // Against the sheet's hand-entered parts: a wrong guess is worse than none, which only
   // means no link. When this build was added: 121 agree, 7 differ (mostly real variants
-  // such as κάτσω for καθίσω), 19 no guess.
+  // such as κάτσω for καθίσω), 19 no guess. With schema 4: 127 agree, 7 differ, 15 no guess.
   const sheet = JSON.parse(fs.readFileSync(path.join(__dirname, "../docs/data/verbs.json"), "utf8")).filter(v => v.future && v.aorist);
   const tally = { agree: 0, differ: [], none: 0 };
   for (const v of sheet) {

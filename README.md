@@ -38,13 +38,18 @@ Commit `verbs.json` and `verb-forms.json`, and push. The page shows the dictiona
 
 The active or passive drill reads `docs/data/voice-sentences.json`. Each sentence names its verb and person; the forms come from `verbs.json`. `make test` checks every sentence against the conjugation engine, and `node tests/test_voice_sentences.js --gaps` lists verb/person pairs that have no sentence yet.
 
+The tense and aspect drill reads `docs/data/aspect-sentences.json`. Each sentence names an active verb, its person, tense and aspect, and marks the verb in the English `*like this*`; the forms come from the verb tables (the dictionary's, through `verb-forms.json`). `make test` checks every sentence, and `node tests/test_aspect_sentences.js --gaps` lists verbs missing a tense or aspect.
+
 ## Updating the dictionary
 
-The dictionary page reads `docs/data/lemma_greek_en.db.gz`, a gzipped copy of the lemma SQLite dictionary. When there's a new build:
+The dictionary page reads `docs/data/lemma_greek_en.db.gz`, a gzipped copy of the lemma SQLite dictionary. It's too big for git, so it's an asset on a [GitHub release](https://github.com/gataky/greek-notes/releases), and the Makefile pins the build to it by URL and SHA-256 (`DICT_URL`, `DICT_SHA256`). `make build`, `serve` and `test` download it if it's missing, and so does CI before deploying.
+
+When there's a new build:
 
 ```sh
 make dictionary DICT_DB=path/to/lemma_greek_en.db   # default: ../lemma/lemma_greek_en/lemma_greek_en.db
 make verb-forms                                      # then refresh the verb tables' forms from it
+make publish-dictionary                              # upload it as a new release and pin the Makefile to it
 ```
 
-That gzips it into `docs/data/`, updates `docs/data/verb-forms.json` and runs the checks. Commit both and push. Installed apps download it again only because it changed; other deploys leave it alone.
+The first two gzip it into `docs/data/`, update `docs/data/verb-forms.json` and run the checks. The last creates a `dictionary-YYYYMMDD` release with `gh` and rewrites the pin. Commit the Makefile and `verb-forms.json`, then push. Installed apps download the dictionary again only because it changed; other deploys leave it alone.
