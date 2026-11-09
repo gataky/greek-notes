@@ -1,5 +1,5 @@
 // Writes exports/anki-verbs.json: the word list's active verbs as Anki cards, for the
-// "Greek verb" and "Greek aspect" note types that ../anki-sync pushes (`./sync verbs`).
+// "Greek verb" and "Greek aspect" note types that anki/ pushes (`make push-verbs`).
 //   node scripts/build_anki_verbs.js      (make anki-verbs)
 //
 // Nothing here is new data. Each verb's forms, group and highlighted letters are the aspect

@@ -20,16 +20,18 @@ A sync tool that pushes vocabulary flashcards from Google Sheets to Anki.
   - **Recognize** card (aorist → present): only for irregular verbs, strong aorists (έμαθα, βγήκα) and verbs with no perfective (είχα).
 - **Greek aspect**, a cloze note per past-tense sentence from the greek-notes tense and aspect drill: `Χθες [διαβάζω] ένα βιβλίο.` → `διάβασα`. These go in the `Greek Verbs::Aspect` subdeck, so its new-card limit can be set on its own.
 
-The forms, groups and sentences come from greek-notes' `exports/anki-verbs.json`, which runs the same code as the site's verb tables. That code reads the lemma dictionary. After adding verbs to the sheet:
+The forms, groups and sentences come from the repo's `exports/anki-verbs.json` (one folder up), which runs the same code as the site's verb tables. That code reads the lemma dictionary. After adding verbs to the sheet, from the repo root:
 
 ```sh
-cd ~/Documents/greek-notes && make sync   # also rebuilds exports/anki-verbs.json
-cd ~/Documents/anki-sync && ./sync verbs --dry-run && ./sync verbs
+make anki DRY=1   # pull the sheet, rebuild exports/anki-verbs.json, preview both decks
+make anki         # then push them
 ```
+
+`make push-verbs` passes the export's path with `--cards`, so the config doesn't need `cards_path`. It's only read when `--cards` isn't given:
 
 ```yaml
 verbs:
-  cards_path: "~/Documents/greek-notes/exports/anki-verbs.json"
+  # cards_path: "/path/to/greek-notes/exports/anki-verbs.json"
   # deck: "Greek Verbs"
   # cloze_deck: "Greek Verbs::Aspect"
 ```
@@ -237,9 +239,9 @@ Set `enabled: false` in the `text_to_speech` config or remove the section entire
 ### Build from Source
 
 ```bash
-git clone https://github.com/yourusername/sync.git
-cd sync
-go build -o sync ./cmd/sync
+git clone https://github.com/gataky/greek-notes.git
+cd greek-notes
+make anki-build   # builds anki/sync
 ```
 
 ## Quick Start

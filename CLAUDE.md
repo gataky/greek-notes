@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Personal Modern Greek study notes: an MkDocs Material site deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main`.
+Personal Modern Greek study notes: an MkDocs Material site deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
 
 ## Layout
 
@@ -21,22 +21,24 @@ docs/                   the site (MkDocs serves everything here)
 overrides/              theme templates (custom_dir)
 hooks/                  MkDocs hooks
 scripts/                build_*.py: write the files in docs/data/; build_anki_verbs.js writes exports/
-exports/                data for other repos, not served by the site (anki-verbs.json)
+exports/                data for anki/, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
 sqlite-database.md      the lemma dictionary's developer guide (a copy)
+anki/                   the Anki sync tool (Go module, its own Makefile and README)
+.claude/skills/         skills that edit the vocabulary sheet (fill-verb-forms, update-examples-notes)
 ```
 
 Put new files by type, not next to the page that uses them. Apps refer to the rest with `../javascripts/`, `../stylesheets/`, `../data/` and `../vendor/`. Don't name a folder `assets/`: Material writes its own files there.
 
 ## Commands
 
-Tools are pinned in `.tool-versions` (asdf: Python, Node, uv); Python packages in `pyproject.toml` + `uv.lock`. `.envrc` (direnv) loads them and `.venv`; the Makefile works without direnv.
+Tools are pinned in `.tool-versions` (asdf: Python, Node, uv, Go); Python packages in `pyproject.toml` + `uv.lock`, Go modules in `anki/go.mod`. `.envrc` (direnv) loads them and `.venv`, and `anki/.envrc` adds a GOPATH on top; the Makefile works without direnv.
 
 ```sh
 make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
-make check     # all tests, then strict build: what CI runs before deploying
+make check     # all tests, the Go tests, then strict build: what CI runs before deploying, plus Go
 make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js, test_aspect_forks.js and test_dictionary.js
 make dump      # print every verb's conjugations for review
 make sync      # pull verbs from the Google Sheet into docs/data/verbs.json, then test
@@ -44,9 +46,16 @@ make fetch-dictionary  # download the pinned dictionary into docs/data/ (build, 
 make dictionary  # gzip a new lemma dictionary build into docs/data/, then test
 make publish-dictionary  # upload docs/data's dictionary as a GitHub release and pin the Makefile to it
 make verb-forms  # copy our verbs' forms from the dictionary into docs/data/verb-forms.json, then test
-make anki-verbs  # write the verb cards for ../anki-sync into exports/anki-verbs.json (sync and verb-forms do too)
+make anki-verbs  # write the verb cards for anki/ into exports/anki-verbs.json (sync and verb-forms do too)
+make anki-build  # go build anki/sync
+make anki-test   # go test ./... in anki/
+make push-words  # anki/sync push: the words tab to the Greek deck
+make push-verbs  # anki-verbs, then anki/sync verbs --cards exports/anki-verbs.json
+make anki        # sync, push-words, push-verbs: the whole flow after editing the sheet
 make upgrade   # uv lock --upgrade
 ```
+
+The push targets take `DRY=1` (`--dry-run`) and need Anki running with AnkiConnect. Preview with `DRY=1` before pushing for the owner; a push writes to their Anki collection.
 
 There is no per-test runner: `tests/test_verbs.js` checks a table of hand-verified forms (`EXPECTED`) and prints each mismatch. To check one verb, add or edit its entry there.
 
@@ -117,14 +126,24 @@ A verb's present forking into its two stems, imperfective and perfective, each w
 
 ## Anki verb cards (`scripts/build_anki_verbs.js`, `exports/anki-verbs.json`)
 
-The owner's Anki sync tool (`../anki-sync`, Go) pushes a "Greek Verbs" deck from this file with `./sync verbs`. The cards show what the site shows, so the forms and highlights are worked out here in JavaScript rather than ported to Go.
+The Anki sync tool in `anki/` pushes a "Greek Verbs" deck from this file with `./sync verbs` (`make push-verbs`). The cards show what the site shows, so the forms and highlights are worked out here in JavaScript rather than ported to Go.
 
 - **Verbs:** the word list's active verbs, in `AspectFork.GROUPS` order (regular groups first, irregular last, which becomes Anki's new-card order). Each has its 1st singular present, past continuous, aorist and `θα` future, plain and as `markHTML()` spans, the group's name, rule and note, and the fork's notes.
 - **`recognize`** is the form for an aorist → present card, set for the irregular, strong and no-perfective groups.
 - **`example`** is the verb's past simple sentence from `aspect-sentences.json`.
 - **`cloze`** holds every past-tense sentence from `aspect-sentences.json`, with the answer wrapped as `{{c1::έγραψα::γράφω}}`. The answer is found with `answersIn()`, as in the drill. The English keeps its `*marks*`: the card's front shows it, with the verb in bold, above the Greek blank. That gives the person, which the Greek often drops, so the card tests the aspect and the form.
 - Committed, one item per line, so the diff shows which cards a push will change. `make sync` and `make verb-forms` rebuild it. The script exits non-zero if a verb has no forms or a sentence's answer can't be found.
-- Don't rename fields without changing `../anki-sync/internal/verbs`.
+- Don't rename fields without changing `anki/internal/verbs` in the same commit, and run `make anki-test`.
+
+## Anki sync tool (`anki/`)
+
+A Go CLI (cobra) that reads the sheet through the Sheets API with a service account and writes to Anki through AnkiConnect. The sheet is the source of truth; nothing is pulled back. `anki/README.md` documents it in full.
+
+- **Config and secrets** are in `~/.config/sync/` (`config.yaml`, `service-account.json`, TTS keys), never in the repo, which is public. The sheet ID stays in that config for the Go tool and the skills.
+- **`./sync push`** (`make push-words`): one note per row of the words tab in the "Greek" deck, with change detection by checksum and Greek audio from ElevenLabs or Google TTS.
+- **`./sync verbs`** (`make push-verbs`): the "Greek Verbs" deck from `exports/anki-verbs.json`. `--cards` sets the file, else `verbs.cards_path` in the config. Run it after `push`, since a verb's present reuses the vocabulary card's audio.
+- Both the site (`scripts/build_verbs.py`, CSV export) and the tool (Sheets API) read the words tab, with their own filters. A column change in the sheet has to be checked against both, and against the skills.
+- Go code and tests: `anki/internal/` (anki, sheets, sync, verbs, tts, mapper, ...), `anki/pkg/models/`. CI doesn't run the Go tests; `make check` does.
 
 ## Active or passive drill (`docs/drills/`, `docs/apps/passive-verbs.html`)
 

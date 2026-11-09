@@ -47,9 +47,9 @@ const (
 	clozeSubdeck     = "Aspect"
 )
 
-// VerbsConfig configures the verb deck, built from greek-notes' exports/anki-verbs.json.
+// VerbsConfig configures the verb deck, built from the repo's exports/anki-verbs.json.
 type VerbsConfig struct {
-	// CardsPath is the path to anki-verbs.json (written by `make anki-verbs` in greek-notes).
+	// CardsPath is the path to anki-verbs.json (written by `make anki-verbs` at the repo root).
 	// A leading ~ is expanded.
 	CardsPath string `yaml:"cards_path"`
 

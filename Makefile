@@ -10,8 +10,13 @@ DICT_GZ     := docs/data/lemma_greek_en.db.gz
 DICT_URL    := https://github.com/gataky/greek-notes/releases/download/dictionary-20261107/lemma_greek_en.db.gz
 DICT_SHA256 := 5fc29721d7e7233d8c3f89e26471b78a237179d173ac4f303a89aaf8baae3adc
 
+# The Anki sync tool (Go) in anki/. Its config and keys live in ~/.config/sync/, not here.
+# DRY=1 makes the push targets preview what they'd change.
+ANKI        := anki/sync
+DRY_RUN     := $(if $(DRY),--dry-run)
+
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms anki-verbs test dump serve build check clean sheet
+.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-18s %s\n", $$1, $$2}'
@@ -65,9 +70,23 @@ verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (D
 	@$(NODE) tests/test_aspect_forks.js
 	@$(NODE) scripts/build_anki_verbs.js
 
-anki-verbs: ## Write the verb cards for ../anki-sync into exports/anki-verbs.json
+anki-verbs: ## Write the verb cards for anki/ into exports/anki-verbs.json
 	$(NODE) scripts/build_anki_verbs.js
 	@git diff --stat -- exports/anki-verbs.json
+
+anki-build: ## Build the Anki sync tool into anki/sync
+	cd anki && go build -o sync ./cmd/sync
+
+anki-test: ## Run the Anki sync tool's Go tests
+	cd anki && go test ./...
+
+push-words: anki-build ## Push the words tab to the Greek deck in Anki (DRY=1 to preview)
+	$(ANKI) push $(DRY_RUN)
+
+push-verbs: anki-build anki-verbs ## Push exports/anki-verbs.json to the Greek Verbs deck (DRY=1 to preview)
+	$(ANKI) verbs --cards "$(CURDIR)/exports/anki-verbs.json" $(DRY_RUN)
+
+anki: sync push-words push-verbs ## After editing the sheet: pull it, check it, push both decks (DRY=1 to preview)
 
 test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills' sentences, the aspect forks and the dictionary lookup
 	$(NODE) tests/test_verbs.js
@@ -86,7 +105,7 @@ serve: fetch-dictionary ## Preview the site at http://127.0.0.1:8000 with live r
 build: fetch-dictionary ## Build the site into site/, failing on warnings like CI does
 	uv run mkdocs build --strict
 
-check: test build ## Everything CI checks before deploying
+check: test anki-test build ## Everything CI checks before deploying, plus the Go tests
 
 clean: ## Remove the built site
 	rm -rf site

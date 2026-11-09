@@ -80,7 +80,7 @@ func (c noteCounts) String() string {
 // Push syncs the verb deck. With dryRun, it reports what would change and writes nothing.
 func (p *VerbPusher) Push(dryRun bool) error {
 	if p.config.Verbs == nil || strings.TrimSpace(p.config.Verbs.CardsPath) == "" {
-		return fmt.Errorf("verbs.cards_path is not set in the config: point it at greek-notes' exports/anki-verbs.json")
+		return fmt.Errorf("no verb cards file: pass --cards or set verbs.cards_path to the repo's exports/anki-verbs.json (make push-verbs does this)")
 	}
 	cfg := p.config.Verbs.WithDefaults()
 

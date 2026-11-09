@@ -28,8 +28,9 @@ text_to_speech:
   # Rate limiting (applies to both providers)
   request_delay_ms: 100
 
-# Verb deck pushed by `./sync verbs`, built from greek-notes (run `make anki-verbs` there)
+# Verb deck pushed by `./sync verbs`, built by `make anki-verbs` at the repo root.
+# `make push-verbs` passes the path with --cards, so cards_path is only for running ./sync by hand.
 verbs:
-  cards_path: "~/Documents/greek-notes/exports/anki-verbs.json"
+  # cards_path: "/path/to/greek-notes/exports/anki-verbs.json"
   # deck: "Greek Verbs"                # default
   # cloze_deck: "Greek Verbs::Aspect"  # default: <deck>::Aspect

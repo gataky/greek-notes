@@ -1,6 +1,23 @@
 # Modern Greek Notes
 
-Personal notes for learning Modern Greek, published with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) on GitHub Pages.
+Personal notes for learning Modern Greek, published with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) on GitHub Pages, and the tool that pushes the same vocabulary to Anki ([`anki/`](anki/README.md)).
+
+## Adding words
+
+The vocabulary sheet (`make sheet` opens it) feeds both the site and Anki. After adding words to the words tab:
+
+1. For a new verb, fill in its verb columns (voice, active form, future simple, aorist, overrides: M–Q). Claude's `fill-verb-forms` skill does this.
+2. For a new active verb, add its sentences to `docs/data/aspect-sentences.json`. `make sync` fails until it has them.
+3. With Anki open, run:
+
+   ```sh
+   make anki DRY=1   # pull the sheet, run the checks, preview both decks
+   make anki         # push the Greek and Greek Verbs decks
+   ```
+
+4. Commit `docs/data/verbs.json` and `exports/anki-verbs.json`, and push to update the site.
+
+`make push-words` and `make push-verbs` push one deck. The Anki tool's config and keys live in `~/.config/sync/` (see [anki/SETUP.md](anki/SETUP.md)).
 
 ## Adding a note
 
@@ -14,7 +31,7 @@ The site is an installable app that works offline. Open https://gataky.github.io
 
 ## Working locally
 
-Tool versions (Python, Node, uv) are pinned in `.tool-versions` for asdf, and Python packages in `pyproject.toml` and `uv.lock`. `.envrc` puts the tools and the `.venv` on your PATH when you `cd` here. Run `direnv allow` once (and again after editing `.envrc`), then:
+Tool versions (Python, Node, uv, and Go for `anki/`) are pinned in `.tool-versions` for asdf, and Python packages in `pyproject.toml` and `uv.lock`. `.envrc` puts the tools and the `.venv` on your PATH when you `cd` here. Run `direnv allow` once (and again after editing `.envrc`), then:
 
 ```sh
 make install   # uv sync: create .venv from uv.lock
@@ -25,7 +42,7 @@ Run `make` to see every target. To add a Python package, run `uv add <package>` 
 
 ## Updating the verb tables
 
-The verb tables page reads `docs/data/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns N–O), and **overrides** (P) only for irregular forms. Then:
+The verb tables page reads `docs/data/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns O–P), and **overrides** (Q) only for irregular forms. Then:
 
 ```sh
 make sync        # pull the verbs into verbs.json and run the checks

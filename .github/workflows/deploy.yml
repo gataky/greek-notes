@@ -3,6 +3,10 @@ name: Deploy site
 on:
   push:
     branches: [main]
+    # The Anki sync tool and Claude skills aren't part of the site
+    paths-ignore:
+      - 'anki/**'
+      - '.claude/**'
   workflow_dispatch:
 
 permissions:
