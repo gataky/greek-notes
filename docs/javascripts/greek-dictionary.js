@@ -225,6 +225,7 @@
 
   const CASES = ["nominative", "accusative", "genitive", "vocative"];  // display order: genitive after accusative
   const NUMBERS = ["singular", "plural"];
+  const GENDERS = ["masculine", "feminine", "neuter"];
   const GENDER_CODES = { M: "masculine", F: "feminine", N: "neuter" };
   // The definite article by gender, case and number. The vocative takes none.
   const ARTICLES = {
@@ -250,17 +251,21 @@
     return out;
   }
 
+  // Every form in a cells object (cases by numbers, or genders by cases by numbers), and the same
+  // object with fn applied to each form. null cells stay null.
+  const allForms = o => (Array.isArray(o) ? o : o ? Object.values(o).flatMap(allForms) : []);
+  const mapForms = (o, fn) => (Array.isArray(o) ? o.map(fn) : o ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, mapForms(v, fn)])) : o);
+
   // Puts "|" between stem and ending so endings can be highlighted like the verb grid's:
   // άνθρωπ|ος, ανθρώπ|ου, σπίτ|ι, σπιτ|ιού. The template names the nominative singular's ending
   // (el-nN-ι-ια-2b), which gives the stem; without one, the letters every form shares are the
   // stem. Accents don't count, and a form that doesn't start with the stem stays whole.
-  function markEndings(cells, template) {
+  function markEndings(cells, template, nominative) {
     const bare = f => Verbs.strip(f.toLowerCase());
-    const all = Object.values(cells).flatMap(c => Object.values(c)).flat().filter(f => f && !f.includes(" "));
+    const all = allForms(cells).filter(f => f && !f.includes(" "));
     if (all.length < 2) return cells;
     let stem = "";
     const ending = /^el-n[MFN]-([^-]+)-/.exec(template || "");
-    const nominative = cells.nominative.singular && cells.nominative.singular[0];
     if (ending && nominative && bare(nominative).endsWith(bare(ending[1]))) {
       stem = bare(nominative).slice(0, -ending[1].length);
     } else {
@@ -271,7 +276,18 @@
     }
     if (!stem) return cells;
     const mark = f => (f.includes(" ") || f.length <= stem.length || !bare(f).startsWith(stem) ? f : f.slice(0, stem.length) + "|" + f.slice(stem.length));
-    return Object.fromEntries(Object.entries(cells).map(([k, c]) => [k, Object.fromEntries(Object.entries(c).map(([num, forms]) => [num, forms && forms.map(mark)]))]));
+    return mapForms(cells, mark);
+  }
+
+  // The cell for one set of labels: its forms, most usual first, [] when the table says the form
+  // doesn't exist (a dash) and null when it has no rows there. Rare, archaic and dated rows only
+  // count when the cell has nothing else.
+  function cellOf(cellRows, ...wanted) {
+    const matching = cellRows.filter(r => wanted.every(t => r.tags.has(t)));
+    const usual = matching.filter(r => !USAGE.some(u => r.tags.has(u)));
+    const forms = [...new Set((usual.length ? usual : matching).flatMap(r => nounForms(r.form)))];
+    const real = forms.filter(f => f !== "-");
+    return real.length ? real : forms.length ? [] : null;
   }
 
   const escapeLike = w => w.replace(/[\\%_]/g, "\\$&");
@@ -532,28 +548,47 @@
         const code = /^el-n([MFN])-/.exec(template || "");
         const fromHead = /^(masculine|feminine|neuter)\b(?! or)/.exec(head || "");
         const gender = code ? GENDER_CODES[code[1]] : fromHead ? fromHead[1] : null;
-        const cells = {};
-        let any = false;
-        for (const c of CASES) {
-          cells[c] = {};
-          for (const n of NUMBERS) {
-            const matching = cellRows.filter(r => r.tags.has(c) && r.tags.has(n));
-            const usual = matching.filter(r => !USAGE.some(u => r.tags.has(u)));
-            const forms = [...new Set((usual.length ? usual : matching).flatMap(r => nounForms(r.form)))];
-            const real = forms.filter(f => f !== "-");
-            cells[c][n] = real.length ? real : forms.length ? [] : null;
-            if (cells[c][n] !== null) any = true;
-          }
+        const cells = Object.fromEntries(CASES.map(c => [c, Object.fromEntries(NUMBERS.map(n => [n, cellOf(cellRows, c, n)]))]));
+        if (CASES.some(c => NUMBERS.some(n => cells[c][n] !== null))) {
+          out.push({ gender, cells: markEndings(cells, template, cells.nominative.singular && cells.nominative.singular[0]) });
         }
-        if (any) out.push({ gender, cells: markEndings(cells, template) });
       }
       return out;
     }
 
-    return { meta, searchGreek, complete, searchEnglish, has, lookup, principalParts, declensions, rows };
+    // An adjective's or participle's declension tables, from its own entries:
+    //   [{ pos: "adj" or "participle", cells: { masculine: { nominative: { singular: ["καλ|ός"], plural: ["καλ|οί"] }, ... }, feminine: ..., neuter: ... } }]
+    // Cells are as in declensions(). Only the positive degree: comparative and superlative rows
+    // are skipped, whether they have tables of their own (ωραίος) or share the positive one
+    // (ελαφρύς). The endings are split at the letters every gender's forms share.
+    function adjectiveDeclensions(word) {
+      const found = rows(`SELECT t.id, e.pos_display, i.form, g.tags
+        FROM headword h JOIN entry e ON e.headword_id = h.id
+        JOIN inflection_table t ON t.entry_id = e.id
+        JOIN inflection i ON i.table_id = t.id JOIN inflection_tags g ON g.id = i.tags_id
+        WHERE h.word = ? AND (e.pos = 'adj' OR e.pos_display = 'participle') AND t.kind = 'declension' AND t.word IS NULL
+        ORDER BY e.ord, t.ord, i.ord`, [word]);
+      const tables = new Map();
+      for (const [id, pos, form, tags] of found) {
+        const set = new Set(tags.split(" "));
+        if (set.has("comparative") || set.has("superlative")) continue;
+        if (!tables.has(id)) tables.set(id, { pos, rows: [] });
+        tables.get(id).rows.push({ form, tags: set });
+      }
+      const out = [];
+      for (const { pos, rows: cellRows } of tables.values()) {
+        const cells = Object.fromEntries(GENDERS.map(g => [g, Object.fromEntries(CASES.map(c =>
+          [c, Object.fromEntries(NUMBERS.map(n => [n, cellOf(cellRows, g, c, n)]))]))]));
+        if (!allForms(cells).length) continue;
+        out.push({ pos, cells: markEndings(cells, null, cells.masculine.nominative.singular && cells.masculine.nominative.singular[0]) });
+      }
+      return out;
+    }
+
+    return { meta, searchGreek, complete, searchEnglish, has, lookup, principalParts, declensions, adjectiveDeclensions, rows };
   }
 
-  const api = { norm, phonetic, queryKeys, isGreek, normalizeTerm, stem, open, article, nounForms, CASES, NUMBERS, EXACT, NORM, PHONETIC };
+  const api = { norm, phonetic, queryKeys, isGreek, normalizeTerm, stem, open, article, nounForms, CASES, NUMBERS, GENDERS, EXACT, NORM, PHONETIC };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GreekDictionary = api;
 })(this);

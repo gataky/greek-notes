@@ -152,6 +152,38 @@ initSqlJs().then(SQL => {
   });
   check(`noun tables read cleanly (${nounTables} tables)`, nounProblems.slice(0, 5), []);
 
+  // ---------- Adjective declensions ----------
+
+  const adj = (word, g, c, i = 0) => D.NUMBERS.map(n => dict.adjectiveDeclensions(word)[i].cells[g][c][n]);
+  check("καλός masculine nominative", adj("καλός", "masculine", "nominative"), [["καλ|ός"], ["καλ|οί"]]);
+  check("καλός feminine genitive", adj("καλός", "feminine", "genitive"), [["καλ|ής"], ["καλ|ών"]]);
+  check("καλός masculine vocative", adj("καλός", "masculine", "vocative"), [["καλ|έ"], ["καλ|οί"]]);
+  check("καλός is an adjective and a noun: one table each", [dict.adjectiveDeclensions("καλός").length, dict.declensions("καλός").length], [1, 1]);
+  check("comparative and superlative tables are left out", dict.adjectiveDeclensions("ωραίος").length, 1);
+  check("comparative rows in the positive table are left out", adj("ελαφρύς", "neuter", "nominative"), [["ελαφρ|ύ"], ["ελαφρ|ιά"]]);
+  check("alternatives, most usual first", adj("ελαφρύς", "masculine", "genitive")[0], ["ελαφρ|ιού", "ελαφρ|ύ"]);
+  check("masculine and feminine alike", adj("συνεχής", "feminine", "nominative"), [["συνεχ|ής"], ["συνεχ|είς"]]);
+  check("a form that doesn't exist is []", adj("αβανιάρης", "feminine", "genitive")[1], []);
+  check("a participle has a table", dict.adjectiveDeclensions("κουρασμένος").map(t => t.pos), ["participle"]);
+  check("a verb has no adjective table", dict.adjectiveDeclensions("γράφω"), []);
+  check("a noun has no adjective table", dict.adjectiveDeclensions("δρόμος"), []);
+
+  // Every 5th adjective and participle: 24 cells, each a list of clean forms, nominative singular in all three genders.
+  const adjectives = dict.rows("SELECT DISTINCT h.word FROM headword h JOIN entry e ON e.headword_id = h.id WHERE e.pos = 'adj' OR e.pos_display = 'participle' ORDER BY h.word").map(r => r[0]);
+  const adjProblems = [];
+  let adjTables = 0;
+  adjectives.filter((_, i) => i % 5 === 0).forEach(word => {
+    for (const t of dict.adjectiveDeclensions(word)) {
+      adjTables++;
+      for (const g of D.GENDERS) for (const c of D.CASES) for (const n of D.NUMBERS) {
+        const cell = t.cells[g][c][n];
+        if (cell !== null && !(Array.isArray(cell) && cell.every(f => clean.test(f)))) adjProblems.push(`${word} ${g} ${c} ${n}: ${JSON.stringify(cell)}`);
+      }
+      if (D.GENDERS.some(g => !t.cells[g].nominative.singular?.length)) adjProblems.push(`${word}: no nominative singular in every gender`);
+    }
+  });
+  check(`adjective tables read cleanly (${adjTables} tables)`, adjProblems.slice(0, 5), []);
+
   console.log(`\n${checks - failures}/${checks} checks passed (${forms.length} stored forms)`);
   process.exit(failures ? 1 : 0);
 });

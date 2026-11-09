@@ -50,12 +50,14 @@ a.w:hover { text-decoration: underline; }
 .forms { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 8px; font-family: var(--display); font-size: 18px; }
 .links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; font-weight: 600; }
 
-/* A verb's conjugation (verb-grid.js) and a noun's declension, inside the entry */
+/* A verb's conjugation (verb-grid.js) and a noun's or adjective's declension, inside the entry */
 .conjugation, .declension { display: flex; flex-direction: column; gap: 14px; min-width: 0; border-top: 1px solid var(--line); padding-top: 16px; }
 .conjugation h3, .declension h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
 .card-tag { margin-left: 8px; letter-spacing: 0; text-transform: none; }
 .declension table { width: auto; }
 .declension td:not(.who) { padding-right: 32px; }
+.declension.adjective td:not(.who) { padding-right: 18px; }
+.declension.adjective td.gap { padding: 0; }
 
 footer { color: var(--muted); font-size: 13px; }
 footer a { color: inherit; }
@@ -264,7 +266,28 @@ function entryHTML(found) {
     : "";
   const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
   return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2></div>
-    ${entries}${conjugationHTML(found)}${declensionHTML(found)}${otherForms}<div class="links">${wiktionary}</div>`;
+    ${entries}${conjugationHTML(found)}${declensionHTML(found)}${adjectiveHTML(found)}${otherForms}<div class="links">${wiktionary}</div>`;
+}
+
+// An adjective's or participle's declension (adjectiveDeclensions() in greek-dictionary.js): the
+// cases down, the genders across, singular then plural. Like the verb grid, wide screens get one
+// table and narrow ones a table per number. The column headings give the gender, so no articles.
+function adjectiveHTML(found) {
+  const { CASES, NUMBERS, GENDERS } = GreekDictionary;
+  return dict.adjectiveDeclensions(found.word).map(({ pos, cells }) => {
+    const numbers = NUMBERS.filter(n => GENDERS.some(g => CASES.some(c => cells[g][c][n] !== null)));
+    const genders = (c, n) => GENDERS.map(g => `<td>${VerbGrid.cellHTML(cells[g][c][n] || [])}</td>`).join("");
+    const subs = GENDERS.map(g => `<th class="sub">${g}</th>`).join("");
+    const gap = (i, tag) => (i ? `<${tag} class="gap"></${tag}>` : "");
+    const table = nums => `<div class="scroll"><table lang="el"><thead>
+      <tr><th></th>${nums.map((n, i) => `${gap(i, "th")}<th class="group" colspan="3">${n}</th>`).join("")}</tr>
+      <tr><th></th>${nums.map((n, i) => gap(i, "th") + subs).join("")}</tr></thead>
+      <tbody>${CASES.map(c => `<tr><td class="who">${c}</td>${nums.map((n, i) => gap(i, "td") + genders(c, n)).join("")}</tr>`).join("")}</tbody></table></div>`;
+    const tag = `<span class="tag card-tag">${pos === "participle" ? "participle" : "adjective"}</span>`;
+    return `<section class="declension adjective"><h3>Declension${tag}</h3>
+      <div class="wide">${table(numbers)}</div>
+      <div class="stacked">${numbers.map(n => table([n])).join("")}</div></section>`;
+  }).join("");
 }
 
 // A noun's declension tables, straight from the dictionary (declensions() in greek-dictionary.js),
