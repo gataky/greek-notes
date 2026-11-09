@@ -72,7 +72,7 @@ function render(verbs) {
     const mine = verbs.filter(v => v.class === p.cls);
     const yours = mine.length
       ? `<p class="yours">Your verbs (${mine.length}): ${mine.map(v =>
-          `<a href="verb-tables/#${encodeURIComponent(v.greek)}" target="_top" lang="el" title="${esc(v.english || "")}">${esc(v.greek)}</a>`).join(`<span class="sep">&nbsp;·</span> `)}</p>`
+          `<a href="../tools/verb-tables/#${encodeURIComponent(v.greek)}" target="_top" lang="el" title="${esc(v.english || "")}">${esc(v.greek)}</a>`).join(`<span class="sep">&nbsp;·</span> `)}</p>`
       : `<p class="yours">None of your verbs are in this group yet.</p>`;
     return `<section class="card" id="${p.cls}">${cardHTML({ ...p.verb, class: p.cls }, { heading })}${yours}</section>`;
   }).join("");

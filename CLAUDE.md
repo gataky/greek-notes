@@ -36,7 +36,7 @@ make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
 make check     # all tests, then strict build: what CI runs before deploying
-make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js and test_dictionary.js
+make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js, test_aspect_forks.js and test_dictionary.js
 make dump      # print every verb's conjugations for review
 make sync      # pull verbs from the Google Sheet into docs/data/verbs.json, then test
 make fetch-dictionary  # download the pinned dictionary into docs/data/ (build, serve and test do this)
@@ -103,6 +103,15 @@ Data flows from the sheet and the dictionary to JSON to the browser. There is no
    - `apps/conjugation-patterns.html` and the drill still use the engine alone, so they can differ from the verb tables.
 
 When changing the engine, run `make test` and also diff all generated forms against the previous commit's engine. Most verbs aren't in `EXPECTED`, so the checks alone can miss regressions.
+
+## Aspect forks (`docs/tools/aspect-forks.md`, `docs/apps/aspect-forks.html`)
+
+A verb's present forking into its two stems, imperfective and perfective, each with its past and future, with the augment and the changed letters highlighted. Active verbs only. **`aspect-fork.js`** (browser and Node) draws it from a conjugation, normally `verbToShow()`'s, so it shows the same forms as the verb tables. It generates no forms:
+- `analyse(conjugation, verb)` compares the 1st singular present, past continuous, aorist and dependent, ignoring accents and diaeresis, and returns them in a bracket notation: `[έ]` augment, `{ψ}` changed or added in the perfective, `(ν)` lost in the perfective, `<γ>` added in the imperfective. `forkHTML()` turns it into spans.
+- **Groups** come from rules on the end of the present and dependent stems (labials, velars, dentals, ν → σ, -ησ- ...), in `GROUPS`. The word list's class decides b1/b2, else the 2nd singular. A verb that fits no rule, whose pasts don't come from its stems (πήγαινα), or that has ή-/εί- on a consonant (ήθελα, είδα) is `irregular` and gets a one-line note, no fork. Passives return null.
+- Notes on single verbs are generated (internal augment, an extra letter change, -ηκ-). There are no hand-written ones; don't add any.
+- Always shown, never folded: under the grid on the verb tables page and in dictionary entries, and on the aspect forks page, which groups the word list's active verbs. `tools/aspect-forks/#κλείνω` opens a verb, `#labials` a group.
+- `tests/test_aspect_forks.js` checks hand-checked groups, markup and notes, and that every dictionary verb's markup spells its forms. `--groups` prints the counts (about 1,880 active verbs, 95 irregular). Run it after changing the rules or `verb-forms.json`; `make verb-forms` and `make sync` do.
 
 ## Active or passive drill (`docs/drills/`, `docs/apps/passive-verbs.html`)
 

@@ -35,6 +35,7 @@ jobs:
       - run: node tests/test_verb_forms.js
       - run: node tests/test_voice_sentences.js
       - run: node tests/test_aspect_sentences.js
+      - run: node tests/test_aspect_forks.js
       - run: node tests/test_dictionary.js
       - run: uv run mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3

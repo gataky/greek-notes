@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
 <link rel="stylesheet" href="../stylesheets/verb-grid.css">
+<link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <style>
 /* Shown on its own and from the dictionary. The notes page hides the header. */
 .back { align-self: flex-start; margin-bottom: 10px; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: none; }
@@ -62,6 +63,8 @@
 
   <section class="card" id="card" aria-live="polite"></section>
 
+  <section class="card" id="fork" aria-live="polite" hidden></section>
+
   <nav class="list" id="list" aria-label="All verbs"></nav>
 
   <p class="credit">
@@ -74,6 +77,7 @@
 <script src="../javascripts/greek-verbs.js"></script>
 <script src="../javascripts/verb-grid.js"></script>
 <script src="../javascripts/verb-forms.js"></script>
+<script src="../javascripts/aspect-fork.js"></script>
 <script>
 const { strip } = GreekVerbs;
 const { verbToShow } = VerbForms;
@@ -86,7 +90,21 @@ const shownFor = (greek, guess = () => null) => verbToShow(greek, { sheet: verbs
 const render = verb => {
   const { verb: shown, conjugation } = shownFor(verb.greek, () => verb.guessed && verb);
   $("card").innerHTML = cardHTML(shown, { conjugation });
+  renderFork(shown, conjugation);
 };
+
+// The verb's aspect fork under its grid (aspect-fork.js), linked to its group on the aspect forks
+// page. Irregular verbs get a line saying they have none; passive verbs aren't covered yet.
+function renderFork(verb, conjugation) {
+  const fork = AspectFork.analyse(conjugation, verb);
+  $("fork").hidden = !fork;
+  if (!fork) return;
+  const inList = verbs.some(v => v.greek === verb.greek && v.voice === "active");
+  const href = `../tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
+  const drawn = fork.group !== "irregular" && fork.group !== "missing";
+  $("fork").innerHTML = `<h3 class="fork-title">Aspect fork<a href="${href}" target="_top">All the groups →</a></h3>
+    ${AspectFork.forkHTML(fork)}${drawn ? AspectFork.LEGEND : ""}`;
+}
 
 
 // ---------- Verb picker ----------

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aspect Forks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/verb-grid.css">
+<link rel="stylesheet" href="../stylesheets/aspect-fork.css">
+<style>
+/* How the stems make each tense */
+.recipe { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.recipe dt { font-weight: 600; }
+.recipe dd { margin: 0; }
+.recipe [lang="el"] { font-family: var(--display); font-size: 17px; }
+.intro p { margin: 0; max-width: 65ch; }
+
+/* Group index and search */
+.index { display: flex; flex-wrap: wrap; gap: 8px; }
+.index a { font-size: 14px; color: var(--ink); text-decoration: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 11px; }
+.index a:hover { border-color: var(--accent); background: var(--accent-soft); }
+.index a b { font-weight: 600; color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
+.find { display: flex; gap: 10px; align-items: center; }
+.find label { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.find input { flex: 1; min-width: 0; font: 400 18px var(--display); padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+.find input:focus { border-color: var(--accent); outline: none; }
+#find-msg { margin: 0; min-height: 1.4em; font-size: 14px; color: var(--muted); }
+#find-msg a { color: var(--accent); }
+.card h2.small { font-family: var(--body); font-size: 20px; font-weight: 600; line-height: 1.2; }
+
+/* One card per group */
+.group { scroll-margin-top: 16px; }
+.ghead { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 400 18px var(--display); cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 4px 10px; display: inline-flex; align-items: baseline; gap: 6px; text-decoration: none; }
+.chip sup { font: 400 11px var(--body); color: var(--muted); }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--surface); }
+.chip[aria-pressed="true"] sup { color: var(--surface); opacity: .75; }
+.chip:focus-visible, .index a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.group details summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
+.group details .scroll { margin-top: 10px; }
+.group th.i { color: var(--accent); }
+.group th.p { color: var(--warn); }
+.group td .pre { color: var(--muted); }
+
+.credit { margin: 0; color: var(--muted); font-size: 13px; }
+.credit a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Verbs</div>
+    <h1>Aspect Forks</h1>
+    <p class="sub">How each verb's present forks into its two stems, and how each stem makes a past and a future.</p>
+  </header>
+
+  <section class="card intro">
+    <p>Every verb has two stems. The <b style="color:var(--accent)">imperfective stem</b> is the present stem and shows an action as ongoing or repeated. The <b style="color:var(--warn)">perfective stem</b> shows it as one complete event. Verbs are grouped by what turns one stem into the other.</p>
+    <dl class="recipe">
+      <dt>Past</dt><dd>(augment) + stem + <span lang="el">-α</span></dd>
+      <dt>Future</dt><dd><span lang="el">θα</span> + stem + <span lang="el">-ω</span></dd>
+      <dt>Augment</dt><dd>The past puts the stress on the third syllable from the end. If a verb is too short for that, it adds <span lang="el" class="aug">έ-</span> (<span lang="el"><span class="aug">έ</span>γραψα</span>). Longer verbs just move the stress (<span lang="el">διάβασα</span>).</dd>
+    </dl>
+    <div id="legend"></div>
+  </section>
+
+  <nav class="card" aria-label="Groups">
+    <h2 class="small">Groups</h2>
+    <div class="index" id="index"></div>
+    <div class="find">
+      <label for="find">Find a verb</label>
+      <input id="find" type="search" lang="el" list="verblist" placeholder="π.χ. κλείνω" autocomplete="off" spellcheck="false">
+      <datalist id="verblist"></datalist>
+    </div>
+    <p id="find-msg" aria-live="polite"></p>
+  </nav>
+
+  <div class="wrap" id="groups"></div>
+
+  <p class="credit">
+    The active verbs from your word list, with the forms the <a href="../tools/verb-tables/" target="_top">verb tables</a> show (the dictionary's, from
+    <a href="https://en.wiktionary.org/" target="_blank" rel="noopener">English Wiktionary</a> via <a href="https://kaikki.org/" target="_blank" rel="noopener">kaikki.org</a>,
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>). The groups and highlights are worked out from those forms.
+    Superscripts are the word list's classes. Irregular verbs don't get a fork. Passive verbs are left out until you get to the passive past and future.
+  </p>
+</div>
+
+<script src="../javascripts/greek-verbs.js"></script>
+<script src="../javascripts/verb-forms.js"></script>
+<script src="../javascripts/aspect-fork.js"></script>
+<script>
+const { GROUPS, GROUP, analyse, forkHTML, markHTML, LEGEND } = AspectFork;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const fold = s => GreekVerbs.strip(s.toLowerCase().normalize("NFC")).replace(/ς/g, "σ");
+const tablesHref = greek => `../tools/verb-tables/#${encodeURIComponent(greek)}`;
+
+$("legend").innerHTML = LEGEND;
+
+let sheet = [], forms = {};
+const lookup = new Map();  // folded verb -> { greek, group, select }
+
+function render() {
+  // Each active verb in the word list, with its fork. A verb whose forms are missing has no group.
+  const byGroup = new Map(GROUPS.map(g => [g.id, []]));
+  for (const v of sheet.filter(v => v.voice === "active")) {
+    const shown = VerbForms.verbToShow(v.greek, { sheet, forms });
+    const fork = shown && analyse(shown.conjugation, shown.verb);
+    if (fork && byGroup.has(fork.group)) byGroup.get(fork.group).push({ verb: v, fork });
+  }
+  const groups = GROUPS.filter(g => byGroup.get(g.id).length);
+
+  $("index").innerHTML = groups.map(g => `<a href="#${g.id}">${esc(g.name)}<b>${byGroup.get(g.id).length}</b></a>`).join("");
+  $("groups").innerHTML = groups.map(g => {
+    const list = byGroup.get(g.id).sort((a, b) => fold(a.verb.greek).localeCompare(fold(b.verb.greek), "el"));
+    const irregular = g.id === "irregular";
+    const chips = list.map(({ verb }, i) => {
+      const label = `${esc(verb.greek)}<sup>${esc(verb.class || "")}</sup>`;
+      return irregular
+        ? `<a class="chip" lang="el" href="${tablesHref(verb.greek)}" target="_top" title="${esc(verb.english || "")}: open in the verb tables">${label}</a>`
+        : `<button class="chip" type="button" lang="el" data-i="${i}" aria-pressed="false" title="${esc(verb.english || "")}">${label}</button>`;
+    }).join("");
+    const rows = list.map(({ fork: f }) => `<tr>${[f.present, f.imperfect, f.aorist || "—", f.dependent ? "θα " + f.dependent : "—"]
+      .map(s => `<td>${markHTML(s)}</td>`).join("")}</tr>`).join("");
+    return `<section class="card group" id="${g.id}">
+      <div class="ghead"><h2 class="small">${esc(g.name)}</h2><span class="fork-rule" lang="el">${esc(g.rule)}</span><p class="fork-gnote">${esc(g.note)}</p></div>
+      ${irregular ? "" : `<div class="slot" aria-live="polite"></div>`}
+      <div class="chips" role="group" aria-label="Verbs in ${esc(g.name)}">${chips}</div>
+      <details><summary>All ${list.length} as a table</summary><div class="scroll"><table lang="el">
+        <thead><tr><th>present</th><th class="i">past continuous</th><th class="p">aorist</th><th class="p">future simple</th></tr></thead>
+        <tbody>${rows}</tbody></table></div></details>
+    </section>`;
+  }).join("");
+
+  // Picking a verb draws its fork in its group's card.
+  for (const g of groups) {
+    const card = $(g.id), list = byGroup.get(g.id);
+    const select = i => {
+      if (g.id === "irregular") return;
+      card.querySelectorAll(".chip").forEach((c, k) => c.setAttribute("aria-pressed", String(k === i)));
+      card.querySelector(".slot").innerHTML = forkHTML(list[i].fork, { group: false });
+    };
+    card.querySelectorAll("button.chip").forEach(c => c.addEventListener("click", () => select(+c.dataset.i)));
+    select(0);
+    list.forEach(({ verb }, i) => lookup.set(fold(verb.greek), { greek: verb.greek, group: g, select: () => select(i), card, i }));
+  }
+  $("verblist").innerHTML = [...lookup.values()].map(v => `<option value="${esc(v.greek)}">`).join("");
+}
+
+// The page sits in a frame sized to its content, so scroll the parent page, not the frame.
+const scrollTo = el => el.scrollIntoView({ behavior: "smooth", block: "start" });
+$("index").addEventListener("click", e => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  scrollTo($(a.getAttribute("href").slice(1)));
+});
+
+function find(query, { quiet = false } = {}) {
+  const q = fold(query.trim());
+  if (!q) { $("find-msg").textContent = ""; return false; }
+  const hit = lookup.get(q) || [...lookup.entries()].find(([k]) => k.startsWith(q))?.[1];
+  if (hit) {
+    hit.select();
+    $("find-msg").innerHTML = `<span lang="el">${esc(hit.greek)}</span> is in “${esc(hit.group.name)}”.`;
+    scrollTo(hit.card);
+    hit.card.querySelectorAll(".chip")[hit.i]?.focus({ preventScroll: true });
+    return true;
+  }
+  if (quiet) return false;
+  // Not in the word list: say which group the dictionary's forms put it in.
+  const greek = query.trim();
+  const shown = forms[greek] && VerbForms.verbToShow(greek, { sheet, forms });
+  const fork = shown && analyse(shown.conjugation, shown.verb);
+  $("find-msg").innerHTML = fork && GROUP[fork.group]
+    ? `<span lang="el">${esc(greek)}</span> isn't in your word list. It's in “${esc(GROUP[fork.group].name)}”: <a href="${tablesHref(greek)}" target="_top">see its fork in the verb tables</a>.`
+    : `No verb starting with “${esc(greek)}” in your word list.`;
+  return false;
+}
+$("find").addEventListener("change", e => find(e.target.value));
+$("find").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); find(e.target.value); } });
+
+// #κλείνω opens a verb, #labials a group (links from the verb tables and the dictionary).
+function fromHash() {
+  const key = decodeURIComponent(location.hash.slice(1));
+  if (!key) return;
+  // Wait a moment for the parent page to size the frame before scrolling it.
+  setTimeout(() => { if (!find(key, { quiet: true }) && $(key)?.classList.contains("group")) scrollTo($(key)); }, 300);
+}
+
+Promise.all([
+  fetch("../data/verbs.json").then(r => r.json()),
+  fetch("../data/verb-forms.json").then(r => r.json()).catch(() => ({})),  // without it, the engine's forms
+])
+  .then(([verbs, dictionaryForms]) => {
+    sheet = verbs;
+    forms = dictionaryForms;
+    render();
+    fromHash();
+  })
+  .catch(() => {
+    $("groups").innerHTML = `<p class="note">Couldn't load verbs.json. Open this page through the site (make serve), not straight from disk.</p>`;
+  });
+</script>
+</body>
+</html>

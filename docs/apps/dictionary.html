@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
 <link rel="stylesheet" href="../stylesheets/verb-grid.css">
+<link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <style>
 /* Search box */
 #search { width: 100%; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
@@ -88,6 +89,7 @@ footer a { color: inherit; }
 <script src="../javascripts/greek-dictionary.js"></script>
 <script src="../javascripts/verb-grid.js"></script>
 <script src="../javascripts/verb-forms.js"></script>
+<script src="../javascripts/aspect-fork.js"></script>
 <script>
 const { isGreek, PHONETIC } = GreekDictionary;
 const $ = id => document.getElementById(id);
@@ -296,7 +298,19 @@ function conjugationHTML(found) {
   const pattern = VerbGrid.PATTERN_ENDINGS[conjugation.pattern];
   const tag = pattern ? `<span class="tag card-tag">${esc(conjugation.pattern)} · ${esc(pattern)}</span>` : "";
   const heading = `<h3>Conjugation${listed && listed !== found.word ? ` <span lang="el">· ${esc(listed)}</span>` : ""}${tag}</h3>`;
-  return `<section class="conjugation">${VerbGrid.cardHTML(verb, { heading, conjugation })}</section>`;
+  return `<section class="conjugation">${VerbGrid.cardHTML(verb, { heading, conjugation })}${forkHTML(verb, conjugation)}</section>`;
+}
+
+// The verb's aspect fork (aspect-fork.js) under the grid, as on the verb tables page. Irregular
+// verbs get a line saying they have none; passive verbs aren't covered yet.
+function forkHTML(verb, conjugation) {
+  const fork = AspectFork.analyse(conjugation, verb);
+  if (!fork) return "";
+  const inList = sheet.some(v => v.greek === verb.greek && v.voice === "active");
+  const href = `../tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
+  const drawn = fork.group !== "irregular" && fork.group !== "missing";
+  return `<div class="fork-block"><h3 class="fork-title">Aspect fork<a href="${href}" target="_top">All the groups →</a></h3>
+    ${AspectFork.forkHTML(fork)}${drawn ? AspectFork.LEGEND : ""}</div>`;
 }
 
 function showHash() {

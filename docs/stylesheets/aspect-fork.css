@@ -1,0 +1,76 @@
+/* Aspect forks (javascripts/aspect-fork.js): a present verb forking into its two stems, then into
+   past and future. Used with verb-grid.css, whose tokens it shares: the imperfective is the
+   accent colour, the perfective the warm one. */
+
+:root { --aug: #7646bd; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --aug: #b995f3; }
+}
+:root[data-theme="dark"] { --aug: #b995f3; }
+
+/* Markup inside forms */
+.aug { color: var(--aug); font-weight: 600; }
+.chg { color: var(--warn); font-weight: 600; background: var(--warn-soft); border-radius: 3px; padding: 0 1px; }
+.ins { color: var(--accent); font-weight: 600; background: var(--accent-soft); border-radius: 3px; padding: 0 1px; }
+.drop { color: var(--accent); text-decoration: underline dotted; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+
+/* Group heading, when the fork shows one */
+.fork-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.fork-group { font-weight: 600; font-size: 15px; }
+.fork-group a { color: inherit; }
+.fork-rule { font-family: var(--display); font-size: 17px; padding: 2px 10px; border-radius: 6px; background: var(--warn-soft); border: 1px solid var(--line); white-space: pre-wrap; }
+.fork-gnote { margin: 0; font-size: 14px; color: var(--muted); }
+.fork-vnote { margin: 0; font-size: 14px; color: var(--muted); }
+.fork-none { margin: 0; font-size: 14px; color: var(--muted); }
+.fork-none [lang="el"] { font-family: var(--display); font-size: 17px; color: var(--ink); }
+
+/* The tree */
+.fork { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.fork > .fork-vnote:first-of-type { margin-top: 12px; }
+.fork .node { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); text-align: center; min-width: 0; }
+.fork .node.present { align-self: center; min-width: 46%; border-width: 2px; border-color: var(--ink); }
+.fork .node.present .form { font-size: 24px; }
+.fork .lbl { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-family: var(--body); }
+.fork .form { font-family: var(--display); font-size: 19px; line-height: 1.35; overflow-wrap: anywhere; }
+.fork .form .pre { color: var(--muted); }
+.fork .split { display: block; width: 100%; height: 30px; }
+.fork .split path { fill: none; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.fork .split .i { stroke: var(--accent); }
+.fork .split .p { stroke: var(--warn); }
+.fork .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fork .col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.fork .stem { border-width: 2px; }
+.fork .col.i .stem { border-color: var(--accent); background: var(--accent-soft); }
+.fork .col.p .stem { border-color: var(--warn); background: var(--warn-soft); }
+.fork .col.i .stem .lbl { color: var(--accent); }
+.fork .col.p .stem .lbl { color: var(--warn); }
+.fork .leaves { display: flex; flex-direction: column; gap: 10px; margin-left: 12px; padding-left: 12px; border-left: 2.5px solid; }
+.fork .col.i .leaves { border-color: var(--accent); }
+.fork .col.p .leaves { border-color: var(--warn); }
+.fork .leaf { position: relative; text-align: left; }
+.fork .leaf::before { content: ""; position: absolute; left: -14px; top: 50%; width: 13px; border-top: 2.5px solid; }
+.fork .col.i .leaf::before { border-color: var(--accent); }
+.fork .col.p .leaf::before { border-color: var(--warn); }
+.fork .leaf.none .form { color: var(--muted); }
+
+/* Colour key */
+.fork-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; }
+.fork-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.fork-legend [lang="el"] { font-family: var(--display); font-size: 17px; }
+.fork-legend .sw { display: inline-block; width: 22px; height: 4px; border-radius: 2px; }
+.fork-legend .sw.i { background: var(--accent); }
+.fork-legend .sw.p { background: var(--warn); }
+
+@media (max-width: 420px) {
+  .fork .cols { gap: 8px; }
+  .fork .leaves { margin-left: 6px; padding-left: 9px; }
+  .fork .leaf::before { left: -11px; width: 10px; }
+  .fork .form { font-size: 17px; }
+  .fork .node { padding: 7px 8px; }
+}
+
+/* The fork's own card on the verb tables page, and its block under the grid in a dictionary entry */
+.fork-title { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.fork-title a { color: var(--accent); letter-spacing: 0; text-transform: none; font-weight: 600; margin-left: 8px; text-decoration: none; }
+.fork-title a:hover { text-decoration: underline; }
+.fork-block { display: flex; flex-direction: column; gap: 14px; min-width: 0; border-top: 1px solid var(--line); padding-top: 16px; }

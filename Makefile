@@ -29,6 +29,7 @@ sync: ## Pull verbs from the Google Sheet into verbs.json, then run the checks
 	@$(NODE) tests/test_verbs.js
 	@$(NODE) tests/test_voice_sentences.js
 	@$(NODE) tests/test_aspect_sentences.js
+	@$(NODE) tests/test_aspect_forks.js
 
 fetch-dictionary: ## Download the pinned dictionary into docs/data/ if it isn't there
 	@if [ ! -f $(DICT_GZ) ]; then \
@@ -60,12 +61,14 @@ verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (D
 	@git diff --stat -- docs/data/verb-forms.json
 	@$(NODE) tests/test_verb_forms.js
 	@$(NODE) tests/test_aspect_sentences.js
+	@$(NODE) tests/test_aspect_forks.js
 
-test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills' sentences and the dictionary lookup
+test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills' sentences, the aspect forks and the dictionary lookup
 	$(NODE) tests/test_verbs.js
 	$(NODE) tests/test_verb_forms.js
 	$(NODE) tests/test_voice_sentences.js
 	$(NODE) tests/test_aspect_sentences.js
+	$(NODE) tests/test_aspect_forks.js
 	$(NODE) tests/test_dictionary.js
 
 dump: ## Print every verb's conjugations, for reviewing
