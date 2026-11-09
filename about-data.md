@@ -8,6 +8,7 @@ Lemma, a Rust build, merges all of that into one SQLite file: 31K headwords, 358
 
 The site ships that file gzipped (23 MB, as a GitHub release asset) and queries it in the browser with sql.js. There's no server, and it works offline. Noun and adjective tables are read straight from the database. Verb tables come from a pre-built verb-forms.json, which the conjugation engine and your vocabulary sheet fill in where the dictionary has gaps.
 
+```
                          BUILD (../lemma, Rust · once a year or so)
  ┌───────────────────────────────┐
  │ English Wiktionary            │
@@ -43,3 +44,4 @@ The site ships that file gzipped (23 MB, as a GitHub release asset) and queries 
      ├ noun/adj tables  read straight from the inflection tables
      └ verb tables    verb-forms.json (pre-built from the db)
                        + your sheet's verbs.json + the conjugation engine for gaps
+```
