@@ -16,6 +16,11 @@ body:has(.dict-home) .md-main__inner { margin: 0; }
 body:has(.dict-home) .md-content__inner { margin: 0; padding: 0; }
 body:has(.dict-home) .md-content__inner::before { display: none; }
 body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 0; }
+/* Below about 880px the dictionary's text starts under the menu button (its column is 760px
+   plus 16px gutters), so the frame starts below the buttons instead */
+@media (max-width: 880px) {
+  body:has(.dict-home) .md-typeset iframe.drill-frame { margin-top: calc(32px + env(safe-area-inset-top, 0px)); }
+}
 
 .dict-home__button,
 .dict-home__close {
@@ -30,14 +35,15 @@ body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 
 .dict-home__button svg,
 .dict-home__close svg { width: 24px; height: 24px; fill: currentColor; }
 
-.dict-home__buttons {
+/* The menu button in the top left, where the menu slides in, and the theme button in the top right */
+.dict-home__open,
+.dict-home__theme {
   position: absolute;
   z-index: 1;
   top: max(10px, env(safe-area-inset-top, 0px));
-  right: max(10px, env(safe-area-inset-right, 0px));
-  display: flex;
-  gap: 2px;
 }
+.dict-home__open { left: max(10px, env(safe-area-inset-left, 0px)); }
+.dict-home__theme { right: max(10px, env(safe-area-inset-right, 0px)); }
 
 /* The theme button shows where it goes: the moon in light mode, the sun in dark */
 .dict-home__theme span { display: flex; }
