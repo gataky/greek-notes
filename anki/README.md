@@ -1,0 +1,568 @@
+# Anki-Sheets Sync
+
+A sync tool that pushes vocabulary flashcards from Google Sheets to Anki.
+
+**🚀 New to this tool? Start with [SETUP.md](SETUP.md) for a 5-minute quick start guide!**
+
+## Features
+
+- **One-way Sync**: The Google Sheet is the source of truth; `push` creates and updates cards in Anki
+- **Checksum-based Change Detection**: Only syncs cards that have actually changed
+- **Dry-run Mode**: Preview changes before applying them
+- **Greek Audio Generation**: Automatic text-to-speech audio for Greek words using ElevenLabs or Google Cloud TTS
+
+## Verb deck
+
+`./sync verbs` pushes a separate **Greek Verbs** deck for learning verb forms and aspect. It has two note types:
+
+- **Greek verb**, one note per active verb in the sheet:
+  - **Forms** card: the present and its meaning on the front, with the verb's group behind a tap-to-reveal hint. The back shows the past continuous, aorist and future simple. The augment and changed letters are coloured as on the greek-notes aspect forks page, and the back also has the group's rule and an example sentence.
+  - **Recognize** card (aorist → present): only for irregular verbs, strong aorists (έμαθα, βγήκα) and verbs with no perfective (είχα).
+- **Greek aspect**, a cloze note per past-tense sentence from the greek-notes tense and aspect drill: `Χθες [διαβάζω] ένα βιβλίο.` → `διάβασα`. These go in the `Greek Verbs::Aspect` subdeck, so its new-card limit can be set on its own.
+
+The forms, groups and sentences come from greek-notes' `exports/anki-verbs.json`, which runs the same code as the site's verb tables. That code reads the lemma dictionary. After adding verbs to the sheet:
+
+```sh
+cd ~/Documents/greek-notes && make sync   # also rebuilds exports/anki-verbs.json
+cd ~/Documents/anki-sync && ./sync verbs --dry-run && ./sync verbs
+```
+
+```yaml
+verbs:
+  cards_path: "~/Documents/greek-notes/exports/anki-verbs.json"
+  # deck: "Greek Verbs"
+  # cloze_deck: "Greek Verbs::Aspect"
+```
+
+- Notes are matched in Anki by the present (or verb + sentence), so nothing is written to the sheet. The sheet decides which verbs are in (`part of speech` = verb, `voice` = active) and gives their meaning.
+- A note is updated only when its content changed. Your own tags (marked, leech) are kept.
+- Notes that are no longer in the export are listed, never deleted.
+- New notes are created regular groups first and irregular last, which becomes Anki's new-card order.
+- Each note is tagged `aspect::<group>` (`aspect::dentals`). A filtered deck on `tag:aspect::dentals` drills one group.
+- Audio uses the configured TTS provider. The present reuses the vocabulary card's file. The forms and sentences get files named `verbs-<hash>-<provider>.mp3`.
+
+## Audio Generation (Text-to-Speech)
+
+The tool automatically generates high-quality audio pronunciation for Greek words.
+
+### Supported Providers
+
+- **ElevenLabs** (recommended, default) - High-quality neural voices with natural pronunciation
+- **Google Cloud TTS** - WaveNet and Standard voices
+
+### ElevenLabs Setup (Recommended)
+
+ElevenLabs provides the highest quality text-to-speech with natural-sounding voices. It's easier to set up than Google Cloud TTS and produces superior audio quality for Greek pronunciation.
+
+#### Requirements
+
+1. **ElevenLabs Account**: Sign up at [elevenlabs.io](https://elevenlabs.io)
+2. **API Key**: Get your API key from your profile settings
+3. **Voice ID**: Choose a voice from the [Voice Library](https://elevenlabs.io/voice-library)
+
+#### Setup Steps
+
+1. **Create an ElevenLabs account**:
+   - Go to [elevenlabs.io](https://elevenlabs.io) and sign up
+   - Free tier includes 10,000 characters/month
+
+2. **Get your API key**:
+   - Go to your profile settings
+   - Copy your API key
+   - Save it securely (you'll add it to the config)
+
+3. **Choose a voice**:
+   - Browse the [Voice Library](https://elevenlabs.io/voice-library)
+   - Click on a voice to hear samples
+   - Copy the Voice ID (found in the voice details or URL)
+   - Recommended voices for Greek (see below)
+
+4. **Add to `~/.config/sync/config.yaml`**:
+   ```yaml
+   text_to_speech:
+     provider: "elevenlabs"          # Use ElevenLabs
+     enabled: true
+
+     # ElevenLabs settings
+     elevenlabs_api_key: "your-api-key-here"
+     elevenlabs_voice_id: "21m00Tcm4TlvDq8ikWAM"  # Rachel voice (recommended)
+
+     # Optional voice settings
+     audio_encoding: "MP3"
+     request_delay_ms: 100           # Delay between requests
+   ```
+
+#### Optional Voice Settings
+
+You can fine-tune the voice output with these optional parameters:
+
+```yaml
+text_to_speech:
+  provider: "elevenlabs"
+  enabled: true
+  elevenlabs_api_key: "your-api-key-here"
+  elevenlabs_voice_id: "21m00Tcm4TlvDq8ikWAM"
+
+  # Optional: Fine-tune voice characteristics
+  stability: 0.5           # 0.0-1.0, lower = more variable/expressive
+  similarity_boost: 0.75   # 0.0-1.0, higher = closer to original voice
+  style: 0.0              # 0.0-1.0, exaggeration of speaking style
+  use_speaker_boost: true  # Enhance speaker similarity
+
+  audio_encoding: "MP3"
+  request_delay_ms: 100
+```
+
+#### Recommended Voices
+
+While ElevenLabs can handle Greek text with most voices, these are recommended for clear pronunciation:
+
+- **Rachel** (`21m00Tcm4TlvDq8ikWAM`) - Clear, neutral female voice
+- **Adam** (`pNInz6obpgDQGcFmaJgB`) - Clear male voice
+- **Aria** (`9BWtsMINqrJLrRacOk9x`) - Natural female voice
+
+Browse the full [Voice Library](https://elevenlabs.io/voice-library) to find your preferred voice.
+
+### Google Cloud TTS Setup
+
+Google Cloud Text-to-Speech is an alternative provider with good quality WaveNet voices.
+
+#### Requirements
+
+1. **Google Cloud Project** with Text-to-Speech API enabled
+2. **Service Account** with `roles/cloudtts.user` role
+3. Same service account JSON key file used for Sheets access
+
+#### Setup
+
+1. Enable the Cloud Text-to-Speech API in your Google Cloud project:
+   ```bash
+   # In Google Cloud Console
+   https://console.cloud.google.com/apis/library/texttospeech.googleapis.com
+   ```
+
+2. Add the `Cloud Text-to-Speech User` role to your service account:
+   - Go to IAM & Admin → IAM
+   - Find your service account
+   - Click Edit → Add Another Role
+   - Select `Cloud Text-to-Speech User`
+
+3. Add TTS configuration to `~/.config/sync/config.yaml`:
+   ```yaml
+   text_to_speech:
+     provider: "google"              # Use Google Cloud TTS
+     enabled: true
+     voice_name: "el-GR-Wavenet-A"  # Greek voice
+     audio_encoding: "MP3"
+     speaking_rate: 1.0              # 0.25 to 4.0
+     pitch: 0.0                      # -20.0 to 20.0
+     volume_gain_db: 0.0             # -96.0 to 16.0
+     request_delay_ms: 100           # Delay between TTS requests
+   ```
+
+#### Supported Voices
+
+Google Cloud TTS supports multiple Greek voices:
+- `el-GR-Wavenet-A` (recommended) - High quality WaveNet voice
+- `el-GR-Standard-A` - Standard quality voice
+
+### How It Works
+
+- **Audio for new and updated cards**: Audio is generated when:
+  - Creating new cards during `push`
+  - Updating existing cards during `push` (if Greek text has changed)
+- **Auto-play on Greek side**: When the Greek side of the card is shown, the audio automatically plays
+- **Text + Audio**: The Greek text is displayed along with the audio (`γεια[sound:γεια.mp3]`)
+- **Smart audio generation**: Checks Anki's media folder before generating
+  - If audio exists: Links the existing file to the card (no TTS API call, no file upload)
+  - If audio doesn't exist: Generates fresh audio using Google Cloud TTS and uploads it
+- **Single audio attachment**: Each card gets exactly one audio file, no duplicates
+- **Graceful degradation**: If audio generation fails, the card is still created/updated without audio
+- **Sequential processing**: Cards are processed one at a time with configurable delay
+
+### Troubleshooting
+
+#### ElevenLabs Issues
+
+**"Failed to initialize ElevenLabs client"**
+- Verify your API key is correct in the config
+- Check your ElevenLabs account is active
+- Ensure you have characters remaining in your quota
+
+**"Invalid voice ID"**
+- Verify the voice ID is correct (copy from voice details on elevenlabs.io)
+- Try a different voice from the Voice Library
+- Use the recommended voice ID: `21m00Tcm4TlvDq8ikWAM`
+
+**"Audio generation failed"**
+- Check your ElevenLabs quota (free tier: 10,000 characters/month)
+- Verify the Greek text is not empty
+- Try increasing `request_delay_ms` if hitting rate limits
+
+**"Quota exceeded"**
+- Check your usage at [elevenlabs.io](https://elevenlabs.io)
+- Upgrade your plan or wait for monthly quota reset
+- Temporarily switch to Google Cloud TTS provider
+
+#### Google Cloud TTS Issues
+
+**"Failed to initialize TTS client"**
+- Verify Text-to-Speech API is enabled in Google Cloud Console
+- Check that your service account has the `roles/cloudtts.user` role
+- Ensure your service account JSON key file is valid
+
+**"Audio generation failed"**
+- Check your Google Cloud quota for TTS requests
+- Verify the Greek text is not empty
+- Try increasing `request_delay_ms` if hitting rate limits
+
+**Disabling Audio Generation**
+Set `enabled: false` in the `text_to_speech` config or remove the section entirely.
+
+## Installation
+
+### Prerequisites
+
+1. **Go 1.25+**: Install from [golang.org](https://golang.org/dl/)
+2. **Anki with AnkiConnect**:
+   - Install Anki from [apps.ankiweb.net](https://apps.ankiweb.net/)
+   - Install AnkiConnect add-on: Code `2055492159`
+3. **Google Service Account** (much simpler than OAuth2!):
+   - Create a project at [console.cloud.google.com](https://console.cloud.google.com/)
+   - Enable the Google Sheets API
+   - Create a Service Account (IAM & Admin → Service Accounts)
+   - Download the JSON key file
+   - **Share your Google Sheet with the service account email**
+
+### Build from Source
+
+```bash
+git clone https://github.com/yourusername/sync.git
+cd sync
+go build -o sync ./cmd/sync
+```
+
+## Quick Start
+
+### 1. Set Up Google Service Account
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com/)
+2. Create/select a project
+3. Enable Google Sheets API
+4. Go to **IAM & Admin → Service Accounts**
+5. Click **Create Service Account** (any name works)
+6. Click on the service account → **Keys** → **Add Key** → **Create New Key** → **JSON**
+7. Download the JSON key file
+8. Move it to `~/.config/sync/service-account.json`
+9. **CRITICAL**: Open your Google Sheet and click **Share**
+   - Add the service account email (looks like `your-service@project.iam.gserviceaccount.com`)
+   - Give it **Editor** permissions
+
+### 2. Initialize Configuration
+
+```bash
+./sync init
+```
+
+You'll be prompted for:
+- **Google Sheet ID**: Found in the URL of your spreadsheet
+  Example: `1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms`
+- **Sheet Name**: The tab name within your spreadsheet (default: "Sheet1")
+- **Anki Deck Name**: The deck you want to sync to
+
+### 3. First Push (Sheets → Anki)
+
+```bash
+# Preview what will be synced
+./sync push --dry-run
+
+# Actually sync
+./sync push
+```
+
+No browser authorization needed - service accounts work automatically!
+
+Edit cards in the Google Sheet and run `./sync push` again; changes made directly in Anki are overwritten
+the next time that card is pushed.
+
+## Google Sheet Format
+
+Your spreadsheet should have these columns (order doesn't matter):
+
+| Column | Required | Description |
+|--------|----------|-------------|
+| Anki ID | No | Auto-populated by the tool |
+| Checksum | No | Auto-populated for change detection |
+| English | Yes | English word/phrase |
+| Greek | Yes | Greek translation |
+| Part of Speech | Yes | Noun, Verb, Adjective, etc. |
+| Attributes | No | Gender (`masculine`, `feminine`, `neuter`, optionally `plural`), verb class, etc. |
+| Examples | No | One example per line, written as `Greek sentence — English translation` |
+| Notes | No | Usage notes, shown below the examples |
+| Tag | No | Top-level tag |
+| Sub Tag 1 | No | Second-level tag (`Sub-Tag 1` is also accepted) |
+| Sub Tag 2 | No | Third-level tag (`Sub-Tag 2` is also accepted) |
+| Regen TTS | No | Any value triggers audio regeneration |
+| Voice | No | Verb voice: `active`, `passive`, or `deponent` |
+| Active Form | No | Active form of a passive verb, if one exists |
+| Future Simple | No | Perfective future of a verb, without θα (e.g. `γράψω`) |
+| Aorist | No | Simple past of a verb (e.g. `έγραψα`) |
+
+For nouns, the definite article (ο, η, το, or οι, τα when the attributes say `plural`) is derived from the
+gender in Attributes. It is shown in front of the Greek word, which is colored by gender, and included in the
+generated audio. Greek text that already starts with an article is left as-is.
+
+### Audio Regeneration
+
+The **Regen TTS** column allows you to force regeneration of text-to-speech audio files for specific cards:
+
+- **Purpose**: When you want to regenerate audio (e.g., after correcting pronunciation, changing voice settings, or fixing Greek text)
+- **How to use**: Add any value (like "x", "1", or "regen") to the Regen TTS column for cards you want to regenerate
+- **What happens**: During the next `push` operation:
+  1. The tool detects the marker in the Regen TTS column
+  2. Deletes the existing audio file from Anki's media collection
+  3. Generates fresh audio using your configured TTS provider
+  4. Updates the card with the new audio
+  5. Clears the Regen TTS cell after successful regeneration
+- **Batch regeneration**: You can mark multiple cards at once to regenerate their audio in a single sync operation
+
+**Example workflow:**
+1. Notice a card has incorrect pronunciation
+2. Fix the Greek text in the Google Sheet
+3. Add "x" to the Regen TTS column for that row
+4. Run `./sync push`
+5. The audio is regenerated and the "x" is automatically cleared
+
+**Examples Field Formatting:**
+- Put one example per line; separate the Greek sentence from its translation with ` — ` (an em dash with spaces)
+- The translation is shown dimmed below the Greek sentence; lines without ` — ` show only the Greek
+- Put explanations and usage notes in the Notes column rather than in Examples
+- Example in sheet cell:
+  ```
+  Θέλω λίγο νερό. — I want a little water.
+  Θέλεις λίγο ψωμί; — Do you want a little bread?
+  ```
+
+### Example
+
+| Anki ID | Checksum | English | Greek | Part of Speech | Attributes | Examples | Notes | Tag | Sub Tag 1 | Sub Tag 2 | Regen TTS | Voice | Active Form | Future Simple | Aorist |
+|---------|----------|---------|-------|----------------|------------|----------|-------|-----|-----------|-----------|-----------|-------|-------------|---------------|--------|
+|  | | hello | γεια | Interjection | Informal | Γεια σου! — Hi! | Informal greeting | Greetings | Basic | | | | | | |
+|  | | house | σπίτι | Noun | Neuter | Αυτό είναι το σπίτι μου. — This is my house. | | City | Buildings | Residential | | | | | |
+|  | | to be written | γράφομαι | Verb | c1 | | | | | | | passive | γράφω | γραφτώ | γράφτηκα |
+
+## Command Reference
+
+### Global Flags
+
+- `-v, --verbose`: Enable verbose logging with timestamps
+- `--debug`: Enable debug logging with file/line info
+- `-n, --dry-run`: Preview changes without applying them
+
+### Commands
+
+#### `init`
+Initialize configuration by prompting for Sheet ID, sheet name, and Anki deck name.
+
+```bash
+./sync init
+```
+
+#### `push`
+Push new and modified cards from Google Sheets to Anki.
+
+```bash
+./sync push [--dry-run] [--verbose] [--force]
+```
+
+- Creates new Anki cards for rows without an Anki ID
+- Updates existing cards if content has changed (checksum mismatch)
+- Writes Anki IDs and checksums back to the Sheet
+- Updates the VocabSync note type's fields, templates and styling to the current layout
+- `-f, --force`: update every existing card, even unchanged ones (run once after a card layout change so
+  existing notes get the new fields)
+
+## Configuration
+
+Configuration is stored in `~/.config/sync/config.yaml`:
+
+```yaml
+google_sheet_id: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+sheet_name: "Sheet1"
+anki_deck: "Greek"
+anki_connect_url: "http://localhost:8765"
+anki_profile: "User 1"  # Your Anki profile name (default: "User 1")
+log_level: "info"
+
+# Optional: Greek audio generation with ElevenLabs (recommended)
+text_to_speech:
+  provider: "elevenlabs"
+  enabled: true
+  elevenlabs_api_key: "your-api-key-here"
+  elevenlabs_voice_id: "21m00Tcm4TlvDq8ikWAM"  # Rachel voice
+  audio_encoding: "MP3"
+  request_delay_ms: 100
+
+# Alternative: Google Cloud TTS
+# text_to_speech:
+#   provider: "google"
+#   enabled: true
+#   voice_name: "el-GR-Wavenet-A"
+#   audio_encoding: "MP3"
+#   speaking_rate: 1.0
+#   pitch: 0.0
+#   volume_gain_db: 0.0
+#   request_delay_ms: 100
+```
+
+Service account credentials: `~/.config/sync/service-account.json`
+
+## How It Works
+
+### Change Detection
+
+The tool uses SHA256 checksums of content fields to detect changes:
+
+- **Content fields**: English, Greek, Part of Speech, Attributes, Examples, Notes, Tag, Sub Tag 1, Sub Tag 2, Voice, Active Form, Future Simple, Aorist
+- **Excluded from checksum**: Anki ID, Checksum (itself), Row Number, Modified At
+
+### Duplicate Detection
+
+**Duplicates are determined by the English + Greek combination:**
+
+- ✅ Allowed: Same English, different Greek
+  - Example: "when" (όταν) - conjunction
+  - Example: "when" (πότε) - adverb
+- ❌ Rejected: Same English + Greek (true duplicate)
+  - Example: "hello" (γεια) appears twice
+
+This allows multiple translations/meanings of the same English word.
+
+### AnkiConnect Note Type
+
+The tool automatically creates a "VocabSync" note type, and keeps an existing one up to date on every push
+(missing fields are added; templates and styling are replaced; review history is untouched).
+
+**Fields:**
+- Front (English), Back (Greek with audio), PartOfSpeech
+- Article, Gender (derived from Attributes for nouns)
+- Attributes, Voice, ActiveForm, FutureSimple, Aorist
+- Examples, Notes
+
+Note types created by earlier versions also keep their old Grammar field; it is no longer used.
+
+**Cards:**
+1. **English → Greek**: Shows English and part of speech, reveals the Greek word (with article and audio),
+   grammar, principal parts, examples and notes
+2. **Greek → English**: Shows the Greek word (with article and audio) and part of speech, reveals English and
+   the same details
+
+Both card types support Anki's night mode.
+
+### Tags
+
+Tags are hierarchical using Anki's `::` separator:
+
+- Single tag: `City`
+- Two levels: `City::Buildings`
+- Three levels: `City::Buildings::Museums`
+
+## Troubleshooting
+
+### "Cannot connect to AnkiConnect"
+
+- Ensure Anki is running
+- Verify AnkiConnect is installed (Tools → Add-ons → Code: 2055492159)
+- Check AnkiConnect is listening on http://localhost:8765
+
+### "Config file not found"
+
+Run `./sync init` to create the configuration.
+
+### "Service account key file not found"
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com/)
+2. Go to IAM & Admin → Service Accounts
+3. Create Service Account
+4. Download JSON key
+5. Move to `~/.config/sync/service-account.json`
+
+### "Failed to read sheet" or "Permission denied"
+
+**Make sure you shared the Google Sheet with your service account email!**
+
+1. Open your Google Sheet
+2. Click **Share**
+3. Add the service account email (from the JSON key file: `client_email` field)
+4. Give it **Editor** permissions
+
+This is the most common mistake - the service account needs explicit access.
+
+### "Required columns missing"
+
+Your Google Sheet must have at minimum: English, Greek, and Part of Speech columns.
+
+## Development
+
+### Project Structure
+
+```
+sync/
+├── cmd/sync/           # Main entry point
+├── internal/
+│   ├── anki/          # AnkiConnect client
+│   ├── cli/           # Cobra CLI commands
+│   ├── config/        # Configuration management
+│   ├── mapper/        # Field mapping and checksums
+│   ├── sheets/        # Google Sheets client
+│   ├── tts/           # Text-to-speech clients
+│   └── sync/          # Push orchestration
+├── pkg/models/        # Domain models
+└── testdata/          # Test fixtures
+```
+
+### Running Tests
+
+```bash
+# All tests
+go test ./...
+
+# Verbose output
+go test -v ./...
+
+# With coverage
+go test -cover ./...
+
+# Specific package
+go test ./internal/sync/...
+```
+
+### Building
+
+```bash
+# Development build
+go build -o sync ./cmd/sync
+
+# Production build
+go build -ldflags="-s -w" -o sync ./cmd/sync
+```
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
+
+## Acknowledgments
+
+- [AnkiConnect](https://github.com/FooSoft/anki-connect) for the Anki API
+- [Cobra](https://github.com/spf13/cobra) for CLI framework
+- [Google Sheets API](https://developers.google.com/sheets/api) for sheet access

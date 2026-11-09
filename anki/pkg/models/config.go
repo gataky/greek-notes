@@ -1,0 +1,181 @@
+package models
+
+import (
+	"fmt"
+	"strings"
+)
+
+// Default configuration values
+const (
+	DefaultAnkiConnectURL = "http://localhost:8765"
+	DefaultLogLevel       = "info"
+)
+
+// Config represents the application configuration stored in ~/.sync/config.yaml
+type Config struct {
+	// GoogleSheetID is the unique identifier for the Google Spreadsheet
+	GoogleSheetID string `yaml:"google_sheet_id"`
+
+	// SheetName is the name of the specific sheet/tab within the spreadsheet
+	SheetName string `yaml:"sheet_name"`
+
+	// AnkiDeck is the name of the Anki deck where cards will be synced
+	AnkiDeck string `yaml:"anki_deck"`
+
+	// AnkiConnectURL is the URL for the AnkiConnect API (default: http://localhost:8765)
+	AnkiConnectURL string `yaml:"anki_connect_url"`
+
+	// GoogleTokenPath is the path to the OAuth2 token file (default: ~/.sync/token.json)
+	GoogleTokenPath string `yaml:"google_token_path"`
+
+	// LogLevel controls logging verbosity: "info", "verbose", or "debug"
+	LogLevel string `yaml:"log_level"`
+
+	// AnkiProfile is the Anki profile name (default: "User 1")
+	AnkiProfile string `yaml:"anki_profile,omitempty"`
+
+	// TextToSpeech configuration for Greek audio generation
+	TextToSpeech *TTSConfig `yaml:"text_to_speech,omitempty"`
+
+	// Verbs configures the verb deck pushed by `sync verbs`
+	Verbs *VerbsConfig `yaml:"verbs,omitempty"`
+}
+
+// Default decks for the verb cards.
+const (
+	DefaultVerbsDeck = "Greek Verbs"
+	clozeSubdeck     = "Aspect"
+)
+
+// VerbsConfig configures the verb deck, built from greek-notes' exports/anki-verbs.json.
+type VerbsConfig struct {
+	// CardsPath is the path to anki-verbs.json (written by `make anki-verbs` in greek-notes).
+	// A leading ~ is expanded.
+	CardsPath string `yaml:"cards_path"`
+
+	// Deck holds the "Greek verb" notes (default "Greek Verbs").
+	Deck string `yaml:"deck,omitempty"`
+
+	// ClozeDeck holds the "Greek aspect" cloze notes (default "<Deck>::Aspect"), so its
+	// new-card limit can be set apart from the verbs'.
+	ClozeDeck string `yaml:"cloze_deck,omitempty"`
+}
+
+// WithDefaults returns a copy with empty decks filled in.
+func (v VerbsConfig) WithDefaults() VerbsConfig {
+	if strings.TrimSpace(v.Deck) == "" {
+		v.Deck = DefaultVerbsDeck
+	}
+	if strings.TrimSpace(v.ClozeDeck) == "" {
+		v.ClozeDeck = v.Deck + "::" + clozeSubdeck
+	}
+	return v
+}
+
+// TTSConfig holds configuration for text-to-speech providers.
+type TTSConfig struct {
+	// Provider selection
+	Provider string `yaml:"provider"` // "google" or "elevenlabs", default "elevenlabs"
+	Enabled  bool   `yaml:"enabled"`
+
+	// Google Cloud TTS fields
+	VoiceName     string  `yaml:"voice_name,omitempty"`
+	AudioEncoding string  `yaml:"audio_encoding,omitempty"`
+	SpeakingRate  float64 `yaml:"speaking_rate,omitempty"`
+	Pitch         float64 `yaml:"pitch,omitempty"`
+	VolumeGainDb  float64 `yaml:"volume_gain_db,omitempty"`
+
+	// ElevenLabs fields
+	ElevenLabsAPIKey     string  `yaml:"elevenlabs_api_key,omitempty"`
+	ElevenLabsVoiceID    string  `yaml:"elevenlabs_voice_id,omitempty"`
+	ElevenLabsModel      string  `yaml:"elevenlabs_model,omitempty"`
+	ElevenLabsStability  float64 `yaml:"elevenlabs_stability,omitempty"`
+	ElevenLabsSimilarity float64 `yaml:"elevenlabs_similarity_boost,omitempty"`
+
+	// Shared fields
+	RequestDelayMs int `yaml:"request_delay_ms,omitempty"`
+}
+
+// Validate checks TTS configuration
+func (t *TTSConfig) Validate() error {
+	if !t.Enabled {
+		return nil // No validation needed if disabled
+	}
+
+	provider := strings.ToLower(t.Provider)
+	if provider == "" {
+		provider = "elevenlabs" // Default
+	}
+
+	switch provider {
+	case "google":
+		if strings.TrimSpace(t.VoiceName) == "" {
+			return fmt.Errorf("voice_name is required for Google TTS provider")
+		}
+	case "elevenlabs":
+		if strings.TrimSpace(t.ElevenLabsAPIKey) == "" {
+			return fmt.Errorf("elevenlabs_api_key is required for ElevenLabs provider")
+		}
+		if strings.TrimSpace(t.ElevenLabsVoiceID) == "" {
+			return fmt.Errorf("elevenlabs_voice_id is required for ElevenLabs provider")
+		}
+	default:
+		return fmt.Errorf("unknown TTS provider: %s (must be 'google' or 'elevenlabs')", t.Provider)
+	}
+
+	return nil
+}
+
+// Validate checks that all required configuration fields are present and valid.
+// Returns an error describing any validation failures.
+func (c *Config) Validate() error {
+	var errors []string
+
+	if strings.TrimSpace(c.GoogleSheetID) == "" {
+		errors = append(errors, "google_sheet_id is required")
+	}
+
+	if strings.TrimSpace(c.SheetName) == "" {
+		errors = append(errors, "sheet_name is required")
+	}
+
+	if strings.TrimSpace(c.AnkiDeck) == "" {
+		errors = append(errors, "anki_deck is required")
+	}
+
+	// Validate log level if specified
+	if c.LogLevel != "" {
+		validLogLevels := map[string]bool{"info": true, "verbose": true, "debug": true}
+		if !validLogLevels[strings.ToLower(c.LogLevel)] {
+			errors = append(errors, "log_level must be 'info', 'verbose', or 'debug'")
+		}
+	}
+
+	if len(errors) > 0 {
+		return fmt.Errorf("configuration validation failed: %s", strings.Join(errors, "; "))
+	}
+
+	// Validate TTS config if present
+	if c.TextToSpeech != nil {
+		if err := c.TextToSpeech.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// SetDefaults applies default values to optional configuration fields if they are empty.
+func (c *Config) SetDefaults() {
+	if c.AnkiConnectURL == "" {
+		c.AnkiConnectURL = DefaultAnkiConnectURL
+	}
+
+	if c.LogLevel == "" {
+		c.LogLevel = DefaultLogLevel
+	}
+
+	if c.AnkiProfile == "" {
+		c.AnkiProfile = "User 1"
+	}
+}

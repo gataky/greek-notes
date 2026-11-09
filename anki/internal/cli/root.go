@@ -1,0 +1,59 @@
+package cli
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/gataky/sync/internal/logging"
+	"github.com/spf13/cobra"
+)
+
+var (
+	verbose bool
+	debug   bool
+	dryRun  bool
+)
+
+// rootCmd represents the base command
+var rootCmd = &cobra.Command{
+	Use:   "sync",
+	Short: "Sync vocabulary cards from Google Sheets to Anki",
+	Long: `A sync tool for managing vocabulary flashcards.
+Pushes vocabulary data from Google Sheets to Anki with checksum-based
+change detection.`,
+}
+
+// Execute runs the root command
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func init() {
+	// Global flags
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging (includes file and line info)")
+	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "n", false, "Preview changes without applying them")
+}
+
+// newSyncLogger creates a logger with the appropriate level based on flags
+func newSyncLogger() *logging.SyncLogger {
+	level := logging.Silent
+	if debug {
+		level = logging.Debug
+	} else if verbose {
+		level = logging.Verbose
+	}
+	return logging.NewSyncLogger(level, os.Stdout)
+}
+
+// getDryRun returns the global dry-run flag value
+func getDryRun() bool {
+	return dryRun
+}
+
+// printError prints an error message and returns the error
+func printError(format string, args ...any) error {
+	err := fmt.Errorf(format, args...)
+	fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	return err
+}
