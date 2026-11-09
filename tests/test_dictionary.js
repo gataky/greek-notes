@@ -164,6 +164,9 @@ initSqlJs().then(SQL => {
   check("alternatives, most usual first", adj("ελαφρύς", "masculine", "genitive")[0], ["ελαφρ|ιού", "ελαφρ|ύ"]);
   check("masculine and feminine alike", adj("συνεχής", "feminine", "nominative"), [["συνεχ|ής"], ["συνεχ|είς"]]);
   check("a form that doesn't exist is []", adj("αβανιάρης", "feminine", "genitive")[1], []);
+  check("two declensions of one word are one table", dict.adjectiveDeclensions("βαρύς").length, 1);
+  check("the headword line's feminine comes first (βαριά, then formal βαρεία)", adj("βαρύς", "feminine", "nominative"), [["βαρ|ιά", "βαρ|εία"], ["βαρ|ιές", "βαρ|είες"]]);
+  check("an alternative feminine follows the usual one", adj("θαυματουργός", "feminine", "nominative")[0], ["θαυματουργ|ή", "θαυματουργ|ός"]);
   check("a participle has a table", dict.adjectiveDeclensions("κουρασμένος").map(t => t.pos), ["participle"]);
   check("a verb has no adjective table", dict.adjectiveDeclensions("γράφω"), []);
   check("a noun has no adjective table", dict.adjectiveDeclensions("δρόμος"), []);

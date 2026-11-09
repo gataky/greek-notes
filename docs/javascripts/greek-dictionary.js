@@ -556,27 +556,43 @@
       return out;
     }
 
-    // An adjective's or participle's declension tables, from its own entries:
+    // An adjective's or participle's declension, one per entry:
     //   [{ pos: "adj" or "participle", cells: { masculine: { nominative: { singular: ["καλ|ός"], plural: ["καλ|οί"] }, ... }, feminine: ..., neuter: ... } }]
     // Cells are as in declensions(). Only the positive degree: comparative and superlative rows
     // are skipped, whether they have tables of their own (ωραίος) or share the positive one
     // (ελαφρύς). The endings are split at the letters every gender's forms share.
+    // A few entries have two positive tables for one word: βαρύς declines as βαριά or, formally,
+    // βαρεία, and θαυματουργός's feminine can be θαυματουργή or θαυματουργός. They're merged into
+    // one, each cell listing the forms of the table whose feminine the headword line gives first,
+    // then the other's.
     function adjectiveDeclensions(word) {
-      const found = rows(`SELECT t.id, e.pos_display, i.form, g.tags
+      const found = rows(`SELECT e.id, t.id, t.kind, e.pos_display, i.form, g.tags
         FROM headword h JOIN entry e ON e.headword_id = h.id
         JOIN inflection_table t ON t.entry_id = e.id
         JOIN inflection i ON i.table_id = t.id JOIN inflection_tags g ON g.id = i.tags_id
-        WHERE h.word = ? AND (e.pos = 'adj' OR e.pos_display = 'participle') AND t.kind = 'declension' AND t.word IS NULL
+        WHERE h.word = ? AND (e.pos = 'adj' OR e.pos_display = 'participle') AND t.kind IN ('declension', 'head') AND t.word IS NULL
         ORDER BY e.ord, t.ord, i.ord`, [word]);
-      const tables = new Map();
-      for (const [id, pos, form, tags] of found) {
+      const entries = new Map();
+      for (const [entryId, tableId, kind, pos, form, tags] of found) {
+        if (!entries.has(entryId)) entries.set(entryId, { pos, feminines: [], tables: new Map() });
+        const entry = entries.get(entryId);
         const set = new Set(tags.split(" "));
+        if (kind === "head") {
+          if (set.has("feminine")) entry.feminines.push(form);
+          continue;
+        }
         if (set.has("comparative") || set.has("superlative")) continue;
-        if (!tables.has(id)) tables.set(id, { pos, rows: [] });
-        tables.get(id).rows.push({ form, tags: set });
+        if (!entry.tables.has(tableId)) entry.tables.set(tableId, []);
+        entry.tables.get(tableId).push({ form, tags: set });
       }
       const out = [];
-      for (const { pos, rows: cellRows } of tables.values()) {
+      for (const { pos, feminines, tables } of entries.values()) {
+        const rank = tableRows => {
+          const feminine = tableRows.find(r => ["feminine", "nominative", "singular"].every(t => r.tags.has(t)));
+          const i = feminine ? feminines.indexOf(feminine.form) : -1;
+          return i < 0 ? Infinity : i;
+        };
+        const cellRows = [...tables.values()].sort((a, b) => rank(a) - rank(b) || 0).flat();
         const cells = Object.fromEntries(GENDERS.map(g => [g, Object.fromEntries(CASES.map(c =>
           [c, Object.fromEntries(NUMBERS.map(n => [n, cellOf(cellRows, g, c, n)]))]))]));
         if (!allForms(cells).length) continue;
