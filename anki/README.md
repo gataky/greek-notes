@@ -11,6 +11,36 @@ A sync tool that pushes vocabulary flashcards from Google Sheets to Anki.
 - **Dry-run Mode**: Preview changes before applying them
 - **Greek Audio Generation**: Automatic text-to-speech audio for Greek words using ElevenLabs or Google Cloud TTS
 
+## Verb deck
+
+`./sync verbs` pushes a separate **Greek Verbs** deck for learning verb forms and aspect. It has two note types:
+
+- **Greek verb**, one note per active verb in the sheet:
+  - **Forms** card: the present and its meaning on the front, with the verb's group behind a tap-to-reveal hint. The back shows the past continuous, aorist and future simple. The augment and changed letters are coloured as on the greek-notes aspect forks page, and the back also has the group's rule and an example sentence.
+  - **Recognize** card (aorist → present): only for irregular verbs, strong aorists (έμαθα, βγήκα) and verbs with no perfective (είχα).
+- **Greek aspect**, a cloze note per past-tense sentence from the greek-notes tense and aspect drill: `Χθες [διαβάζω] ένα βιβλίο.` → `διάβασα`. These go in the `Greek Verbs::Aspect` subdeck, so its new-card limit can be set on its own.
+
+The forms, groups and sentences come from greek-notes' `exports/anki-verbs.json`, which runs the same code as the site's verb tables. That code reads the lemma dictionary. After adding verbs to the sheet:
+
+```sh
+cd ~/Documents/greek-notes && make sync   # also rebuilds exports/anki-verbs.json
+cd ~/Documents/anki-sync && ./sync verbs --dry-run && ./sync verbs
+```
+
+```yaml
+verbs:
+  cards_path: "~/Documents/greek-notes/exports/anki-verbs.json"
+  # deck: "Greek Verbs"
+  # cloze_deck: "Greek Verbs::Aspect"
+```
+
+- Notes are matched in Anki by the present (or verb + sentence), so nothing is written to the sheet. The sheet decides which verbs are in (`part of speech` = verb, `voice` = active) and gives their meaning.
+- A note is updated only when its content changed. Your own tags (marked, leech) are kept.
+- Notes that are no longer in the export are listed, never deleted.
+- New notes are created regular groups first and irregular last, which becomes Anki's new-card order.
+- Each note is tagged `aspect::<group>` (`aspect::dentals`). A filtered deck on `tag:aspect::dentals` drills one group.
+- Audio uses the configured TTS provider. The present reuses the vocabulary card's file. The forms and sentences get files named `verbs-<hash>-<provider>.mp3`.
+
 ## Audio Generation (Text-to-Speech)
 
 The tool automatically generates high-quality audio pronunciation for Greek words.

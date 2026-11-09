@@ -1,13 +1,7 @@
 package anki
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
-
 	"github.com/atselvan/ankiconnect"
-	"github.com/privatesquare/bkst-go-utils/utils/errors"
 )
 
 // Template names of the two card types generated for each note.
@@ -195,119 +189,10 @@ hr#answer {
 // EnsureNoteType creates the VocabSync note type, or brings an existing one up to date by adding
 // missing fields and replacing its card templates and styling. Review history is not affected.
 func (c *AnkiClient) EnsureNoteType(modelName string) error {
-	var modelList *[]string
-	err := retryWithBackoff("ListNoteTypes", 3, func() error {
-		var restErr *errors.RestErr
-		modelList, restErr = c.client.Models.GetAll()
-		if restErr != nil {
-			return fmt.Errorf("%s", restErr.Error)
-		}
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("failed to list note types: %v", err)
-	}
-
-	if modelList != nil {
-		for _, m := range *modelList {
-			if m == modelName {
-				return c.updateNoteType(modelName)
-			}
-		}
-	}
-
-	model := ankiconnect.Model{
-		ModelName:     modelName,
-		InOrderFields: noteTypeFields,
-		Css:           noteTypeCSS,
-		CardTemplates: noteTypeTemplates,
-	}
-
-	if err := retryWithBackoff("CreateNoteType", 3, func() error {
-		if restErr := c.client.Models.Create(model); restErr != nil {
-			return fmt.Errorf("%s", restErr.Error)
-		}
-		return nil
-	}); err != nil {
-		return fmt.Errorf("failed to create note type %s after retries: %v", modelName, err)
-	}
-
-	return nil
-}
-
-// updateNoteType adds any missing fields to an existing note type and replaces its templates and styling.
-func (c *AnkiClient) updateNoteType(modelName string) error {
-	var existingFields *[]string
-	err := retryWithBackoff("GetNoteTypeFields", 3, func() error {
-		var restErr *errors.RestErr
-		existingFields, restErr = c.client.Models.GetFields(modelName)
-		if restErr != nil {
-			return fmt.Errorf("%s", restErr.Error)
-		}
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("failed to get fields of note type %s: %v", modelName, err)
-	}
-
-	have := make(map[string]bool)
-	if existingFields != nil {
-		for _, f := range *existingFields {
-			have[f] = true
-		}
-	}
-	fieldCount := len(have)
-	for _, field := range noteTypeFields {
-		if have[field] {
-			continue
-		}
-		params := map[string]any{"modelName": modelName, "fieldName": field, "index": fieldCount}
-		if err := c.invoke("modelFieldAdd", params); err != nil {
-			return fmt.Errorf("failed to add field %s to note type %s: %w", field, modelName, err)
-		}
-		fieldCount++
-	}
-
-	templates := make(map[string]map[string]string, len(noteTypeTemplates))
-	for _, t := range noteTypeTemplates {
-		templates[t.Name] = map[string]string{"Front": t.Front, "Back": t.Back}
-	}
-	templateParams := map[string]any{"model": map[string]any{"name": modelName, "templates": templates}}
-	if err := c.invoke("updateModelTemplates", templateParams); err != nil {
-		return fmt.Errorf("failed to update templates of note type %s: %w", modelName, err)
-	}
-
-	stylingParams := map[string]any{"model": map[string]any{"name": modelName, "css": noteTypeCSS}}
-	if err := c.invoke("updateModelStyling", stylingParams); err != nil {
-		return fmt.Errorf("failed to update styling of note type %s: %w", modelName, err)
-	}
-
-	return nil
-}
-
-// invoke calls an AnkiConnect action that the ankiconnect library does not expose, with retries.
-func (c *AnkiClient) invoke(action string, params any) error {
-	body, err := json.Marshal(map[string]any{"action": action, "version": 6, "params": params})
-	if err != nil {
-		return fmt.Errorf("failed to encode %s request: %w", action, err)
-	}
-
-	return retryWithBackoff(action, 3, func() error {
-		resp, err := http.Post(c.url, "application/json", bytes.NewReader(body))
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		var result struct {
-			Error *string `json:"error"`
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return fmt.Errorf("failed to decode %s response: %w", action, err)
-		}
-		if result.Error != nil {
-			return fmt.Errorf("%s", *result.Error)
-		}
-		return nil
+	return c.EnsureModel(ModelSpec{
+		Name:      modelName,
+		Fields:    noteTypeFields,
+		Templates: noteTypeTemplates,
+		CSS:       noteTypeCSS,
 	})
 }

@@ -44,4 +44,4 @@ docs/
 .direnv/
 # .claude/
 
-sync
+/sync

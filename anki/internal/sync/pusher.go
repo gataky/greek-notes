@@ -2,10 +2,6 @@ package sync
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -189,166 +185,37 @@ func (p *Pusher) Push(dryRun bool) error {
 // getAnkiMediaDir returns the path to the Anki media directory for the configured profile.
 // Returns empty string if the directory cannot be determined.
 func (p *Pusher) getAnkiMediaDir() string {
-	profile := p.config.AnkiProfile
-	if profile == "" {
-		profile = "User 1"
-	}
-
-	var baseDir string
-	switch runtime.GOOS {
-	case "darwin": // macOS
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return ""
-		}
-		baseDir = filepath.Join(homeDir, "Library", "Application Support", "Anki2")
-	case "windows":
-		appData := os.Getenv("APPDATA")
-		if appData == "" {
-			return ""
-		}
-		baseDir = filepath.Join(appData, "Anki2")
-	case "linux":
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return ""
-		}
-		baseDir = filepath.Join(homeDir, ".local", "share", "Anki2")
-	default:
-		return ""
-	}
-
-	return filepath.Join(baseDir, profile, "collection.media")
+	return ankiMediaDir(p.config.AnkiProfile)
 }
 
 // audioFileExists checks if an audio file already exists in Anki's media directory.
 func (p *Pusher) audioFileExists(filename string) bool {
-	mediaDir := p.getAnkiMediaDir()
-	if mediaDir == "" {
-		// Can't determine media directory, assume file doesn't exist
-		return false
-	}
-
-	filePath := filepath.Join(mediaDir, filename)
-	_, err := os.Stat(filePath)
-	return err == nil
+	return mediaLibrary(p.getAnkiMediaDir()).exists(filename)
 }
 
 // getProviderSource returns the source code for the current TTS provider.
 // Returns "etts" for ElevenLabs, "gtts" for Google TTS, or empty string if unknown.
 func (p *Pusher) getProviderSource() string {
-	if p.config.TextToSpeech == nil {
-		return ""
-	}
-
-	provider := strings.ToLower(p.config.TextToSpeech.Provider)
-	if provider == "" {
-		provider = "elevenlabs" // Default
-	}
-
-	switch provider {
-	case "elevenlabs":
-		return "etts"
-	case "google":
-		return "gtts"
-	default:
-		return ""
-	}
+	return providerSource(p.config.TextToSpeech)
 }
 
 // getNextAudioVersion finds the highest version number for a Greek word + source.
-// Scans Anki media directory for files matching {greekWord}-{source}-*.mp3
 // Returns max(versions) + 1, or 1 if no versioned files exist.
 func (p *Pusher) getNextAudioVersion(greekWord string, source string) int {
-	mediaDir := p.getAnkiMediaDir()
-	if mediaDir == "" {
-		return 1
-	}
-
-	// Pattern: {greek}-{source}-*.mp3
-	pattern := fmt.Sprintf("%s-%s-", greekWord, source)
-
-	files, err := os.ReadDir(mediaDir)
-	if err != nil {
-		return 1
-	}
-
-	maxVersion := 0
-	for _, file := range files {
-		name := file.Name()
-		if !strings.HasPrefix(name, pattern) || !strings.HasSuffix(name, ".mp3") {
-			continue
-		}
-
-		// Extract version number from: {greek}-{source}-{version}.mp3
-		versionPart := strings.TrimPrefix(name, pattern)
-		versionPart = strings.TrimSuffix(versionPart, ".mp3")
-
-		version, err := strconv.Atoi(versionPart)
-		if err != nil {
-			continue // Skip malformed filenames
-		}
-
-		if version > maxVersion {
-			maxVersion = version
-		}
-	}
-
-	return maxVersion + 1
+	_, version := mediaLibrary(p.getAnkiMediaDir()).latestWordAudio(greekWord, source)
+	return version + 1
 }
 
 // buildAudioFilename creates a versioned filename for audio.
 // Format: {greekWord}-{source}-{version}.mp3
 func (p *Pusher) buildAudioFilename(greekWord string, source string, version int) string {
-	return fmt.Sprintf("%s-%s-%d.mp3", greekWord, source, version)
+	return wordAudioFilename(greekWord, source, version)
 }
 
 // findExistingAudio looks for existing audio in both legacy and versioned formats.
 // Returns filename if found, empty string if no audio exists.
-// Checks legacy format ({word}.mp3) first, then latest versioned file.
 func (p *Pusher) findExistingAudio(greekWord string, source string) string {
-	mediaDir := p.getAnkiMediaDir()
-	if mediaDir == "" {
-		return ""
-	}
-
-	// Check legacy format first: {word}.mp3
-	legacyFilename := fmt.Sprintf("%s.mp3", greekWord)
-	if p.audioFileExists(legacyFilename) {
-		return legacyFilename
-	}
-
-	// Check for latest versioned file
-	files, err := os.ReadDir(mediaDir)
-	if err != nil {
-		return ""
-	}
-
-	pattern := fmt.Sprintf("%s-%s-", greekWord, source)
-	var latestFile string
-	maxVersion := 0
-
-	for _, file := range files {
-		name := file.Name()
-		if !strings.HasPrefix(name, pattern) || !strings.HasSuffix(name, ".mp3") {
-			continue
-		}
-
-		versionPart := strings.TrimPrefix(name, pattern)
-		versionPart = strings.TrimSuffix(versionPart, ".mp3")
-
-		version, err := strconv.Atoi(versionPart)
-		if err != nil {
-			continue
-		}
-
-		if version > maxVersion {
-			maxVersion = version
-			latestFile = name
-		}
-	}
-
-	return latestFile
+	return mediaLibrary(p.getAnkiMediaDir()).wordAudio(greekWord, source)
 }
 
 // generateAudioForCard generates audio for a vocabulary card using TTS.

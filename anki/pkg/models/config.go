@@ -36,6 +36,40 @@ type Config struct {
 
 	// TextToSpeech configuration for Greek audio generation
 	TextToSpeech *TTSConfig `yaml:"text_to_speech,omitempty"`
+
+	// Verbs configures the verb deck pushed by `sync verbs`
+	Verbs *VerbsConfig `yaml:"verbs,omitempty"`
+}
+
+// Default decks for the verb cards.
+const (
+	DefaultVerbsDeck = "Greek Verbs"
+	clozeSubdeck     = "Aspect"
+)
+
+// VerbsConfig configures the verb deck, built from greek-notes' exports/anki-verbs.json.
+type VerbsConfig struct {
+	// CardsPath is the path to anki-verbs.json (written by `make anki-verbs` in greek-notes).
+	// A leading ~ is expanded.
+	CardsPath string `yaml:"cards_path"`
+
+	// Deck holds the "Greek verb" notes (default "Greek Verbs").
+	Deck string `yaml:"deck,omitempty"`
+
+	// ClozeDeck holds the "Greek aspect" cloze notes (default "<Deck>::Aspect"), so its
+	// new-card limit can be set apart from the verbs'.
+	ClozeDeck string `yaml:"cloze_deck,omitempty"`
+}
+
+// WithDefaults returns a copy with empty decks filled in.
+func (v VerbsConfig) WithDefaults() VerbsConfig {
+	if strings.TrimSpace(v.Deck) == "" {
+		v.Deck = DefaultVerbsDeck
+	}
+	if strings.TrimSpace(v.ClozeDeck) == "" {
+		v.ClozeDeck = v.Deck + "::" + clozeSubdeck
+	}
+	return v
 }
 
 // TTSConfig holds configuration for text-to-speech providers.
