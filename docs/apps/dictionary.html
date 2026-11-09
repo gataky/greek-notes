@@ -50,7 +50,6 @@ a.w { font-family: var(--display); font-size: 1.1em; text-decoration: none; }
 a.w:hover { text-decoration: underline; }
 .card details summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
 .card details p { margin: 8px 0 0; font-size: 15px; }
-.forms { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 8px; font-family: var(--display); font-size: 18px; }
 .links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; font-weight: 600; }
 
 /* A verb's conjugation (verb-grid.js) and a noun's or adjective's declension, inside the entry */
@@ -280,12 +279,9 @@ function entryHTML(found) {
       ${entry.head ? `<p class="head">${linkWords(entry.head)}</p>` : ""}
       <ol class="senses">${senses}</ol>${etymology}${tables}</section>`;
   }).join("");
-  const otherForms = found.forms.length
-    ? `<details><summary>Other forms · ${found.forms.length}</summary><div class="forms" lang="el">${found.forms.map(f => `<span>${esc(f)}</span>`).join("")}</div></details>`
-    : "";
   const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
   return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2></div>
-    ${entries}${verbEntry ? "" : conjugation}${otherForms}<div class="links">${wiktionary}</div>`;
+    ${entries}${verbEntry ? "" : conjugation}<div class="links">${wiktionary}</div>`;
 }
 
 // An adjective's or participle's declension (adjectiveDeclensions() in greek-dictionary.js): the
