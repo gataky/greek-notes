@@ -80,7 +80,9 @@ sheet.forEach((entry, sheetIndex) => {
     clozes.push({
       verb: entry.greek, group: fork.group, order: [groupOrder.get(fork.group), sheetIndex],
       aspect: s.aspect, reason: REASONS[s.reason] || s.reason,
-      el: s.el, en: unmark(s.en), text, note: s.note || "",
+      // The English keeps the drill's *marks* around the verb: the card shows it in bold, so
+      // the front says who did it, which the Greek often doesn't.
+      el: s.el, en: s.en, text, note: s.note || "",
     });
   }
 

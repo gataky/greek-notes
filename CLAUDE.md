@@ -122,7 +122,7 @@ The owner's Anki sync tool (`../anki-sync`, Go) pushes a "Greek Verbs" deck from
 - **Verbs:** the word list's active verbs, in `AspectFork.GROUPS` order (regular groups first, irregular last, which becomes Anki's new-card order). Each has its 1st singular present, past continuous, aorist and `θα` future, plain and as `markHTML()` spans, the group's name, rule and note, and the fork's notes.
 - **`recognize`** is the form for an aorist → present card, set for the irregular, strong and no-perfective groups.
 - **`example`** is the verb's past simple sentence from `aspect-sentences.json`.
-- **`cloze`** holds every past-tense sentence from `aspect-sentences.json`, with the answer wrapped as `{{c1::έγραψα::γράφω}}`. The answer is found with `answersIn()`, as in the drill.
+- **`cloze`** holds every past-tense sentence from `aspect-sentences.json`, with the answer wrapped as `{{c1::έγραψα::γράφω}}`. The answer is found with `answersIn()`, as in the drill. The English keeps its `*marks*`: the card's front shows it, with the verb in bold, above the Greek blank. That gives the person, which the Greek often drops, so the card tests the aspect and the form.
 - Committed, one item per line, so the diff shows which cards a push will change. `make sync` and `make verb-forms` rebuild it. The script exits non-zero if a verb has no forms or a sentence's answer can't be found.
 - Don't rename fields without changing `../anki-sync/internal/verbs`.
 
