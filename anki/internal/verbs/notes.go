@@ -3,6 +3,7 @@ package verbs
 import (
 	"fmt"
 	"html"
+	"regexp"
 	"strings"
 )
 
@@ -114,7 +115,7 @@ func ClozeNote(c Cloze) Note {
 		Label: c.El,
 		Fields: map[string]string{
 			"Text":    html.EscapeString(c.Text),
-			"English": html.EscapeString(c.En),
+			"English": markedEnglish(c.En),
 			"Aspect":  fmt.Sprintf("<b>%s</b>: %s", name, html.EscapeString(c.Reason)),
 			"Notes":   html.EscapeString(c.Note),
 			"Verb":    html.EscapeString(c.Verb),
@@ -123,6 +124,14 @@ func ClozeNote(c Cloze) Note {
 		Tags:  []string{tagPrefix + c.Group},
 		Audio: []Audio{{Field: "Audio", Text: c.El}},
 	}
+}
+
+// markedVerb is the drill's marking of the verb in an English sentence: "I *swept* the kitchen".
+var markedVerb = regexp.MustCompile(`\*([^*]+)\*`)
+
+// markedEnglish escapes an English sentence and shows its *marked* verb in bold.
+func markedEnglish(en string) string {
+	return markedVerb.ReplaceAllString(html.EscapeString(en), "<b>$1</b>")
 }
 
 func exampleHTML(el, en string) string {

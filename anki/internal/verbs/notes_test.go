@@ -82,10 +82,13 @@ func TestVerbNoteFallsBackToSheet(t *testing.T) {
 func TestClozeNote(t *testing.T) {
 	n := ClozeNote(Cloze{
 		Verb: "διαβάζω", Group: "dentals", Aspect: "simple", Reason: "a single, finished action",
-		El: "Διάβασα ένα βιβλίο.", En: "I read a book.", Text: "{{c1::Διάβασα::διαβάζω}} ένα βιβλίο.",
+		El: "Διάβασα ένα βιβλίο.", En: "I *read* a book & a <letter>.", Text: "{{c1::Διάβασα::διαβάζω}} ένα βιβλίο.",
 	})
 	if n.Fields["Text"] != "{{c1::Διάβασα::διαβάζω}} ένα βιβλίο." {
 		t.Errorf("Text = %q", n.Fields["Text"])
+	}
+	if n.Fields["English"] != "I <b>read</b> a book &amp; a &lt;letter&gt;." {
+		t.Errorf("English = %q", n.Fields["English"])
 	}
 	if n.Fields["Aspect"] != "<b>Aorist</b>: a single, finished action" {
 		t.Errorf("Aspect = %q", n.Fields["Aspect"])

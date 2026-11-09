@@ -71,7 +71,7 @@ type Cloze struct {
 	Aspect string `json:"aspect"` // continuous or simple
 	Reason string `json:"reason"` // why this aspect, e.g. "a single, finished action"
 	El     string `json:"el"`
-	En     string `json:"en"`
+	En     string `json:"en"`   // the verb is marked: "I *swept* the kitchen"
 	Text   string `json:"text"` // El with the answer as {{c1::answer::dictionary form}}
 	Note   string `json:"note"`
 }

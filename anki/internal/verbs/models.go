@@ -80,12 +80,18 @@ var verbTemplates = []ankiconnect.CardTemplate{
 	},
 }
 
+// The front gives the English, with the verb in bold, above the Greek with the verb blanked and
+// its dictionary form as the hint. The English says who did it (Greek often drops the subject)
+// and what happened; the Greek context (κάθε βράδυ, χθες, όταν...) decides the aspect.
+const clozeFront = `<div class="kind">past continuous or aorist?</div>` +
+	`<div class="prompt">{{English}}</div>` +
+	`<div class="sentence" lang="el">{{cloze:Text}}</div>`
+
 var clozeTemplates = []ankiconnect.CardTemplate{
 	{
 		Name:  "Cloze",
-		Front: `<div class="kind">past continuous or aorist?</div><div class="sentence" lang="el">{{cloze:Text}}</div>`,
-		Back: `<div class="kind">past continuous or aorist?</div><div class="sentence" lang="el">{{cloze:Text}}</div>{{Audio}}` +
-			`<hr id="answer"><div class="english">{{English}}</div>` +
+		Front: clozeFront,
+		Back: clozeFront + `{{Audio}}<hr id="answer">` +
 			`<div class="aspect">{{Aspect}}</div>` +
 			`{{#Notes}}<div class="notes">{{Notes}}</div>{{/Notes}}`,
 	},
@@ -145,7 +151,9 @@ hr#answer { border: none; border-top: 1px solid var(--line); width: 80%; margin:
 .ex-el { font-size: 20px; }
 .ex-en { font-size: 16px; color: var(--muted); }
 
-.sentence { font-size: 26px; margin-top: 8px; }
+.prompt { font-size: 20px; margin-top: 8px; }
+.prompt b { color: var(--warn); }
+.sentence { font-size: 26px; margin-top: 12px; }
 .cloze { font-weight: 600; color: var(--warn); }
 .aspect { font-size: 16px; }
 .aspect b { color: var(--ink); }
