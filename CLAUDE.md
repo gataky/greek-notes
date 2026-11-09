@@ -25,7 +25,7 @@ exports/                data for anki/, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
 sqlite-database.md      the lemma dictionary's developer guide (a copy)
 anki/                   the Anki sync tool (Go module, its own Makefile and README)
-.claude/skills/         skills that edit the vocabulary sheet (fill-verb-forms, update-examples-notes)
+.claude/skills/         add-verb (sheet → site → Anki), and the sheet editors it uses (fill-verb-forms, update-examples-notes)
 ```
 
 Put new files by type, not next to the page that uses them. Apps refer to the rest with `../javascripts/`, `../stylesheets/`, `../data/` and `../vendor/`. Don't name a folder `assets/`: Material writes its own files there.
@@ -143,7 +143,8 @@ A Go CLI (cobra) that reads the sheet through the Sheets API with a service acco
 - **`./sync push`** (`make push-words`): one note per row of the words tab in the "Greek" deck, with change detection by checksum and Greek audio from ElevenLabs or Google TTS.
 - **`./sync verbs`** (`make push-verbs`): the "Greek Verbs" deck from `exports/anki-verbs.json`. `--cards` sets the file, else `verbs.cards_path` in the config. Run it after `push`, since a verb's present reuses the vocabulary card's audio.
 - Both the site (`scripts/build_verbs.py`, CSV export) and the tool (Sheets API) read the words tab, with their own filters. A column change in the sheet has to be checked against both, and against the skills.
-- Go code and tests: `anki/internal/` (anki, sheets, sync, verbs, tts, mapper, ...), `anki/pkg/models/`. CI doesn't run the Go tests; `make check` does.
+- Go code and tests: `anki/internal/` (anki, sheets, sync, verbs, tts, mapper, ...), `anki/pkg/models/`. `.github/workflows/anki.yml` runs `go vet`, `go test` and a build on changes to `anki/`, `exports/` or the export script.
+- `anki/internal/verbs/export_test.go` decodes the committed `exports/anki-verbs.json` strictly, so a field the script writes but Go doesn't read, or a required field left empty, fails the Go tests. Rebuild the export (`make anki-verbs`) before running them after changing the script.
 
 ## Active or passive drill (`docs/drills/`, `docs/apps/passive-verbs.html`)
 

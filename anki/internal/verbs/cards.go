@@ -2,8 +2,8 @@
 // and recognise hard aorists) and "Greek aspect" cloze notes (choose the past continuous or the
 // aorist in a sentence).
 //
-// The forms, groups, highlighted letters and sentences come from greek-notes' exports/anki-verbs.json
-// (`make anki-verbs` there), which runs the same JavaScript as its verb tables and aspect forks
+// The forms, groups, highlighted letters and sentences come from the repo's exports/anki-verbs.json
+// (`make anki-verbs`), which runs the same JavaScript as the site's verb tables and aspect forks
 // pages, so the cards always agree with the site. This package only lays them out as notes.
 package verbs
 
@@ -84,7 +84,7 @@ func Load(path string) (*Export, error) {
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read verb cards (run `make anki-verbs` in greek-notes): %w", err)
+		return nil, fmt.Errorf("failed to read verb cards (run `make anki-verbs` at the repo root): %w", err)
 	}
 	var export Export
 	if err := json.Unmarshal(data, &export); err != nil {

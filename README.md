@@ -4,7 +4,7 @@ Personal notes for learning Modern Greek, published with [MkDocs Material](https
 
 ## Adding words
 
-The vocabulary sheet (`make sheet` opens it) feeds both the site and Anki. After adding words to the words tab:
+The vocabulary sheet (`make sheet` opens it) feeds both the site and Anki. After adding verbs, Claude's `add-verb` skill does all of the steps below; ask it to "add the new verbs". By hand, after adding words to the words tab:
 
 1. For a new verb, fill in its verb columns (voice, active form, future simple, aorist, overrides: M–Q). Claude's `fill-verb-forms` skill does this.
 2. For a new active verb, add its sentences to `docs/data/aspect-sentences.json`. `make sync` fails until it has them.

@@ -1,0 +1,40 @@
+name: Anki sync tool
+
+# The Go tests, including the check of the committed exports/anki-verbs.json against the
+# structs that read it. The site's own checks are in deploy.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'anki/**'
+      - 'exports/**'
+      - 'scripts/build_anki_verbs.js'
+      - '.tool-versions'
+      - '.github/workflows/anki.yml'
+  pull_request:
+    paths:
+      - 'anki/**'
+      - 'exports/**'
+      - 'scripts/build_anki_verbs.js'
+      - '.tool-versions'
+      - '.github/workflows/anki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: anki
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: .tool-versions
+          cache-dependency-path: anki/go.sum
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build -o sync ./cmd/sync
