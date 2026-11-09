@@ -56,7 +56,7 @@ First-person singular simple past, stressed on the third syllable from the end:
 
 ### Q: overrides
 
-Leave this blank for a regular verb, which is the usual case. Add an entry only for a form that can't be predicted from O and P. Nothing in this repo parses the column, so the existing rows are the only spec. Copy their format exactly: lowercase keys, entries joined with `; `, in this order.
+Leave this blank for a regular verb, which is the usual case. Add an entry only for a form that can't be predicted from O and P. `parseOverrides()` in `docs/javascripts/greek-verbs.js` reads the column, and the README's "Overrides" section explains it. It ignores unknown keys without a warning, so copy this format exactly: lowercase keys, entries joined with `; `, in this order.
 
 | Entry | Meaning | Example verb → value |
 |---|---|---|

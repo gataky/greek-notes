@@ -42,7 +42,7 @@ Run `make` to see every target. To add a Python package, run `uv add <package>` 
 
 ## Updating the verb tables
 
-The verb tables page reads `docs/data/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns O–P), and **overrides** (Q) only for irregular forms. Then:
+The verb tables page reads `docs/data/verbs.json`, which comes from the words tab of the vocabulary sheet (`make sheet` opens it). For each verb, fill in **future simple** and **aorist** (columns O–P), and **overrides** (Q) only for irregular forms ([format below](#overrides)). Then:
 
 ```sh
 make sync        # pull the verbs into verbs.json and run the checks
@@ -50,6 +50,24 @@ make verb-forms  # copy their forms from the dictionary into verb-forms.json (ne
 ```
 
 Commit `verbs.json` and `verb-forms.json`, and push. The page shows the dictionary's forms wherever it has them. The sheet's columns only count for forms the dictionary doesn't have.
+
+### Overrides
+
+The overrides column holds forms the conjugation engine can't work out from the future simple and aorist. Leave it blank for a regular verb. Otherwise it's a list of entries separated by `;`, each `key: value`, or just the key for `no perfective`:
+
+| Entry | What it sets | Example |
+|---|---|---|
+| `no perfective` | Nothing by itself. It marks a verb with no perfective stem, so the site and `make sync` stop asking for its future and aorist. Leave O and P blank: that's what leaves those forms empty. | είμαι → `no perfective` |
+| `past: X` | The past continuous, given as its 1st singular in -α, for a stem or augment the engine wouldn't guess. The other persons are built from it: the accent moves back as usual (ήθελα, θέλαμε), unless X has it later than the third syllable from the end (υπήρχα), in which case it stays put (υπήρχαμε). | θέλω → `past: ήθελα` |
+| `imp: εσύ, εσείς` | The simple imperative, singular then plural. | έρχομαι → `imp: έλα, ελάτε` |
+| `imp-cont: εσύ, εσείς` | The continuous imperative, the same way. | πάω → `imp-cont: πήγαινε, πηγαίνετε` |
+
+- Combine entries with `; `: έχω is `no perfective; past: είχα`.
+- In `imp` and `imp-cont`, write `—` for a form that doesn't exist (`imp: —, ιδωθείτε`). Give one form per person; there's no way to list alternatives.
+- Keys are lowercase. Anything else is ignored without a warning, so a typo silently falls back to the engine's guess: θέλω with `past ήθελα` (no colon) shows έθελα.
+- The engine reads the column in `parseOverrides()` in `docs/javascripts/greek-verbs.js`.
+
+The dictionary still wins. An override only shows where the dictionary has no form for that cell, or for a verb with no dictionary table, which is rare. At the moment, only two of the sheet's overrides change what the site and Anki show: αμφιβάλλω's `past:`, since the dictionary has no 1st singular past continuous for it, and βάζομαι's `imp:`, since βάζομαι has no table. The others agree with the dictionary or are replaced by it. They're still worth keeping, for cells a future dictionary build drops.
 
 ## Drill sentences
 
