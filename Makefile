@@ -11,7 +11,7 @@ DICT_URL    := https://github.com/gataky/greek-notes/releases/download/dictionar
 DICT_SHA256 := 5fc29721d7e7233d8c3f89e26471b78a237179d173ac4f303a89aaf8baae3adc
 
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms test dump serve build check clean sheet
+.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms anki-verbs test dump serve build check clean sheet
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-18s %s\n", $$1, $$2}'
@@ -30,6 +30,7 @@ sync: ## Pull verbs from the Google Sheet into verbs.json, then run the checks
 	@$(NODE) tests/test_voice_sentences.js
 	@$(NODE) tests/test_aspect_sentences.js
 	@$(NODE) tests/test_aspect_forks.js
+	@$(NODE) scripts/build_anki_verbs.js
 
 fetch-dictionary: ## Download the pinned dictionary into docs/data/ if it isn't there
 	@if [ ! -f $(DICT_GZ) ]; then \
@@ -62,6 +63,11 @@ verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (D
 	@$(NODE) tests/test_verb_forms.js
 	@$(NODE) tests/test_aspect_sentences.js
 	@$(NODE) tests/test_aspect_forks.js
+	@$(NODE) scripts/build_anki_verbs.js
+
+anki-verbs: ## Write the verb cards for ../anki-sync into exports/anki-verbs.json
+	$(NODE) scripts/build_anki_verbs.js
+	@git diff --stat -- exports/anki-verbs.json
 
 test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills' sentences, the aspect forks and the dictionary lookup
 	$(NODE) tests/test_verbs.js

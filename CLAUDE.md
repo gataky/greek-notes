@@ -20,7 +20,8 @@ docs/                   the site (MkDocs serves everything here)
   manifest.webmanifest, sw.js   must stay at the site root (service worker scope)
 overrides/              theme templates (custom_dir)
 hooks/                  MkDocs hooks
-scripts/                build_*.py: write the files in docs/data/
+scripts/                build_*.py: write the files in docs/data/; build_anki_verbs.js writes exports/
+exports/                data for other repos, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
 sqlite-database.md      the lemma dictionary's developer guide (a copy)
 ```
@@ -43,6 +44,7 @@ make fetch-dictionary  # download the pinned dictionary into docs/data/ (build, 
 make dictionary  # gzip a new lemma dictionary build into docs/data/, then test
 make publish-dictionary  # upload docs/data's dictionary as a GitHub release and pin the Makefile to it
 make verb-forms  # copy our verbs' forms from the dictionary into docs/data/verb-forms.json, then test
+make anki-verbs  # write the verb cards for ../anki-sync into exports/anki-verbs.json (sync and verb-forms do too)
 make upgrade   # uv lock --upgrade
 ```
 
@@ -112,6 +114,17 @@ A verb's present forking into its two stems, imperfective and perfective, each w
 - Notes on single verbs are generated (internal augment, an extra letter change, -ηκ-). There are no hand-written ones; don't add any.
 - Always shown, never folded: under the grid on the verb tables page and in dictionary entries, and on the aspect forks page, which groups the word list's active verbs. `tools/aspect-forks/#κλείνω` opens a verb, `#labials` a group.
 - `tests/test_aspect_forks.js` checks hand-checked groups, markup and notes, and that every dictionary verb's markup spells its forms. `--groups` prints the counts (about 1,880 active verbs, 95 irregular). Run it after changing the rules or `verb-forms.json`; `make verb-forms` and `make sync` do.
+
+## Anki verb cards (`scripts/build_anki_verbs.js`, `exports/anki-verbs.json`)
+
+The owner's Anki sync tool (`../anki-sync`, Go) pushes a "Greek Verbs" deck from this file with `./sync verbs`. The cards show what the site shows, so the forms and highlights are worked out here in JavaScript rather than ported to Go.
+
+- **Verbs:** the word list's active verbs, in `AspectFork.GROUPS` order (regular groups first, irregular last, which becomes Anki's new-card order). Each has its 1st singular present, past continuous, aorist and `θα` future, plain and as `markHTML()` spans, the group's name, rule and note, and the fork's notes.
+- **`recognize`** is the form for an aorist → present card, set for the irregular, strong and no-perfective groups.
+- **`example`** is the verb's past simple sentence from `aspect-sentences.json`.
+- **`cloze`** holds every past-tense sentence from `aspect-sentences.json`, with the answer wrapped as `{{c1::έγραψα::γράφω}}`. The answer is found with `answersIn()`, as in the drill.
+- Committed, one item per line, so the diff shows which cards a push will change. `make sync` and `make verb-forms` rebuild it. The script exits non-zero if a verb has no forms or a sentence's answer can't be found.
+- Don't rename fields without changing `../anki-sync/internal/verbs`.
 
 ## Active or passive drill (`docs/drills/`, `docs/apps/passive-verbs.html`)
 
