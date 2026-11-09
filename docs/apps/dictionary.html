@@ -32,16 +32,19 @@
 
 /* Entry */
 .card h2 { overflow-wrap: anywhere; }
-.entry { display: flex; flex-direction: column; gap: 8px; }
-.entry + .entry { border-top: 1px solid var(--line); padding-top: 16px; }
+/* One section per part of speech: heading, headword line, senses, then its own tables */
+.entry { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.entry + .entry { border-top: 2px solid var(--line); margin-top: 10px; padding-top: 22px; }
+.entry .pos { font-size: 20px; font-weight: 600; line-height: 1.2; margin: 0 0 2px; padding-left: 10px; border-left: 3px solid var(--accent); }
 .entry .head { color: var(--muted); font-size: 15px; margin: 0; }
-.entry ol { margin: 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; }
-.entry li::marker { color: var(--muted); font-size: 14px; }
+.senses { margin: 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; }
+.senses li::marker { color: var(--muted); font-size: 14px; }
+.entry > .conjugation, .entry > .declension { margin-top: 10px; }
 .label { color: var(--muted); font-style: italic; font-size: 14px; }
 .ref { color: var(--muted); }
-.entry .ex { display: block; margin-top: 3px; padding-left: 10px; border-left: 2px solid var(--line); }
-.entry .ex .el { display: block; font-family: var(--display); font-size: 18px; }
-.entry .ex .tr { display: block; color: var(--muted); font-size: 14px; }
+.senses .ex { display: block; margin-top: 3px; padding-left: 10px; border-left: 2px solid var(--line); }
+.senses .ex .el { display: block; font-family: var(--display); font-size: 18px; }
+.senses .ex .tr { display: block; color: var(--muted); font-size: 14px; }
 .card a { color: var(--accent); }
 a.w { font-family: var(--display); font-size: 1.1em; text-decoration: none; }
 a.w:hover { text-decoration: underline; }
@@ -52,7 +55,7 @@ a.w:hover { text-decoration: underline; }
 
 /* A verb's conjugation (verb-grid.js) and a noun's or adjective's declension, inside the entry */
 .conjugation, .declension { display: flex; flex-direction: column; gap: 14px; min-width: 0; border-top: 1px solid var(--line); padding-top: 16px; }
-.conjugation h3, .declension h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.conjugation h4, .declension h4 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
 .card-tag { margin-left: 8px; letter-spacing: 0; text-transform: none; }
 .declension table { width: auto; }
 .declension td:not(.who) { padding-right: 32px; }
@@ -247,7 +250,20 @@ $("results").addEventListener("click", e => {
 
 // ---------- Entry ----------
 
+// The part of speech as a heading (pos_display in the database guide).
+const POS_NAMES = {
+  adj: "adjective", adv: "adverb", name: "proper noun", num: "numeral", intj: "interjection",
+  pron: "pronoun", prep: "preposition", conj: "conjunction", prep_phrase: "prepositional phrase", det: "determiner",
+};
+
+// One section per entry: its part of speech, headword line, senses and etymology, then its own
+// tables, so καλός the adjective is followed by the adjective's declension and καλός the noun by
+// the noun's. The conjugation goes with the first verb entry, or after them all when the word
+// list has the verb but the dictionary doesn't call any entry a verb.
 function entryHTML(found) {
+  const nouns = dict.declensions(found.word), adjectives = dict.adjectiveDeclensions(found.word);
+  const conjugation = conjugationHTML(found);
+  const verbEntry = found.entries.find(e => e.pos === "verb");
   const entries = found.entries.map(entry => {
     const senses = entry.senses.map(s => {
       const example = s.example
@@ -256,25 +272,28 @@ function entryHTML(found) {
       return `<li${s.isReference ? ' class="ref"' : ""}>${glossHTML(s.gloss, { link: true })}${example}</li>`;
     }).join("");
     const etymology = entry.etymology ? `<details><summary>Etymology</summary><p>${linkWords(entry.etymology)}</p></details>` : "";
-    return `<div class="entry">
-      <div class="tags"><span class="tag">${esc(entry.pos)}</span></div>
+    const tables = (entry === verbEntry ? conjugation : "")
+      + declensionHTML(nouns.filter(t => t.entry === entry.id))
+      + adjectiveHTML(adjectives.filter(t => t.entry === entry.id));
+    return `<section class="entry">
+      <h3 class="pos">${esc(POS_NAMES[entry.pos] || entry.pos.replace(/_/g, " "))}</h3>
       ${entry.head ? `<p class="head">${linkWords(entry.head)}</p>` : ""}
-      <ol>${senses}</ol>${etymology}</div>`;
+      <ol class="senses">${senses}</ol>${etymology}${tables}</section>`;
   }).join("");
   const otherForms = found.forms.length
     ? `<details><summary>Other forms · ${found.forms.length}</summary><div class="forms" lang="el">${found.forms.map(f => `<span>${esc(f)}</span>`).join("")}</div></details>`
     : "";
   const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
   return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2></div>
-    ${entries}${conjugationHTML(found)}${declensionHTML(found)}${adjectiveHTML(found)}${otherForms}<div class="links">${wiktionary}</div>`;
+    ${entries}${verbEntry ? "" : conjugation}${otherForms}<div class="links">${wiktionary}</div>`;
 }
 
 // An adjective's or participle's declension (adjectiveDeclensions() in greek-dictionary.js): the
 // cases down, the genders across, singular then plural. Like the verb grid, wide screens get one
 // table and narrow ones a table per number. The column headings give the gender, so no articles.
-function adjectiveHTML(found) {
+function adjectiveHTML(tables) {
   const { CASES, NUMBERS, GENDERS } = GreekDictionary;
-  return dict.adjectiveDeclensions(found.word).map(({ pos, cells }) => {
+  return tables.map(({ cells }) => {
     const numbers = NUMBERS.filter(n => GENDERS.some(g => CASES.some(c => cells[g][c][n] !== null)));
     const genders = (c, n) => GENDERS.map(g => `<td>${VerbGrid.cellHTML(cells[g][c][n] || [])}</td>`).join("");
     const subs = GENDERS.map(g => `<th class="sub">${g}</th>`).join("");
@@ -283,8 +302,7 @@ function adjectiveHTML(found) {
       <tr><th></th>${nums.map((n, i) => `${gap(i, "th")}<th class="group" colspan="3">${n}</th>`).join("")}</tr>
       <tr><th></th>${nums.map((n, i) => gap(i, "th") + subs).join("")}</tr></thead>
       <tbody>${CASES.map(c => `<tr><td class="who">${c}</td>${nums.map((n, i) => gap(i, "td") + genders(c, n)).join("")}</tr>`).join("")}</tbody></table></div>`;
-    const tag = `<span class="tag card-tag">${pos === "participle" ? "participle" : "adjective"}</span>`;
-    return `<section class="declension adjective"><h3>Declension${tag}</h3>
+    return `<section class="declension adjective"><h4>Declension</h4>
       <div class="wide">${table(numbers)}</div>
       <div class="stacked">${numbers.map(n => table([n])).join("")}</div></section>`;
   }).join("");
@@ -293,15 +311,15 @@ function adjectiveHTML(found) {
 // A noun's declension tables, straight from the dictionary (declensions() in greek-dictionary.js),
 // with the article before each form. A number the table has nothing for (a noun with no plural)
 // is left out; a form that doesn't exist shows as a dash.
-function declensionHTML(found) {
+function declensionHTML(tables) {
   const { CASES, NUMBERS, article } = GreekDictionary;
-  return dict.declensions(found.word).map(({ gender, cells }) => {
+  return tables.map(({ gender, cells }) => {
     const numbers = NUMBERS.filter(n => CASES.some(c => cells[c][n] !== null));
     const withArticle = (c, n, f) => (article(gender, c, n) && !f.includes(" ") ? article(gender, c, n) + " " + f : f);
     const rows = CASES.map(c => `<tr><td class="who">${c}</td>${numbers.map(n =>
       `<td>${VerbGrid.cellHTML((cells[c][n] || []).map(f => withArticle(c, n, f)))}</td>`).join("")}</tr>`).join("");
     const tag = gender ? `<span class="tag card-tag">${gender}</span>` : "";
-    return `<section class="declension"><h3>Declension${tag}</h3>
+    return `<section class="declension"><h4>Declension${tag}</h4>
       <div class="scroll"><table lang="el"><thead><tr><th></th>${numbers.map(n => `<th class="sub">${n}</th>`).join("")}</tr></thead>
       <tbody>${rows}</tbody></table></div></section>`;
   }).join("");
@@ -320,7 +338,7 @@ function conjugationHTML(found) {
   const { verb, conjugation } = shown;
   const pattern = VerbGrid.PATTERN_ENDINGS[conjugation.pattern];
   const tag = pattern ? `<span class="tag card-tag">${esc(conjugation.pattern)} · ${esc(pattern)}</span>` : "";
-  const heading = `<h3>Conjugation${listed && listed !== found.word ? ` <span lang="el">· ${esc(listed)}</span>` : ""}${tag}</h3>`;
+  const heading = `<h4>Conjugation${listed && listed !== found.word ? ` <span lang="el">· ${esc(listed)}</span>` : ""}${tag}</h4>`;
   return `<section class="conjugation">${VerbGrid.cardHTML(verb, { heading, conjugation })}${forkHTML(verb, conjugation)}</section>`;
 }
 
@@ -332,7 +350,7 @@ function forkHTML(verb, conjugation) {
   const inList = sheet.some(v => v.greek === verb.greek && v.voice === "active");
   const href = `../tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
   const drawn = fork.group !== "irregular" && fork.group !== "missing";
-  return `<div class="fork-block"><h3 class="fork-title">Aspect fork<a href="${href}" target="_top">All the groups →</a></h3>
+  return `<div class="fork-block"><h4 class="fork-title">Aspect fork<a href="${href}" target="_top">All the groups →</a></h4>
     ${AspectFork.forkHTML(fork)}${drawn ? AspectFork.LEGEND : ""}</div>`;
 }
 

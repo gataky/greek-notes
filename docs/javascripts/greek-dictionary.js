@@ -444,7 +444,7 @@
       const [id, , frequency] = found;
       const entries = rows("SELECT id, pos_display, head, etymology FROM entry WHERE headword_id = ? ORDER BY ord", [id])
         .map(([entryId, pos, head, etymology]) => ({
-          pos, head, etymology,
+          id: entryId, pos, head, etymology,
           senses: rows("SELECT gloss, example, example_translation, is_reference FROM sense WHERE entry_id = ? ORDER BY ord", [entryId])
             .map(([gloss, example, translation, ref]) => ({ gloss, example, translation, isReference: !!ref })),
         }));
@@ -525,40 +525,41 @@
     }
 
     // A noun's declension tables, from its own entries:
-    //   [{ gender, cells: { nominative: { singular: ["δρόμ|ος"], plural: ["δρόμ|οι"] }, ... } }]
+    //   [{ entry, gender, cells: { nominative: { singular: ["δρόμ|ος"], plural: ["δρόμ|οι"] }, ... } }]
     // A cell is a list of alternatives, most usual first, [] when the form doesn't exist and null
     // when the table doesn't say. gender ("masculine", "feminine", "neuter") comes from the
-    // table's template (el-nM-ος-οι-2a), else the entry's headword line, else it's null.
+    // table's template (el-nM-ος-οι-2a), else the entry's headword line, else it's null. entry is
+    // the id of the entry the table belongs to, as in lookup()'s entries.
     // Tables declined like adjectives, by gender, are left out.
     function declensions(word) {
-      const found = rows(`SELECT t.id, t.template, e.head, i.form, g.tags
+      const found = rows(`SELECT t.id, e.id, t.template, e.head, i.form, g.tags
         FROM headword h JOIN entry e ON e.headword_id = h.id
         JOIN inflection_table t ON t.entry_id = e.id
         JOIN inflection i ON i.table_id = t.id JOIN inflection_tags g ON g.id = i.tags_id
         WHERE h.word = ? AND e.pos = 'noun' AND t.kind = 'declension' AND t.word IS NULL
         ORDER BY e.ord, t.ord, i.ord`, [word]);
       const tables = new Map();
-      for (const [id, template, head, form, tags] of found) {
-        if (!tables.has(id)) tables.set(id, { template, head, rows: [] });
+      for (const [id, entry, template, head, form, tags] of found) {
+        if (!tables.has(id)) tables.set(id, { entry, template, head, rows: [] });
         tables.get(id).rows.push({ form, tags: new Set(tags.split(" ")) });
       }
       const out = [];
-      for (const { template, head, rows: cellRows } of tables.values()) {
+      for (const { entry, template, head, rows: cellRows } of tables.values()) {
         if (cellRows.some(r => Object.values(GENDER_CODES).some(g => r.tags.has(g)))) continue;
         const code = /^el-n([MFN])-/.exec(template || "");
         const fromHead = /^(masculine|feminine|neuter)\b(?! or)/.exec(head || "");
         const gender = code ? GENDER_CODES[code[1]] : fromHead ? fromHead[1] : null;
         const cells = Object.fromEntries(CASES.map(c => [c, Object.fromEntries(NUMBERS.map(n => [n, cellOf(cellRows, c, n)]))]));
         if (CASES.some(c => NUMBERS.some(n => cells[c][n] !== null))) {
-          out.push({ gender, cells: markEndings(cells, template, cells.nominative.singular && cells.nominative.singular[0]) });
+          out.push({ entry, gender, cells: markEndings(cells, template, cells.nominative.singular && cells.nominative.singular[0]) });
         }
       }
       return out;
     }
 
     // An adjective's or participle's declension, one per entry:
-    //   [{ pos: "adj" or "participle", cells: { masculine: { nominative: { singular: ["καλ|ός"], plural: ["καλ|οί"] }, ... }, feminine: ..., neuter: ... } }]
-    // Cells are as in declensions(). Only the positive degree: comparative and superlative rows
+    //   [{ entry, pos: "adj" or "participle", cells: { masculine: { nominative: { singular: ["καλ|ός"], plural: ["καλ|οί"] }, ... }, feminine: ..., neuter: ... } }]
+    // entry and cells are as in declensions(). Only the positive degree: comparative and superlative rows
     // are skipped, whether they have tables of their own (ωραίος) or share the positive one
     // (ελαφρύς). The endings are split at the letters every gender's forms share.
     // A few entries have two positive tables for one word: βαρύς declines as βαριά or, formally,
@@ -586,7 +587,7 @@
         entry.tables.get(tableId).push({ form, tags: set });
       }
       const out = [];
-      for (const { pos, feminines, tables } of entries.values()) {
+      for (const [entry, { pos, feminines, tables }] of entries) {
         const rank = tableRows => {
           const feminine = tableRows.find(r => ["feminine", "nominative", "singular"].every(t => r.tags.has(t)));
           const i = feminine ? feminines.indexOf(feminine.form) : -1;
@@ -596,7 +597,7 @@
         const cells = Object.fromEntries(GENDERS.map(g => [g, Object.fromEntries(CASES.map(c =>
           [c, Object.fromEntries(NUMBERS.map(n => [n, cellOf(cellRows, g, c, n)]))]))]));
         if (!allForms(cells).length) continue;
-        out.push({ pos, cells: markEndings(cells, null, cells.masculine.nominative.singular && cells.masculine.nominative.singular[0]) });
+        out.push({ entry, pos, cells: markEndings(cells, null, cells.masculine.nominative.singular && cells.masculine.nominative.singular[0]) });
       }
       return out;
     }
