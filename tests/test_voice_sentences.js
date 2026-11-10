@@ -100,6 +100,28 @@ bank.forEach((s, i) => {
   }
 }
 
+// Marking levels: which results count as right, and the letters the feedback highlights.
+{
+  const MARKS = [
+    ["accent", "exact", false], ["accent", "accents", true], ["accent", "forgiving", true],
+    ["spelling", "accents", false], ["spelling", "forgiving", true],
+    ["wrong person", "forgiving", false], ["wrong voice", "forgiving", false], ["particle", "forgiving", false],
+    ["correct", "exact", true], ["accent", "unknown", true],
+  ];
+  for (const [result, level, want] of MARKS) {
+    if (VD.countsAsRight(result, level) !== want) fail("marking", `${result} at ${level}: expected ${want ? "right" : "wrong"}`);
+  }
+  const marked = (typed, answer) => VD.changes(typed, answer).map(([t, c]) => c ? `[${t}]` : t).join("");
+  const DIFFS = [
+    ["γραφω", "γράφω", "γρ[ά]φω"], ["γράφις", "γράφεις", "γράφ[ε]ις"], ["Γράφω", "γράφω", "γράφω"],
+    ["θα γραψω", "θα γράψω", "θα γρ[ά]ψω"], ["σικονόμαστε", "σηκωνόμαστε", "σ[η]κ[ω]νόμαστε"],
+  ];
+  for (const [typed, answer, want] of DIFFS) {
+    const got = marked(typed, answer);
+    if (got !== want) fail("changes", `"${typed}" → "${answer}": got ${got}, expected ${want}`);
+  }
+}
+
 // Coverage: every drilled verb in every person, where the bank has it.
 const gaps = [];
 const drilled = [...passives.flatMap(p => [p.activeForm, p.greek]), ...deponents.map(d => d.greek)];

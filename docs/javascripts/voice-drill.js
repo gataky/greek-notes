@@ -116,7 +116,39 @@
     return { result: "wrong", typed: t };
   }
 
-  const api = { PERSONS, lower, strip, expand, present, tokens, answersIn, lev, grade };
+  // How strictly the drills mark spelling, a setting on both pages. Each level lists the
+  // slips it counts as right; real mistakes (wrong person, voice, aspect, θα / να) never are.
+  const MARKING = { exact: [], accents: ["accent"], forgiving: ["accent", "spelling"] };
+  const DEFAULT_MARKING = "accents";
+  const countsAsRight = (result, level) =>
+    result === "correct" || (MARKING[level] || MARKING[DEFAULT_MARKING]).includes(result);
+
+  // The answer split into [text, changed] runs, changed being the letters that differ from
+  // what was typed (by longest common subsequence, so an accent or one letter lights up).
+  function changes(typed, answer) {
+    const a = Array.from(lower(typed)), b = Array.from(answer);
+    const lb = Array.from(lower(answer));
+    const L = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+    for (let i = a.length - 1; i >= 0; i--) {
+      for (let j = b.length - 1; j >= 0; j--) {
+        L[i][j] = a[i] === lb[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+      }
+    }
+    const runs = [];
+    const add = (ch, changed) => {
+      const last = runs[runs.length - 1];
+      if (last && last[1] === changed) last[0] += ch; else runs.push([ch, changed]);
+    };
+    let i = 0;
+    for (let j = 0; j < b.length; j++) {
+      while (i < a.length && a[i] !== lb[j] && L[i + 1][j] >= L[i][j + 1]) i++;
+      if (i < a.length && a[i] === lb[j]) { add(b[j], false); i++; } else add(b[j], true);
+    }
+    return runs;
+  }
+
+  const api = { PERSONS, lower, strip, expand, present, tokens, answersIn, lev, grade,
+    MARKING, DEFAULT_MARKING, countsAsRight, changes };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.VoiceDrill = api;
 })(this);

@@ -155,6 +155,7 @@ Present tense: an English sentence, and the learner types the Greek verb, choosi
 - **`voice-drill.js`** (browser and Node) has the logic the page and the test share: present forms with `ουν(ε)` expanded, finding the answer word in a sentence, and grading (correct, accent, spelling, wrong person, wrong voice).
 - **`tests/test_voice_sentences.js`** runs in `make test`, `make sync` and CI. It fails when a sentence's Greek doesn't contain exactly one word that is its verb in its person, when the reason doesn't fit the voice, when "you" isn't marked (sg) or (pl), or on duplicates. A changed verb in the sheet can break sentences, which is why `make sync` runs it. `--gaps` lists verb/person pairs with no sentence; βλέπομαι in the singular and most of βάζομαι are left out on purpose.
 - **Page:** pairs come back to back (the same verb once active, once -μαι), unseen sentences come first until a verb's sentences are used up, persons with more misses come up more often, and missed sentences come back a few turns later. Progress is per device, in localStorage (`gav-history`, `gav-seen`, `gav-settings`).
+- **Marking** (both drills): Exact, Accents optional (the default) or Forgiving decides whether `grade()`'s `accent` and `spelling` results count as right for the score, streak and retries (`MARKING` and `countsAsRight()` in `voice-drill.js`). Wrong person, voice, aspect, tense and θα / να never do. Either way the feedback lights up the letters that differ (`changes()`), and the history keeps the raw result.
 
 ## Tense and aspect drill (`docs/drills/tense-aspect.md`, `docs/apps/tense-aspect.html`)
 
@@ -187,6 +188,7 @@ Active verbs only, since the owner hasn't learned the passive past yet. The lear
   - A verb's two aspects in one tense come back to back.
   - Tenses with more misses come up more often, and missed sentences come back a few turns later.
   - Chips turn each tense on or off.
+  - Marking works as in the active or passive drill.
   - Progress is per device, in localStorage (`gta-history`, `gta-seen`, `gta-settings`).
 
 ## Dictionary (`docs/apps/dictionary.html`)

@@ -94,6 +94,7 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 
 .feedback .fix { font-family: var(--display); font-size: 22px; color: var(--ink); }
 .feedback .fix s { color: var(--bad); text-decoration-thickness: 1.5px; }
 .feedback .fix b { color: var(--good); font-weight: 400; }
+.feedback .fix mark { background: var(--warn-soft); color: var(--warn); border-radius: 3px; padding: 0 1px; }
 
 .reveal { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
 .greek { font-family: var(--display); font-size: clamp(24px, 5.5vw, 30px); line-height: 1.25; margin: 0; }
@@ -219,6 +220,16 @@ table.para { border-collapse: collapse; width: 100%; }
     </div>
 
     <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" role="radiogroup" aria-label="Marking">
+        <label class="chip"><input type="radio" name="marking" value="exact"> Exact</label>
+        <label class="chip"><input type="radio" name="marking" value="accents"> Accents optional</label>
+        <label class="chip"><input type="radio" name="marking" value="forgiving"> Forgiving</label>
+      </div>
+      <p class="help" id="markingInfo"></p>
+    </div>
+
+    <div class="section">
       <h2>Where you slip</h2>
       <p class="help" id="slipInfo"></p>
       <div class="slip" id="slip" hidden></div>
@@ -274,7 +285,8 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
 
-let settings = { pairs: true, deps: true, showPair: false, ...store.get("gav-settings", {}) };
+let settings = { pairs: true, deps: true, showPair: false, marking: VD.DEFAULT_MARKING, ...store.get("gav-settings", {}) };
+if (!(settings.marking in VD.MARKING)) settings.marking = VD.DEFAULT_MARKING;
 let history = store.get("gav-history", []);   // [{ p: person, v: voice, r: result }], newest last
 let seen = new Set(store.get("gav-seen", []));  // sentences already asked, so the bank cycles
 let byVerb = new Map(), pairs = [], deponents = [], bankSize = 0;
@@ -416,7 +428,7 @@ function finish(g, raw) {
   answered = true;
   const result = g ? g.result : "shown";
   session.total++;
-  if (result === "correct") { session.correct++; session.streak++; }
+  if (VD.countsAsRight(result, settings.marking)) { session.correct++; session.streak++; }
   else {
     session.streak = 0;
     retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
@@ -452,16 +464,24 @@ function message(g) {
 
 function showFeedback(g, raw) {
   const f = $("feedback");
-  const kind = !g ? "bad" : g.result === "correct" ? "good" : (g.result === "accent" || g.result === "spelling") ? "warn" : "bad";
+  const ok = g && VD.countsAsRight(g.result, settings.marking);
+  const kind = !g ? "bad" : ok ? "good" : (g.result === "accent" || g.result === "spelling") ? "warn" : "bad";
   f.className = "feedback " + kind;
   f.innerHTML = "";
-  const strong = document.createElement("strong"); strong.textContent = RESULT[g ? g.result : "shown"]; f.append(strong);
-  const msg = g ? message(g) : "This one will come back later.";
+  const strong = document.createElement("strong"); strong.textContent = RESULT[ok ? "correct" : g ? g.result : "shown"]; f.append(strong);
+  const msg = !g ? "This one will come back later." : ok && g.result !== "correct" ? "Counted as right. " + message(g) : message(g);
   if (msg) { const p = document.createElement("span"); p.className = "msg"; p.textContent = msg; f.append(p); }
   if (g && g.result !== "correct") {
     const fix = document.createElement("span"); fix.className = "fix"; fix.lang = "el";
     const del = document.createElement("s"); del.textContent = g.typed;
-    const ins = document.createElement("b"); ins.textContent = item.answer;
+    const ins = document.createElement("b");
+    if (g.result === "accent" || g.result === "spelling") {
+      // Light up the letters that differ, so a slip that counts as right is still seen.
+      for (const [text, changed] of VD.changes(g.typed, item.answer)) {
+        if (!changed) { ins.append(text); continue; }
+        const m = document.createElement("mark"); m.textContent = text; ins.append(m);
+      }
+    } else ins.textContent = item.answer;
     fix.append(del, " → ", ins); f.append(fix);
   }
   f.hidden = false;
@@ -605,6 +625,23 @@ $("optPairs").addEventListener("change", e => setOption("pairs", e.target.checke
 $("optDeps").addEventListener("change", e => setOption("deps", e.target.checked));
 $("optPair").addEventListener("change", e => setOption("showPair", e.target.checked));
 $("reset").addEventListener("click", () => { history = []; store.set("gav-history", history); renderSlips(); });
+// ---------- Marking ----------
+
+const MARKING_HELP = {
+  exact: "Every letter and accent has to be right.",
+  accents: "A missing or misplaced accent counts as right; other spelling slips don't.",
+  forgiving: "Accent and small spelling slips count as right.",
+};
+function renderMarking() {
+  for (const r of document.querySelectorAll('input[name="marking"]')) r.checked = r.value === settings.marking;
+  $("markingInfo").textContent = MARKING_HELP[settings.marking] +
+    " You're still shown the right spelling, and slips still show under Where you slip.";
+}
+for (const r of document.querySelectorAll('input[name="marking"]')) {
+  r.addEventListener("change", () => { if (r.checked) { setOption("marking", r.value); renderMarking(); } });
+}
+renderMarking();
+
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && answered && !$("panel-drill").hidden && e.target.tagName !== "BUTTON") { e.preventDefault(); next(); }
 });
