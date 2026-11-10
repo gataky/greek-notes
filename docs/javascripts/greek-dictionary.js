@@ -530,14 +530,15 @@
     // when the table doesn't say. gender ("masculine", "feminine", "neuter") comes from the
     // table's template (el-nM-ος-οι-2a), else the entry's headword line, else it's null. entry is
     // the id of the entry the table belongs to, as in lookup()'s entries.
-    // Tables declined like adjectives, by gender, are left out.
-    function declensions(word) {
+    // Tables declined like adjectives, by gender, are left out. pos "name" gives a proper
+    // name's instead (Αθήνα, Απρίλιος), which the dictionary page doesn't show.
+    function declensions(word, pos = "noun") {
       const found = rows(`SELECT t.id, e.id, t.template, e.head, i.form, g.tags
         FROM headword h JOIN entry e ON e.headword_id = h.id
         JOIN inflection_table t ON t.entry_id = e.id
         JOIN inflection i ON i.table_id = t.id JOIN inflection_tags g ON g.id = i.tags_id
-        WHERE h.word = ? AND e.pos = 'noun' AND t.kind = 'declension' AND t.word IS NULL
-        ORDER BY e.ord, t.ord, i.ord`, [word]);
+        WHERE h.word = ? AND e.pos = ? AND t.kind = 'declension' AND t.word IS NULL
+        ORDER BY e.ord, t.ord, i.ord`, [word, pos]);
       const tables = new Map();
       for (const [id, entry, template, head, form, tags] of found) {
         if (!tables.has(id)) tables.set(id, { entry, template, head, rows: [] });

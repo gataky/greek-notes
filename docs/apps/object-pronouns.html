@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Object Pronouns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/drill.css">
+<style>
+.slip { grid-template-columns: auto 1fr; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Weak pronouns · where they go</div>
+    <h1>Object Pronouns</h1>
+    <p class="sub">Type the marked words in Greek: the verb with its weak pronoun (το, τον, της, μου…). Choose the pronoun by the gender of what it stands for, and put it where it goes: before the verb, after θα, να, δεν and μην, but after an imperative.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Where they go</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap">
+    <div class="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="eyebrow">Fill the gap</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <p class="english" id="english" aria-live="polite">Loading sentences…</p>
+        <p class="gapped" id="gapped" lang="el"></p>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off">
+        <input class="answer" id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="The pronoun and the verb…" aria-label="Your answer" disabled>
+        <button class="btn" id="check" type="submit" disabled>Check</button>
+      </form>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="reveal" id="reveal" hidden>
+        <p class="greek" id="greek" lang="el"></p>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+          <p class="note" id="note" hidden></p>
+          <p class="note" id="also" lang="el" hidden></p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips" id="chips"></div>
+      <p class="help" id="bankInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" id="marking" role="radiogroup" aria-label="Marking"></div>
+      <p class="help" id="markingInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tables">
+        <div class="tcard">
+          <h3>The weak pronouns</h3>
+          <p>Accusative for the object, genitive for "to" someone.</p>
+          <table lang="el">
+            <tr><th></th><th>acc.</th><th>gen.</th></tr>
+            <tr><td class="who" lang="en">me</td><td>με</td><td>μου</td></tr>
+            <tr><td class="who" lang="en">you</td><td>σε</td><td>σου</td></tr>
+            <tr><td class="who" lang="en">him</td><td>τον</td><td>του</td></tr>
+            <tr><td class="who" lang="en">her</td><td>τη(ν)</td><td>της</td></tr>
+            <tr><td class="who" lang="en">it</td><td>το</td><td>του</td></tr>
+            <tr><td class="who" lang="en">us</td><td>μας</td><td>μας</td></tr>
+            <tr><td class="who" lang="en">you pl.</td><td>σας</td><td>σας</td></tr>
+            <tr><td class="who" lang="en">them</td><td>τους, τις, τα</td><td>τους</td></tr>
+          </table>
+        </div>
+        <div class="tcard">
+          <h3>Where they go</h3>
+          <p>Before the verb, except after an imperative.</p>
+          <table lang="el">
+            <tr><td class="who" lang="en">plain verb</td><td><b>το</b> ξέρω</td></tr>
+            <tr><td class="who" lang="en">δεν</td><td>δεν <b>το</b> ξέρω</td></tr>
+            <tr><td class="who" lang="en">θα, να</td><td>θα <b>το</b> πω</td></tr>
+            <tr><td class="who" lang="en">imperative</td><td>πες <b>το</b></td></tr>
+            <tr><td class="who" lang="en">μην</td><td>μην <b>το</b> πεις</td></tr>
+            <tr><td class="who" lang="en">two</td><td><b>μου το</b> έδωσε</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li>"It" and "them" take the gender of the noun they stand for: <span class="g">το βιβλίο → το</span>, <span class="g">ο καφές → τον</span>, <span class="g">η πόρτα → την</span>, <span class="g">οι πόρτες → τις</span>.</li>
+          <li>"Gave me", "told him", "phone her" are "to" someone, so the genitive: <span class="g">μου έδωσε, του είπα, της τηλεφώνησα</span>.</li>
+          <li>Two pronouns before the verb: the genitive first. <span class="g">Μου το έδωσε. Θα σου τα φέρω.</span> After an imperative either order is fine: <span class="g">δώσ' μου το, δώσ' το μου</span>.</li>
+          <li>An imperative stressed on its third-last syllable takes a second accent before the pronoun: <span class="g">διάβασέ το, βοήθησέ με, περίμενέ με</span>.</li>
+          <li>Speech often shortens the imperative before a pronoun: <span class="g">δώσ' το, πάρ' τα, βάλ' το</span>. The full <span class="g">δώσε το, πάρε τα</span> is accepted too.</li>
+          <li>See <a href="../grammar/pronouns/personal/" target="_top">Personal pronouns</a> for the notes behind this drill.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/gap-sentences.js"></script>
+<script src="../javascripts/pronoun-drill.js"></script>
+<script src="../javascripts/drill-kit.js"></script>
+<script src="../javascripts/gap-drill-page.js"></script>
+<script>
+"use strict";
+const PD = window.PronounDrill, VD = window.VoiceDrill;
+const RULES = {
+  before: ["Before the verb", "A weak pronoun goes right before the verb."],
+  negation: ["After δεν", "After δεν, the pronoun still goes right before the verb."],
+  particle: ["After θα, να", "θα or να comes first, then the pronoun, then the verb."],
+  imperative: ["After an imperative", "With an imperative, the pronoun goes after the verb."],
+  dont: ["After μην", "With μην, the pronoun goes back before the verb."],
+};
+const TWO = " With two pronouns, the one for \"to whom\" comes first.";
+const hasTwoAccents = w => (w.normalize("NFD").match(/́/g) || []).length > 1;
+const show = w => `${w} (${PD.meaning(w)})`;
+
+window.GapDrillPage({
+  storage: "gop",
+  data: ["pronoun-sentences"],
+  groups: Object.entries(RULES).map(([key, [label]]) => ({ key, label: label.replace(/(θα, να|δεν|μην)/, '<span class="g" lang="el">$1</span>') })),
+  prepare: s => (PD.RULES.includes(s.rule) && PD.analyse(s.answer) ? { ...s, group: s.rule, answers: [s.answer, ...(s.also || [])] } : null),
+  grade: PD.grade,
+  explain(g, item) {
+    const why = RULES[item.rule][1] + (PD.analyse(item.answer).pronouns.length === 2 && item.rule !== "imperative" ? TWO : "");
+    const side = g.order === false ? [why] : [];
+    switch (g.result) {
+      case "correct": return { kind: "good", title: "Σωστά!", msg: [] };
+      case "accent": return { kind: "warn", title: "Almost. Check the accent.", msg: [VD.lower(item.answer).split(" ").some(hasTwoAccents)
+        ? "The imperative is stressed on its third-last syllable, so it takes a second accent before the pronoun." : "The letters are right; only an accent is off."] };
+      case "order": return { kind: "bad", title: "Right words, wrong order.", msg: [why] };
+      case "pronoun": {
+        const msg = g.extra.length && g.missing.length ? `${g.extra.map(show).join(", ")}: here it's ${g.missing.map(show).join(", ")}.`
+          : g.missing.length ? `Missing: ${g.missing.map(show).join(", ")}.` : `Not needed here: ${g.extra.join(", ")}.`;
+        return { kind: "bad", title: "Check the pronoun.", msg: [msg, ...side] };
+      }
+      case "particle": return { kind: "bad", title: "Check θα, να, δεν or μην.", msg: side };
+      case "spelling": return { kind: "warn", title: "Close: check the verb's spelling.", msg: side };
+      case "verb": return { kind: "bad", title: g.pronounsRight ? "Right pronoun, check the verb form." : "Check the verb form and the pronoun.", msg: side };
+      default: return { kind: "bad", title: "Not quite.", msg: [] };
+    }
+  },
+  reason: item => [RULES[item.rule][0], RULES[item.rule][1] + (PD.analyse(item.answer).pronouns.length === 2 && item.rule !== "imperative" ? TWO : "")],
+  errors: [["Word order", "order"], ["Pronoun", "pronoun"], ["θα, να, δεν, μην", "particle"], ["Verb form", "verb"], ["Accent", "accent"], ["Spelling", "spelling"], ["Other", "wrong"]],
+});
+</script>
+</body>
+</html>

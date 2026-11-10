@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Noun Gender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/drill.css">
+<style>
+.slip { grid-template-columns: auto 1fr 1fr; }
+.counts td { font-family: var(--body); font-size: 15px; font-variant-numeric: tabular-nums; }
+.counts td:first-child { font-family: var(--display); font-size: 19px; }
+.counts td.top { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Nouns · gender</div>
+    <h1>Noun Gender</h1>
+    <p class="sub">A noun from your word list. Pick its article (ο, η or το), then type its plural with the article. The ending is the best clue, and the page shows how often it holds in your list.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">How to tell</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap">
+    <div class="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="eyebrow" id="ask">Which article?</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <p class="big" id="word" lang="el">…</p>
+        <p class="sub" id="gloss" aria-live="polite">Loading nouns…</p>
+      </div>
+
+      <div class="choices" id="choices">
+        <button class="choice" type="button" data-gender="masculine" disabled><span lang="el">ο</span><small>masculine</small></button>
+        <button class="choice" type="button" data-gender="feminine" disabled><span lang="el">η</span><small>feminine</small></button>
+        <button class="choice" type="button" data-gender="neuter" disabled><span lang="el">το</span><small>neuter</small></button>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off" hidden>
+        <input class="answer" id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="The plural, with its article: οι…, τα…" aria-label="The plural">
+        <button class="btn" id="check" type="submit">Check</button>
+      </form>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="reveal" id="reveal" hidden>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+        </div>
+        <div class="scroll"><table class="para" id="para" lang="el"></table></div>
+      </div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="opt-plural"> Also the plural</label>
+        <label class="chip"><input type="checkbox" id="opt-english"> Show the English</label>
+      </div>
+      <p class="help" id="bankInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" id="marking" role="radiogroup" aria-label="Marking"></div>
+      <p class="help" id="markingInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tcard">
+        <h3>Endings in your word list</h3>
+        <p>The nominative singular's ending, and how many of your nouns with it have each gender. The most common one is in colour.</p>
+        <div class="scroll"><table class="counts" id="counts"></table></div>
+      </div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li><span class="g">-ος, -ας, -ης, -ές, -ούς</span> are masculine: <span class="g">ο δρόμος, ο άντρας, ο μαθητής, ο καναπές, ο παππούς</span>.</li>
+          <li><span class="g">-α</span> and <span class="g">-η</span> are feminine: <span class="g">η γάτα, η πόλη</span>. But <span class="g">-μα</span> is neuter: <span class="g">το όνομα, τα ονόματα</span>.</li>
+          <li><span class="g">-ο, -ι, -ί</span> are neuter: <span class="g">το βιβλίο, το σπίτι, το παιδί</span>. So are most loanwords ending in a consonant or another vowel: <span class="g">το μπολ, το ταξί, το μενού</span>, which don't change at all.</li>
+          <li>A few <span class="g">-ος</span> nouns are feminine and decline like the masculine: <span class="g">η οδός, η Αίγυπτος, η πρόοδος</span>. Others are neuter, with a plural in <span class="g">-η</span>: <span class="g">το δάσος, τα δάση</span>.</li>
+          <li>Some people's nouns take either article: <span class="g">ο/η γιατρός, ο/η σύζυγος</span>.</li>
+          <li>The plural article is <span class="g">οι</span> for masculine and feminine, <span class="g">τα</span> for neuter. See <a href="../grammar/articles/" target="_top">Articles</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/noun-drill.js"></script>
+<script src="../javascripts/drill-kit.js"></script>
+<script>
+"use strict";
+const ND = window.NounDrill, VD = window.VoiceDrill, K = window.DrillKit, $ = K.$;
+const ARTICLE = { masculine: "ο", feminine: "η", neuter: "το" };
+const RESULT = { correct: "Σωστά!", accent: "Almost. Check the accent.", spelling: "Right form, misspelled.", form: "Not that form.",
+  missing: "Check the article.", extra: "Just the article and the noun.", wrong: "Not quite.", n: "Almost: the ν.", shown: "Answer" };
+
+let settings = { plural: true, english: true, marking: VD.DEFAULT_MARKING, ...K.store.get("gng-settings", {}) };
+let history = K.store.get("gng-history", []);  // [{ e: ending, g: gender asked, r: "correct" | "wrong", p: plural result or absent }]
+let seen = new Set(K.store.get("gng-seen", []));
+let nouns = [], counts = {}, retry = [], recent = [];
+let item = null, stage = "idle";  // idle | gender | plural | done
+const session = K.score();
+
+// ---------- Loading ----------
+
+Promise.all(["words", "declensions"].map(n => fetch(`../data/${n}.json`).then(r => r.json())))
+  .then(([words, tables]) => { build(words, tables); renderCounts(); renderSlips(); next(); })
+  .catch(() => { $("gloss").textContent = "Couldn't load the nouns. Open this page through the site (make serve), not straight from disk."; });
+
+function build(words, tables) {
+  const byWord = new Map(tables.map(t => [t.greek, t]));
+  for (const w of words) {
+    const t = byWord.get(w.greek);
+    if (!t || t.pos !== "noun" || !ND.cell(t, "nominative", "singular")) continue;
+    // As written (Ασία), not lowercased for matching.
+    const singular = ND.cell(t, "nominative", "singular")[0].replace(/\|/g, "");
+    nouns.push({ ...t, english: ND.gloss(w.english), singular, ending: ND.endingOf(singular), id: K.hash(w.greek),
+      hasPlural: !t.name && !!ND.cell(t, "nominative", "plural") });
+  }
+  counts = ND.endingCounts(nouns);
+  renderOptions();
+}
+
+// ---------- Choosing ----------
+
+const right = r => r === "correct";
+
+// Endings you miss come up more often; unseen nouns first; a missed noun comes back a few turns later.
+function pickNoun() {
+  const due = retry.findIndex(r => r.due <= session.q);
+  if (due >= 0) return retry.splice(due, 1)[0].it;
+  const recentRows = history.slice(-200);
+  const miss = {};
+  for (const e of Object.keys(counts)) {
+    const rows = recentRows.filter(r => r.e === e);
+    miss[e] = rows.length ? rows.filter(r => !right(r.r) || (r.p && !K.counts(r.p, settings.marking))).length / rows.length : 0.3;
+  }
+  let pool = nouns.filter(n => !seen.has(n.id) && !recent.includes(n.id));
+  if (!pool.length) { seen = new Set(); pool = nouns.filter(n => !recent.includes(n.id)); }
+  const it = K.weighted(pool, n => 1 + 3 * miss[n.ending]);
+  recent = [...recent, it.id].slice(-10);
+  return it;
+}
+
+// ---------- One noun ----------
+
+function next() {
+  if (!nouns.length) return;
+  item = pickNoun();
+  session.q++;
+  seen.add(item.id); K.store.set("gng-seen", [...seen]);
+  item.result = null; item.plural = null;
+  stage = "gender";
+  $("counter").textContent = "Noun " + session.q;
+  $("ask").textContent = "Which article?";
+  $("word").textContent = item.singular;
+  $("gloss").textContent = item.english;
+  $("gloss").hidden = !settings.english;
+  for (const b of $("choices").children) { b.disabled = false; b.className = "choice"; }
+  $("form").hidden = true; $("answer").value = ""; $("answer").disabled = false; $("check").disabled = false;
+  $("feedback").hidden = true; $("reveal").hidden = true;
+  $("show").disabled = false; $("next").disabled = true;
+  K.focus($("choices").children[0]);
+}
+
+function chooseGender(g) {
+  if (stage !== "gender") return;
+  const ok = item.gender.includes(g);
+  item.result = ok ? "correct" : "wrong";
+  for (const b of $("choices").children) {
+    b.disabled = true;
+    if (item.gender.includes(b.dataset.gender)) b.className = "choice right";
+    else if (b.dataset.gender === g) b.className = "choice wrong";
+  }
+  $("word").textContent = articles() + " " + item.singular;
+  const counted = counts[item.ending], top = topGender(item.ending);
+  const ending = item.ending === "other" ? "this ending" : "-" + item.ending;
+  const usual = item.gender.includes(top) ? `Most of your nouns in ${ending} are ${top}.` : `Most of your nouns in ${ending} are ${top}; this one isn't.`;
+  K.feedback($("feedback"), ok
+    ? { kind: "good", title: "Σωστά!", msg: item.gender.length > 1 ? "This one takes either article." : usual }
+    : { kind: "bad", title: `It's ${item.gender.join(" or ")}.`, msg: usual, answer: articles() + " " + item.singular });
+  if (counted) item.why = `${ending}: ${counted.masculine} masculine, ${counted.feminine} feminine, ${counted.neuter} neuter in your word list.`;
+
+  if (settings.plural && item.hasPlural) {
+    stage = "plural";
+    $("ask").textContent = "Now the plural";
+    $("form").hidden = false;
+    K.focus($("answer"));
+    $("show").disabled = false;
+  } else finish();
+}
+
+function checkPlural(e) {
+  e && e.preventDefault();
+  if (stage === "done") { next(); return; }
+  if (stage !== "plural") return;
+  const raw = $("answer").value.trim();
+  if (!raw) return;
+  const slots = ND.phrase({ noun: item, case: "nominative", number: "plural" });
+  const g = ND.gradePhrase(raw, slots, { case: "nominative", number: "plural", gender: item.gender[0] });
+  item.plural = g;
+  const answer = slots.map(s => s.forms[0]).join(" ");
+  const pluralKind = K.counts(g.result, settings.marking) ? "good" : ["accent", "spelling", "n", "extra"].includes(g.result) ? "warn" : "bad";
+  const slip = K.forgiven(g.result, settings.marking);
+  const msgs = g.words.map((w, k) => wordMessage(w, slots[k])).filter(Boolean);
+  // A wrong gender stays in the box above the plural's feedback.
+  const genderOk = item.result === "correct";
+  const kind = genderOk ? pluralKind : "bad";
+  const title = genderOk ? (slip ? K.FORGIVEN : RESULT[g.result]) : `It's ${articles()} ${item.singular}.` + (pluralKind === "good" ? " The plural is right." : "");
+  const clean = g.result === "correct";
+  K.feedback($("feedback"), { kind, title, msg: clean ? [] : [...(genderOk && !slip ? [] : [RESULT[g.result]]), ...msgs].filter(m => m !== title), typed: clean ? "" : g.words.map(w => w.typed || "…").join(" "), highlight: K.isSlip(g.result), answer: clean ? "" : answer });
+  finish();
+}
+
+function wordMessage(w, slot) {
+  const what = slot.role === "article" ? "The article" : "The noun";
+  if (w.result === "missing") return slot.role === "article" ? "Type the article too: οι or τα." : "";
+  if (w.result === "form") return `${what} ${w.typed} is ${ND.describe(w.hit, { case: "nominative", number: "plural", gender: item.gender[0] })}.`;
+  if (w.result === "n") return "τη keeps its ν before a vowel and before κ, π, τ, ξ, ψ.";
+  return "";
+}
+
+function finish() {
+  stage = "done";
+  const pluralOk = !item.plural || K.counts(item.plural.result, settings.marking);
+  session.add(item.result === "correct" && pluralOk);
+  if (item.result !== "correct" || !pluralOk) retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
+  if (item.result) {
+    const row = { e: item.ending, g: item.gender[0], r: item.result };
+    if (item.plural) row.p = item.plural.result;
+    history = [...history, row].slice(-400);
+    K.store.set("gng-history", history); renderSlips();
+  }
+  showReveal();
+  for (const b of $("choices").children) b.disabled = true;
+  $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
+  K.focus($("next"));
+}
+
+function showAnswer() {
+  if (stage === "gender") {
+    item.result = null;
+    for (const b of $("choices").children) { b.disabled = true; if (item.gender.includes(b.dataset.gender)) b.className = "choice right"; }
+    $("word").textContent = articles() + " " + item.singular;
+    retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
+    K.feedback($("feedback"), { kind: "bad", title: "Answer", msg: "This one will come back later.", answer: articles() + " " + item.singular + (item.hasPlural ? ", " + pluralText() : "") });
+    stage = "done"; session.add(false); showReveal();
+    $("show").disabled = true; $("next").disabled = false; K.focus($("next"));
+  } else if (stage === "plural") {
+    K.feedback($("feedback"), { kind: "warn", title: "The plural", answer: pluralText() });
+    item.plural = { result: "shown" };
+    finish();
+  }
+}
+
+const articles = () => item.gender.map(g => ARTICLE[g]).join("/");
+function pluralText() {
+  const slots = ND.phrase({ noun: item, case: "nominative", number: "plural" });
+  return slots.map(s => s.forms[0]).join(" ");
+}
+const topGender = e => ND.GENDERS.reduce((a, g) => (counts[e][g] > counts[e][a] ? g : a), "masculine");
+
+function showReveal() {
+  $("reason").textContent = item.ending === "other" ? "other ending" : "-" + item.ending;
+  $("why").textContent = item.why || "";
+  renderParadigm();
+  $("reveal").hidden = false;
+}
+
+// The noun's declension with its articles, nominative, accusative and genitive.
+function renderParadigm() {
+  const t = $("para"); t.innerHTML = "";
+  const g = item.gender[0];
+  const head = t.insertRow();
+  head.append(document.createElement("th"));
+  const numbers = ND.NUMBERS.filter(n => ND.CASES.some(c => ND.cell(item, c, n)));
+  for (const n of numbers) { const th = document.createElement("th"); th.textContent = n; th.lang = "en"; head.append(th); }
+  for (const c of ND.CASES) {
+    const tr = t.insertRow();
+    const who = tr.insertCell(); who.className = "who"; who.textContent = c; who.lang = "en";
+    for (const n of numbers) {
+      const td = tr.insertCell();
+      const forms = ND.cell(item, c, n) || [];
+      td.innerHTML = forms.length ? forms.map(f => `<span class="pre">${ND.articleForms(g, c, n, ND.plain(f))[0]}</span> ${K.markHTML(f)}`).join(" / ") : "–";
+      if (c === "nominative" && n === "plural" && item.plural) td.className = "hit";
+    }
+  }
+}
+
+// ---------- Panels ----------
+
+function renderOptions() {
+  for (const k of ["plural", "english"]) $("opt-" + k).checked = settings[k];
+  $("bankInfo").textContent = `${nouns.length} nouns from your word list with a table in the dictionary.`;
+}
+
+function setOption(key, value) {
+  settings[key] = value;
+  K.store.set("gng-settings", settings);
+  if (key === "english" && item) $("gloss").hidden = !value;
+}
+
+function renderCounts() {
+  const order = [...ND.ENDINGS, "other"].filter(e => counts[e]);
+  const rows = order.map(e => {
+    const top = topGender(e);
+    const cells = ND.GENDERS.map(g => `<td${g === top ? ' class="top"' : ""}>${counts[e][g]}</td>`).join("");
+    return `<tr><td lang="el">${e === "other" ? "other" : "-" + e}</td>${cells}</tr>`;
+  }).join("");
+  $("counts").innerHTML = `<tr><th></th><th>masc.</th><th>fem.</th><th>neut.</th></tr>${rows}`;
+}
+
+function renderSlips() {
+  const recentRows = history.slice(-200);
+  const has = recentRows.length > 0;
+  $("slipInfo").textContent = has
+    ? `Your last ${recentRows.length} noun${recentRows.length === 1 ? "" : "s"} on this device, by ending. Endings you miss come up more often.`
+    : "Answer a few nouns and this shows which endings trip you up.";
+  $("slip").hidden = !has; $("errs").hidden = !has; $("reset").hidden = !has;
+  if (!has) return;
+  const grid = $("slip"); grid.innerHTML = "";
+  grid.append(K.div("h", ""), K.div("h", "Gender"), K.div("h", "Plural"));
+  for (const e of [...ND.ENDINGS, "other"]) {
+    const rows = recentRows.filter(r => r.e === e);
+    if (!rows.length) continue;
+    const label = K.div("rl g", e === "other" ? "other" : "-" + e); label.lang = "el";
+    grid.append(label, K.rateCell(rows, r => right(r.r)), K.rateCell(rows.filter(r => r.p && r.p !== "shown"), r => K.counts(r.p, settings.marking)));
+  }
+  const wrong = recentRows.filter(r => !right(r.r));
+  K.errList($("errs"), [
+    ...ND.GENDERS.map(g => [`Missed a ${g} noun`, wrong.filter(r => r.g === g).length]),
+    ["Plural form", recentRows.filter(r => r.p === "form").length],
+    ["Plural article missing", recentRows.filter(r => r.p === "missing").length],
+    ["Accent", recentRows.filter(r => r.p === "accent").length],
+    ["Spelling", recentRows.filter(r => r.p === "spelling").length],
+  ]);
+}
+
+// ---------- Wiring ----------
+
+for (const b of $("choices").children) b.addEventListener("click", () => chooseGender(b.dataset.gender));
+document.addEventListener("keydown", e => {
+  if (stage !== "gender" || $("panel-drill").hidden || e.target.tagName === "INPUT") return;
+  const g = { "1": "masculine", "2": "feminine", "3": "neuter", "ο": "masculine", "η": "feminine", "τ": "neuter" }[e.key];
+  if (g) { e.preventDefault(); chooseGender(g); }
+});
+$("form").addEventListener("submit", checkPlural);
+$("show").addEventListener("click", showAnswer);
+$("next").addEventListener("click", next);
+for (const k of ["plural", "english"]) $("opt-" + k).addEventListener("change", e => setOption(k, e.target.checked));
+$("reset").addEventListener("click", () => { history = []; K.store.set("gng-history", history); renderSlips(); });
+K.marking(settings, () => K.store.set("gng-settings", settings), renderSlips);
+K.enterForNext(() => stage === "done", "panel-drill", next);
+K.tabs([["drill", "tab-drill", "panel-drill"], ["tables", "tab-tables", "panel-tables"]]);
+</script>
+</body>
+</html>

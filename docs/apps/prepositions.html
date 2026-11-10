@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prepositions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/drill.css">
+<style>
+.slip { grid-template-columns: auto 1fr; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Prepositions · σε, από, με, για</div>
+    <h1>Prepositions</h1>
+    <p class="sub">Type the marked words in Greek: the preposition, the article and the noun, in the accusative. σε joins the article (στο, στην), and sometimes Greek needs no preposition at all.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Which one</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap">
+    <div class="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="eyebrow">Fill the gap</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <p class="english" id="english" aria-live="polite">Loading sentences…</p>
+        <p class="gapped" id="gapped" lang="el"></p>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off">
+        <input class="answer" id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Preposition, article and noun…" aria-label="Your answer" disabled>
+        <button class="btn" id="check" type="submit" disabled>Check</button>
+      </form>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="reveal" id="reveal" hidden>
+        <p class="greek" id="greek" lang="el"></p>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+          <p class="note" id="note" hidden></p>
+          <p class="note" id="also" lang="el" hidden></p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips" id="chips"></div>
+      <p class="help" id="bankInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" id="marking" role="radiogroup" aria-label="Marking"></div>
+      <p class="help" id="markingInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tables">
+        <div class="tcard">
+          <h3>σε + the article</h3>
+          <p>σε joins the article into one word.</p>
+          <table lang="el">
+            <tr><th></th><th>sing.</th><th>plural</th></tr>
+            <tr><td class="who" lang="en">masc.</td><td>στον</td><td>στους</td></tr>
+            <tr><td class="who" lang="en">fem.</td><td>στη(ν)</td><td>στις</td></tr>
+            <tr><td class="who" lang="en">neut.</td><td>στο</td><td>στα</td></tr>
+          </table>
+        </div>
+        <div class="tcard">
+          <h3>The big four</h3>
+          <p>All take the accusative.</p>
+          <table>
+            <tr><td class="who" lang="el">σε</td><td>at, in, on, to</td></tr>
+            <tr><td class="who" lang="el">από</td><td>from, since, through, out of</td></tr>
+            <tr><td class="who" lang="el">με</td><td>with, by (bus, train)</td></tr>
+            <tr><td class="who" lang="el">για</td><td>for, about</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li>Greek doesn't separate being somewhere from going there: <span class="g">στο σπίτι</span> is "at home" and "(to) home".</li>
+          <li>Place words take σε or από: <span class="g">δίπλα σε, κοντά σε, μέσα σε</span>, but <span class="g">πίσω από, κάτω από, έξω από, μακριά από</span>.</li>
+          <li><span class="g">στη</span> keeps its ν before a vowel and before κ, π, τ, ξ, ψ: <span class="g">στην Αθήνα, στην πόρτα</span>, but <span class="g">στη θάλασσα</span>.</li>
+          <li>No preposition with days, months, seasons and parts of the day: <span class="g">τη Δευτέρα, τον Μάιο, το πρωί</span>. Nor after <span class="g">περιμένω, ψάχνω, ακούω, κοιτάζω, ζητάω, πληρώνω</span>.</li>
+          <li>But a preposition where English has none: <span class="g">τηλεφωνώ στη Μαρία, απαντάω στον δάσκαλο</span>.</li>
+          <li>See <a href="../grammar/prepositions/" target="_top">Prepositions</a> for the notes behind this drill.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/gap-sentences.js"></script>
+<script src="../javascripts/noun-drill.js"></script>
+<script src="../javascripts/preposition-drill.js"></script>
+<script src="../javascripts/drill-kit.js"></script>
+<script src="../javascripts/gap-drill-page.js"></script>
+<script>
+"use strict";
+const PD = window.PrepositionDrill, ND = window.NounDrill;
+const WHY = {
+  σε: "σε is at, in, on and to. It joins the article: στον, στη(ν), στο.",
+  από: "από is from, since, through and out of.",
+  με: "με is with, and by for transport.",
+  για: "για is for and about.",
+  place: "A place word, then σε or από, then the accusative.",
+  other: "These take the accusative directly.",
+  none: "Greek has no preposition here, only the accusative.",
+};
+const ROLE = { article: "The article", adjective: "The adjective", noun: "The noun", possessive: "The possessive" };
+let tables = null, adjectives = null;
+
+window.GapDrillPage({
+  storage: "gpp",
+  data: ["preposition-sentences", "declensions"],
+  groups: PD.GROUPS.map(g => ({ key: g.key, label: /^[a-z]/i.test(g.label) ? g.label : `<span class="g" lang="el">${g.label}</span>` })),
+  prepare(s, declensions) {
+    if (!tables) {
+      tables = new Map(declensions.map(t => [t.greek, t]));
+      adjectives = new Map(declensions.filter(t => t.pos === "adjective").map(t => [t.greek, t]));
+    }
+    const expected = PD.analyse(s, tables.get(s.noun), adjectives);
+    if (expected.error) { console.warn(s.answer, expected.error); return null; }
+    return { ...s, expected, group: PD.groupOf(s.prep) };
+  },
+  grade: PD.grade,
+  explain(g, item) {
+    const e = item.expected;
+    const wordMsgs = (g.phrase ? g.phrase.words : []).map((w, k) => {
+      const slot = e.slots[k];
+      if (w.result === "form") {
+        const d = ND.diffs(w.hit, e.want);
+        return `${ROLE[slot.role]} ${w.typed} is ${ND.describe(w.hit, e.want)}.` + (d.includes("case") ? " After a preposition, and for these time words and objects, it's the accusative." : "")
+          + (d.includes("gender") ? ` ${item.noun} is ${e.gender}.` : "");
+      }
+      if (w.result === "n") return "τη keeps its ν before a vowel and before κ, π, τ, ξ, ψ.";
+      return "";
+    }).filter(Boolean);
+    const prepName = p => (p === "none" ? "no preposition" : p);
+    switch (g.result) {
+      case "correct": return { kind: "good", title: "Σωστά!", msg: g.also ? [`That works too. The sentence has ${item.answer}.`] : [] };
+      case "accent": return { kind: "warn", title: "Almost. Check the accent.", msg: [] };
+      case "n": return { kind: "warn", title: "Almost: the ν.", msg: wordMsgs };
+      case "spelling": return { kind: "warn", title: "Right words, a spelling slip.", msg: [] };
+      case "extra": return { kind: "warn", title: "A word too many.", msg: [] };
+      case "contraction": return { kind: "warn", title: "Join σε to the article.", msg: [`σε + ${e.article} is written as one word: σ${e.article}.`] };
+      case "missing article": return { kind: "bad", title: "This one takes the article.", msg: wordMsgs };
+      case "extra article": return { kind: "bad", title: "No article here.", msg: item.note ? [] : ["Greek leaves the article out here."] };
+      case "preposition": return { kind: "bad", title: e.prep === "none" ? "No preposition in Greek here." : g.typedPrep === "none" ? "This one needs a preposition." : "Wrong preposition.",
+        msg: [g.typedPrep !== "none" && e.prep !== "none" ? `You typed ${prepName(g.typedPrep)}; here it's ${e.prep}.` : "", ...wordMsgs] };
+      case "form": return { kind: "bad", title: "Check the endings.", msg: wordMsgs };
+      default: return { kind: "bad", title: "Not quite.", msg: wordMsgs };
+    }
+  },
+  reason: item => [item.prep === "none" ? "no preposition" : item.prep, WHY[item.group]],
+  errors: [["Wrong preposition", "preposition"], ["σε not joined", "contraction"], ["Case or gender", "form"], ["Article missing", "missing article"],
+    ["Article not needed", "extra article"], ["The ν of τη(ν)", "n"], ["Accent", "accent"], ["Spelling", "spelling"], ["Other", "wrong"]],
+});
+</script>
+</body>
+</html>

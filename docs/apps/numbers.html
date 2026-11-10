@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/drill.css">
+<style>
+.slip { grid-template-columns: auto 1fr 1fr 1fr; }
+.tables { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.big.digits { font-family: var(--body); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Numbers · cardinals</div>
+    <h1>Numbers</h1>
+    <p class="sub">Write numbers in Greek, read them back as digits, and count things, where 1, 3, 4, the hundreds and χίλιοι agree with the noun.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Tables</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap">
+    <div class="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="eyebrow" id="ask">…</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <p class="english" id="english" aria-live="polite" hidden></p>
+        <p class="big" id="big" lang="el">…</p>
+        <p class="gapped" id="gapped" lang="el" hidden></p>
+        <ul class="cues" id="cues" hidden></ul>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off">
+        <input class="answer" id="answer" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Your answer" disabled>
+        <button class="btn" id="check" type="submit" disabled>Check</button>
+      </form>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="reveal" id="reveal" hidden>
+        <p class="greek" id="greek" lang="el"></p>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+        </div>
+        <div class="scroll"><table class="para" id="para" lang="el" hidden></table></div>
+      </div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="opt-write"> Write the number</label>
+        <label class="chip"><input type="checkbox" id="opt-read"> Read the number</label>
+        <label class="chip"><input type="checkbox" id="opt-count"> Count things</label>
+      </div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="opt-small"> 0–20</label>
+        <label class="chip"><input type="checkbox" id="opt-tens"> 21–100</label>
+        <label class="chip"><input type="checkbox" id="opt-hundreds"> 101–1.000</label>
+        <label class="chip"><input type="checkbox" id="opt-big"> Over 1.000</label>
+      </div>
+      <p class="help">Counting uses nouns from your word list. Over 1.000 includes years, which Greek reads like any other number.</p>
+    </div>
+
+    <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" id="marking" role="radiogroup" aria-label="Marking"></div>
+      <p class="help" id="markingInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tables" id="tables"></div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li>Only 1, 3, 4 (and 13, 14, 21, 23…), the hundreds from 200 and χίλιοι change with the noun: <span class="g">τρεις γυναίκες, τρία παιδιά, διακόσιοι άντρες</span>. Every other number has one form.</li>
+          <li>On its own, for counting, prices and phone numbers, a number is neuter: <span class="g">τρία, τέσσερα, διακόσια</span>.</li>
+          <li><span class="g">εκατό</span> becomes <span class="g">εκατόν</span> before another number: <span class="g">εκατόν ένα</span>. There's no "one" before 100 or 1000: <span class="g">χίλια</span>.</li>
+          <li>From 2000 up, thousands are the feminine noun <span class="g">χιλιάδες</span>, so the number before it is feminine whatever you count: <span class="g">τρεις χιλιάδες παιδιά</span>.</li>
+          <li>In compounds the "one" stays singular, and so does nothing else: <span class="g">είκοσι ένας άντρες</span>.</li>
+          <li>Spelling traps: <span class="g">τρεις</span> but <span class="g">τέσσερις</span>; <span class="g">δεκατρείς</span> has an accent, τρεις doesn't. See <a href="../grammar/numerals/" target="_top">Numerals</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/noun-drill.js"></script>
+<script src="../javascripts/number-words.js"></script>
+<script src="../javascripts/drill-kit.js"></script>
+<script>
+"use strict";
+const ND = window.NounDrill, NW = window.NumberWords, VD = window.VoiceDrill, K = window.DrillKit, $ = K.$;
+const MODES = { write: "Write the number", read: "Read the number", count: "Count things" };
+const RANGES = { small: "0–20", tens: "21–100", hundreds: "101–1.000", big: "Over 1.000" };
+// Counting sentences: Greek with ___, English for one and for several.
+const FRAMES = {
+  nominative: [["Εδώ είναι ___.", "Here is ___.", "Here are ___."]],
+  accusative: [["Βλέπω ___.", "I see ___."], ["Θέλω ___.", "I want ___."]],
+};
+const COUNT_TAGS = ["person", "animal", "food", "drink", "home", "school", "object", "clothing", "transport", "city", "nature"];
+const RESULT = { correct: "Σωστά!", n: "Almost: the ν.", accent: "Almost. Check the accent.", spelling: "Right words, a spelling slip.", extra: "A word too many.",
+  form: "Check the agreement.", missing: "A word is missing.", wrong: "Not quite.", shown: "Answer" };
+const OPTS = [...Object.keys(MODES), ...Object.keys(RANGES)];
+
+let settings = { write: true, read: true, count: true, small: true, tens: true, hundreds: true, big: false, marking: VD.DEFAULT_MARKING, ...K.store.get("gnm-settings", {}) };
+let history = K.store.get("gnm-history", []);  // [{ m: mode, k: range, r: result, d: features wrong }]
+let nouns = [], english = new Map(), retry = [];
+let item = null, answered = false;
+const session = K.score();
+
+// ---------- Loading ----------
+
+Promise.all(["words", "declensions"].map(n => fetch(`../data/${n}.json`).then(r => r.json())))
+  .then(([words, tables]) => { build(words, tables); renderTables(); renderOptions(); renderSlips(); next(); })
+  .catch(() => { $("big").textContent = "Couldn't load the words. Open this page through the site (make serve), not straight from disk."; });
+
+function build(words, tables) {
+  const byWord = new Map(tables.map(t => [t.greek, t]));
+  for (const w of words) {
+    const t = byWord.get(w.greek);
+    if (!t || t.pos !== "noun" || t.gender.length !== 1 || t.name || !COUNT_TAGS.includes(w.tag)) continue;
+    if (!ND.CASES.slice(0, 2).every(c => ND.cell(t, c, "singular") && ND.cell(t, c, "plural"))) continue;
+    nouns.push(t); english.set(w.greek, ND.gloss(w.english));
+  }
+}
+
+// ---------- Choosing ----------
+
+const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+// A number in a range. Over 1.000: mostly four digits, some years, some bigger.
+function numberIn(k) {
+  if (k === "small") return { n: rand(0, 20) };
+  if (k === "tens") return { n: rand(21, 100) };
+  if (k === "hundreds") return { n: Math.random() < 0.3 ? rand(1, 10) * 100 : rand(101, 1000) };
+  const x = Math.random();
+  if (x < 0.3) return { n: rand(1900, 2035), year: true };
+  if (x < 0.7) return { n: rand(1001, 9999) };
+  if (x < 0.9) return { n: Math.random() < 0.5 ? rand(10, 999) * 1000 : rand(10000, 999999) };
+  return { n: rand(1, 20) * 100000 + (Math.random() < 0.5 ? 0 : rand(1, 999)) * 1000 };
+}
+// For counting, mostly numbers that change with the noun.
+function countNumber(k) {
+  for (let i = 0; i < 50; i++) {
+    const { n } = numberIn(k);
+    if (n > 0 && (NW.agrees(n) || Math.random() < 0.25)) return n;
+  }
+  return k === "small" ? 3 : k === "tens" ? 23 : k === "hundreds" ? 300 : 1300;
+}
+
+const right = r => K.counts(r, settings.marking);
+
+function pickItem() {
+  const due = retry.findIndex(r => r.due <= session.q && settings[r.it.mode] && settings[r.it.range]);
+  if (due >= 0) return retry.splice(due, 1)[0].it;
+  const rows = history.slice(-200);
+  const rate = (m, k) => { const x = rows.filter(r => r.m === m && r.k === k); return x.length ? x.filter(r => !right(r.r)).length / x.length : 0.3; };
+  const combos = Object.keys(MODES).filter(m => settings[m] && (m !== "count" || nouns.length))
+    .flatMap(m => Object.keys(RANGES).filter(k => settings[k]).map(k => [m, k]));
+  if (!combos.length) return null;
+  const [mode, range] = K.weighted(combos, ([m, k]) => 1 + 3 * rate(m, k));
+  if (mode !== "count") {
+    const { n, year } = numberIn(range);
+    return { mode, range, n, year, slots: numberSlots(n, "neuter", "nominative") };
+  }
+  const n = countNumber(range), noun = K.pick(nouns);
+  const c = Math.random() < 0.5 ? "nominative" : "accusative";
+  const number = n === 1 ? "singular" : "plural";
+  const slots = [...numberSlots(n, noun.gender[0], c), ...ND.phrase({ noun, case: c, number, article: false })];
+  return { mode, range, n, noun, case: c, number, gender: noun.gender[0], frame: K.pick(FRAMES[c]), slots };
+}
+
+// NounDrill-style slots for a number's words, so gradePhrase can name a wrong gender or case.
+function numberSlots(n, g, c) {
+  const all = NW.allParts(n);
+  return NW.parts(n, g, c).map((forms, k) => ({ role: "number", word: String(n), forms, marked: forms, all: all[k] }));
+}
+
+// ---------- One number ----------
+
+const answerText = it => it.slots.map(s => s.forms[0]).join(" ");
+
+function next() {
+  item = pickItem();
+  if (!item) { $("big").textContent = "Turn on a kind of question."; return; }
+  answered = false; session.q++;
+  $("counter").textContent = "Number " + session.q;
+  $("feedback").hidden = true; $("reveal").hidden = true;
+  const input = $("answer");
+  input.value = ""; input.disabled = false;
+  $("english").hidden = true; $("gapped").hidden = true; $("cues").hidden = true; $("big").hidden = false;
+  if (item.mode === "write") {
+    $("ask").textContent = item.year ? "Write the year in Greek" : "Write it in Greek";
+    $("big").textContent = NW.digits(item.n, item.year); $("big").className = "big digits"; $("big").lang = "en";
+    input.lang = "el"; input.inputMode = "text"; input.placeholder = "The number in words…";
+  } else if (item.mode === "read") {
+    $("ask").textContent = "Write it in digits";
+    $("big").textContent = NW.words(item.n); $("big").className = "big"; $("big").lang = "el";
+    input.lang = "en"; input.inputMode = "numeric"; input.placeholder = "Digits…";
+  } else {
+    $("ask").textContent = "Fill the gap";
+    $("big").hidden = true;
+    const [el, sg, pl] = item.frame;
+    const [pre, post] = (item.number === "plural" && pl ? pl : sg).split("___");
+    const noun = english.get(item.noun.greek);
+    const b = document.createElement("b"); b.textContent = `${NW.digits(item.n)} ${item.number === "plural" ? ND.pluralEn(noun) : noun}`;
+    $("english").replaceChildren(pre, b, post); $("english").hidden = false;
+    const [before, after] = el.split("___");
+    const blank = document.createElement("span"); blank.className = "blank"; blank.textContent = " ";
+    $("gapped").replaceChildren(before, blank, after); $("gapped").hidden = false;
+    $("cues").innerHTML = `<li>${NW.digits(item.n)}</li><li><span class="g" lang="el">${K.esc(item.noun.greek)}</span> ${K.esc(noun)}</li>`;
+    $("cues").hidden = false;
+    input.lang = "el"; input.inputMode = "text"; input.placeholder = "The number and the noun…";
+  }
+  $("check").disabled = false; $("show").disabled = false; $("next").disabled = true;
+  K.focus(input);
+}
+
+function check(e) {
+  e && e.preventDefault();
+  if (answered) { next(); return; }
+  const raw = $("answer").value.trim();
+  if (!raw) return;
+  if (item.mode === "read") {
+    const n = NW.readDigits(raw);
+    finish({ result: n === item.n ? "correct" : "wrong", typed: raw, read: n });
+  } else finish(ND.gradePhrase(raw, item.slots, want()));
+}
+
+const want = () => ({ gender: item.mode === "count" ? item.gender : "neuter", case: item.mode === "count" ? item.case : "nominative", number: item.number });
+
+function finish(g) {
+  answered = true;
+  const result = g ? g.result : "shown";
+  session.add(right(result));
+  if (!right(result)) retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
+  if (g) {
+    const d = g.words ? [...new Set(g.words.flatMap(w => (w.hit ? ND.diffs(w.hit, want()) : [])))] : [];
+    history = [...history, { m: item.mode, k: item.range, r: result, d }].slice(-400);
+    K.store.set("gnm-history", history); renderSlips();
+  }
+  const kind = !g ? "bad" : right(result) ? "good" : ["accent", "spelling", "n", "extra"].includes(result) ? "warn" : "bad";
+  // A forgiven slip still shows the right spelling.
+  const clean = result === "correct";
+  let msgs = [], typed = "", answer = "";
+  if (item.mode === "read") {
+    answer = kind === "good" ? "" : NW.digits(item.n, item.year);
+    typed = g && g.read !== null ? NW.digits(g.read, item.year) : g ? g.typed : "";
+    if (g && g.read !== null && kind !== "good") msgs.push(`${NW.digits(g.read)} is ${NW.words(g.read)}.`);
+  } else {
+    msgs = g ? g.words.map((w, k) => wordMessage(w, item.slots[k])).filter(Boolean) : [];
+    if (g && g.extra.length) msgs.push(`${g.extra.join(" ")}: not part of the answer.`);
+    typed = g && !clean ? g.words.map(w => w.typed || "…").join(" ") : "";
+    answer = clean ? "" : answerText(item);
+  }
+  if (!g) msgs.push("This one will come back later.");
+  K.feedback($("feedback"), { kind, title: K.forgiven(result, settings.marking) ? K.FORGIVEN : RESULT[result], msg: msgs, typed, answer, highlight: K.isSlip(result) });
+  showReveal();
+  $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
+  K.focus($("next"));
+}
+
+function wordMessage(w, slot) {
+  const what = slot.role === "noun" ? "The noun" : "";
+  if (w.result === "missing") return slot.role === "noun" ? "The noun is missing." : `A word of the number is missing: ${slot.forms[0]}.`;
+  if (w.result === "form") {
+    if (slot.role === "noun") return `The noun ${w.typed} is ${ND.describe(w.hit, want())}.`;
+    const d = ND.diffs(w.hit, want());
+    if (d.includes("gender")) return item.mode === "count"
+      ? `${w.typed} is ${w.hit.gender}; ${item.noun.greek} is ${item.gender}, so it's ${slot.forms[0]}.`
+      : `${w.typed} is ${w.hit.gender}. Counting on its own uses the neuter: ${slot.forms[0]}.`;
+    return `${w.typed} is the ${w.hit.case}; here it's ${want().case}: ${slot.forms[0]}.`;
+  }
+  if (w.result === "spelling" || w.result === "accent") return `${what || w.typed}: check the ${w.result === "accent" ? "accent" : "spelling"} (${slot.forms[0]}).`;
+  if (w.result === "wrong") return `${w.typed} should be ${slot.forms[0]}.`;
+  return "";
+}
+
+function showReveal() {
+  const words = answerText(item);
+  if (item.mode === "count") {
+    const [before, after] = item.frame[0].split("___");
+    const b = document.createElement("b"); b.textContent = words;
+    $("greek").replaceChildren(before, b, after);
+    const agrees = NW.agrees(item.n);
+    $("reason").textContent = `${item.gender} · ${item.case}`;
+    $("why").textContent = agrees
+      ? `${NW.digits(item.n)} changes with the noun: ${item.noun.greek} is ${item.gender}.`
+      : item.n >= 2000 && NW.agrees(Math.floor(item.n / 1000) % 1000 || 1)
+        ? "The thousands are χιλιάδες, which is feminine, whatever you count."
+        : `${NW.digits(item.n)} has one form for every gender.`;
+    renderAgreement();
+  } else {
+    $("greek").textContent = `${NW.digits(item.n, item.year)} = ${words}`;
+    const variants = item.slots.filter(s => s.forms.length > 1).map(s => s.forms.join(" or "));
+    $("reason").textContent = RANGES[item.range];
+    $("why").textContent = variants.length ? `Also spelled: ${variants.join("; ")}.` : "";
+    $("para").hidden = true;
+  }
+  $("reveal").hidden = false;
+}
+
+// The number with the noun in each gender, so the agreement shows.
+function renderAgreement() {
+  const t = $("para"); t.innerHTML = ""; t.hidden = false;
+  const head = t.insertRow();
+  head.append(document.createElement("th"));
+  for (const c of ["nominative", "accusative"]) { const th = document.createElement("th"); th.textContent = c; th.lang = "en"; if (c === item.case) th.className = "cur"; head.append(th); }
+  for (const g of ND.GENDERS) {
+    const tr = t.insertRow();
+    const who = tr.insertCell(); who.className = "who"; who.textContent = g; who.lang = "en";
+    for (const c of ["nominative", "accusative"]) {
+      const td = tr.insertCell();
+      td.textContent = NW.words(item.n, g, c);
+      if (g === item.gender && c === item.case) td.className = "hit";
+    }
+  }
+}
+
+// ---------- Panels ----------
+
+function renderOptions() {
+  for (const k of OPTS) $("opt-" + k).checked = settings[k];
+}
+
+function setOption(key, value) {
+  settings[key] = value;
+  for (const group of [Object.keys(MODES), Object.keys(RANGES)]) {
+    if (group.includes(key) && !group.some(k => settings[k])) { settings[key] = true; renderOptions(); return; }
+  }
+  K.store.set("gnm-settings", settings);
+}
+
+function renderSlips() {
+  const rows = history.slice(-200);
+  const has = rows.length > 0;
+  $("slipInfo").textContent = has
+    ? `Your last ${rows.length} answer${rows.length === 1 ? "" : "s"} on this device. What you miss comes up more often.`
+    : "Answer a few numbers and this shows which kinds and sizes trip you up.";
+  $("slip").hidden = !has; $("errs").hidden = !has; $("reset").hidden = !has;
+  if (!has) return;
+  const grid = $("slip"); grid.innerHTML = "";
+  grid.append(K.div("h", ""), ...Object.values(MODES).map(m => K.div("h", m)));
+  for (const [k, label] of Object.entries(RANGES)) {
+    grid.append(K.div("rl", label));
+    for (const m of Object.keys(MODES)) grid.append(K.rateCell(rows.filter(r => r.m === m && r.k === k), r => right(r.r)));
+  }
+  K.errList($("errs"), [
+    ["Gender of the number", rows.filter(r => (r.d || []).includes("gender")).length],
+    ["Case", rows.filter(r => (r.d || []).includes("case")).length],
+    ["Missing a word", rows.filter(r => r.r === "missing").length],
+    ["Accent", rows.filter(r => r.r === "accent").length],
+    ["Spelling", rows.filter(r => r.r === "spelling").length],
+  ]);
+}
+
+function renderTables() {
+  const row = (label, cells) => `<tr><td class="who">${label}</td>${cells.map(c => `<td>${c}</td>`).join("")}</tr>`;
+  // One spelling per cell; the others go in the card's note.
+  const units = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => row(n, [NW.words(n), NW.words(n + 10)])).join("");
+  const tens = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => row(n, [NW.words(n * 10), NW.words(n * 100)])).join("");
+  const agree = [1, 3, 4, 13, 200, 1000].map(n => row(NW.digits(n), ND.GENDERS.map(g => NW.words(n, g)))).join("");
+  const others = ns => ns.flatMap(n => NW.parts(n).flatMap(p => p.slice(1))).join(", ");
+  $("tables").innerHTML =
+    `<div class="tcard"><h3>1 to 19</h3><p>Counting, so neuter. 0 is μηδέν, 10 δέκα. Also spelled ${others([2, 7, 8, 9, 16, 17, 18, 19])}.</p>` +
+    `<table lang="el"><tr><th></th><th>1–9</th><th>11–19</th></tr>${units}</table></div>` +
+    `<div class="tcard"><h3>Tens and hundreds</h3><p>εκατό becomes εκατόν before more. Also spelled ${others([700, 800, 900])}.</p>` +
+    `<table lang="el"><tr><th></th><th>tens</th><th>hundreds</th></tr>${tens}</table></div>` +
+    `<div class="tcard wide"><h3>The ones that agree</h3><p>Nominative, and compounds ending in them (21, 23, 304). From 2000 up, the thousands are χιλιάδες, which is feminine.</p>` +
+    `<table lang="el"><tr><th></th><th>masc.</th><th>fem.</th><th>neut.</th></tr>${agree}</table></div>`;
+}
+
+// ---------- Wiring ----------
+
+$("form").addEventListener("submit", check);
+$("show").addEventListener("click", () => { if (!answered && item) finish(null); });
+$("next").addEventListener("click", next);
+for (const k of OPTS) $("opt-" + k).addEventListener("change", e => setOption(k, e.target.checked));
+$("reset").addEventListener("click", () => { history = []; K.store.set("gnm-history", history); renderSlips(); });
+K.marking(settings, () => K.store.set("gnm-settings", settings), renderSlips);
+K.enterForNext(() => answered, "panel-drill", next);
+K.tabs([["drill", "tab-drill", "panel-drill"], ["tables", "tab-tables", "panel-tables"]], name => { if (name === "drill" && !answered) K.focus($("answer")); });
+</script>
+</body>
+</html>

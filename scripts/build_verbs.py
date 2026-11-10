@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Build docs/data/verbs.json from the verbs on the words tab of the Google Sheet.
+"""Build docs/data/verbs.json from the verbs on the words tab of the Google Sheet, and
+docs/data/words.json from its nouns and adjectives.
 
 Usage:
     python3 scripts/build_verbs.py            # download the sheet (it must be link-shared)
@@ -7,7 +8,8 @@ Usage:
 
 Columns are found by their header, so their position in the sheet doesn't matter.
 The conjugation itself happens in the browser (docs/javascripts/greek-verbs.js); this
-script only copies the per-verb facts the rules can't work out.
+script only copies the per-verb facts the rules can't work out. words.json is the list
+the noun drills draw from; scripts/build_declensions.js adds the dictionary's tables.
 """
 
 import argparse
@@ -22,6 +24,7 @@ SHEET_ID = "1p39Sbnkx3G4swoSPJ2KKVKu-VwteKmaAQ9toFadd5cA"
 WORDS_GID = "833818589"
 URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={WORDS_GID}"
 OUT = Path(__file__).resolve().parent.parent / "docs" / "data" / "verbs.json"
+WORDS_OUT = OUT.with_name("words.json")
 
 # JSON key -> sheet header
 FIELDS = {
@@ -35,6 +38,17 @@ FIELDS = {
     "overrides": "overrides",
 }
 
+# words.json: JSON key -> sheet header, for nouns and adjectives. gender is the sheet's
+# attributes column: masculine, feminine, neuter, or invariable (ο/η γιατρός).
+WORD_FIELDS = {
+    "greek": "greek",
+    "english": "english",
+    "pos": "part of speech",
+    "gender": "attributes",
+    "tag": "tag",
+}
+WORD_POS = {"noun", "adjective"}
+
 
 def read_rows(csv_path):
     if csv_path:
@@ -43,6 +57,29 @@ def read_rows(csv_path):
         with urllib.request.urlopen(URL) as resp:
             text = resp.read().decode("utf-8")
     return list(csv.DictReader(io.StringIO(text)))
+
+
+def write_lines(path, items):
+    """One item per line keeps diffs readable."""
+    lines = [json.dumps({k: v for k, v in item.items() if v}, ensure_ascii=False) for item in items]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("[\n" + ",\n".join(lines) + "\n]\n", encoding="utf-8")
+    shown = path.relative_to(Path.cwd()) if path.is_relative_to(Path.cwd()) else path
+    return len(lines), shown
+
+
+def words(rows):
+    """The nouns and adjectives, in sheet order, one per spelling."""
+    out = {}
+    for row in rows:
+        word = {key: " ".join((row.get(header) or "").split()) for key, header in WORD_FIELDS.items()}
+        word["pos"] = word["pos"].lower()
+        if word["pos"] not in WORD_POS or not word["greek"] or word["greek"] in out:
+            continue
+        if word["pos"] != "noun":
+            word["gender"] = ""
+        out[word["greek"]] = word
+    return list(out.values())
 
 
 def main():
@@ -77,11 +114,8 @@ def main():
     if unfilled:
         print(f"note: {len(unfilled)} verb(s) have no aorist yet: {' '.join(unfilled)}", file=sys.stderr)
 
-    # One verb per line keeps diffs readable.
-    lines = [json.dumps({k: v for k, v in verb.items() if v}, ensure_ascii=False) for verb in verbs.values()]
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("[\n" + ",\n".join(lines) + "\n]\n", encoding="utf-8")
-    print(f"Wrote {len(lines)} verbs to {OUT.relative_to(Path.cwd()) if OUT.is_relative_to(Path.cwd()) else OUT}")
+    print("Wrote %d verbs to %s" % write_lines(OUT, verbs.values()))
+    print("Wrote %d nouns and adjectives to %s" % write_lines(WORDS_OUT, words(rows)))
 
 
 if __name__ == "__main__":

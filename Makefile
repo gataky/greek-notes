@@ -16,7 +16,7 @@ ANKI        := anki/sync
 DRY_RUN     := $(if $(DRY),--dry-run)
 
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet
+.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms declensions anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-18s %s\n", $$1, $$2}'
@@ -28,13 +28,16 @@ upgrade: ## Update Python packages to the newest allowed versions (rewrites uv.l
 	uv lock --upgrade
 	uv sync
 
-sync: ## Pull verbs from the Google Sheet into verbs.json, then run the checks
+sync: fetch-dictionary ## Pull verbs, nouns and adjectives from the Google Sheet into verbs.json and words.json, then run the checks
 	uv run python scripts/build_verbs.py
-	@git diff --stat -- docs/data/verbs.json
+	@$(NODE) scripts/build_declensions.js
+	@git diff --stat -- docs/data/verbs.json docs/data/words.json docs/data/declensions.json
 	@$(NODE) tests/test_verbs.js
 	@$(NODE) tests/test_voice_sentences.js
 	@$(NODE) tests/test_aspect_sentences.js
 	@$(NODE) tests/test_aspect_forks.js
+	@$(NODE) tests/test_nouns.js
+	@$(NODE) tests/test_preposition_sentences.js
 	@$(NODE) scripts/build_anki_verbs.js
 
 fetch-dictionary: ## Download the pinned dictionary into docs/data/ if it isn't there
@@ -51,7 +54,7 @@ fetch-dictionary: ## Download the pinned dictionary into docs/data/ if it isn't 
 dictionary: ## Copy in a new dictionary build (DICT_DB=path/to/lemma_greek_en.db), then check it
 	gzip -9 -n -c "$(DICT_DB)" > $(DICT_GZ)
 	@$(NODE) tests/test_dictionary.js
-	@echo "Check the site, then run make publish-dictionary so the build uses it."
+	@echo "Then run make verb-forms and make declensions, check the site, and run make publish-dictionary so the build uses it."
 
 publish-dictionary: ## Upload docs/data's dictionary as a new GitHub release and pin the build to it
 	@SHA=$$(shasum -a 256 $(DICT_GZ) | cut -d' ' -f1); \
@@ -69,6 +72,12 @@ verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (D
 	@$(NODE) tests/test_aspect_sentences.js
 	@$(NODE) tests/test_aspect_forks.js
 	@$(NODE) scripts/build_anki_verbs.js
+
+declensions: fetch-dictionary ## Copy the word list's noun and adjective tables from the dictionary into declensions.json
+	$(NODE) scripts/build_declensions.js
+	@git diff --stat -- docs/data/declensions.json
+	@$(NODE) tests/test_nouns.js
+	@$(NODE) tests/test_preposition_sentences.js
 
 anki-verbs: ## Write the verb cards for anki/ into exports/anki-verbs.json
 	$(NODE) scripts/build_anki_verbs.js
@@ -88,12 +97,16 @@ push-verbs: anki-build anki-verbs ## Push exports/anki-verbs.json to the Greek V
 
 anki: sync push-words push-verbs ## After editing the sheet: pull it, check it, push both decks (DRY=1 to preview)
 
-test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills' sentences, the aspect forks and the dictionary lookup
+test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills, the aspect forks and the dictionary lookup
 	$(NODE) tests/test_verbs.js
 	$(NODE) tests/test_verb_forms.js
 	$(NODE) tests/test_voice_sentences.js
 	$(NODE) tests/test_aspect_sentences.js
 	$(NODE) tests/test_aspect_forks.js
+	$(NODE) tests/test_nouns.js
+	$(NODE) tests/test_numbers.js
+	$(NODE) tests/test_pronoun_sentences.js
+	$(NODE) tests/test_preposition_sentences.js
 	$(NODE) tests/test_dictionary.js
 
 dump: ## Print every verb's conjugations, for reviewing

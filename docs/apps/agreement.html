@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agreement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/drill.css">
+<style>
+.slip { grid-template-columns: auto 1fr 1fr; }
+/* Whole phrases need the full width, and wrap on a phone. */
+.tables { grid-template-columns: 1fr; }
+.tables td { white-space: normal; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Articles, adjectives and nouns · case</div>
+    <h1>Agreement</h1>
+    <p class="sub">Fill the gap with the article, the adjective and the noun, all in the same gender, number and case. The sentence tells you the case: the subject is nominative, the object accusative, and "of" is the genitive.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-drill" aria-selected="true" aria-controls="panel-drill">Drill</button>
+    <button class="tab" role="tab" id="tab-tables" aria-selected="false" aria-controls="panel-tables">Tables</button>
+  </nav>
+
+  <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap">
+    <div class="card">
+      <div class="prompt">
+        <div class="prompt-top">
+          <span class="eyebrow">Fill the gap</span>
+          <span class="counter" id="counter"></span>
+        </div>
+        <p class="english" id="english" aria-live="polite">Loading words…</p>
+        <p class="gapped" id="gapped" lang="el"></p>
+        <ul class="cues" id="cues"></ul>
+      </div>
+
+      <form class="answer-row" id="form" autocomplete="off">
+        <input class="answer" id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Article, adjective and noun…" aria-label="Your answer" disabled>
+        <button class="btn" id="check" type="submit" disabled>Check</button>
+      </form>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="reveal" id="reveal" hidden>
+        <p class="greek" id="greek" lang="el"></p>
+        <div class="why">
+          <span class="reason" id="reason"></span>
+          <p id="why"></p>
+        </div>
+        <div class="scroll"><table class="para" id="para" lang="el"></table></div>
+      </div>
+
+      <div class="actions">
+        <div class="stats">
+          <span>Correct <b id="sCorrect">0</b> / <b id="sTotal">0</b></span>
+          <span>Streak <b id="sStreak">0</b></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="show" disabled>Show answer</button>
+          <button class="btn" type="button" id="next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Practise</h2>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="opt-nominative"> Nominative</label>
+        <label class="chip"><input type="checkbox" id="opt-accusative"> Accusative</label>
+        <label class="chip"><input type="checkbox" id="opt-genitive"> Genitive</label>
+        <label class="chip"><input type="checkbox" id="opt-singular"> Singular</label>
+        <label class="chip"><input type="checkbox" id="opt-plural"> Plural</label>
+        <label class="chip"><input type="checkbox" id="opt-adjective"> With an adjective</label>
+      </div>
+      <p class="help" id="bankInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" id="marking" role="radiogroup" aria-label="Marking"></div>
+      <p class="help" id="markingInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Where you slip</h2>
+      <p class="help" id="slipInfo"></p>
+      <div class="slip" id="slip" hidden></div>
+      <ul class="errs" id="errs" hidden></ul>
+      <button class="linkbtn" type="button" id="reset" hidden>Reset these stats</button>
+    </div>
+  </section>
+
+  <section id="panel-tables" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="tables" id="tables"></div>
+      <div class="tips">
+        <strong>Things to watch</strong>
+        <ul>
+          <li>The article and the adjective take the noun's gender, which the noun's ending doesn't always show: <span class="g">ο μεγάλος άντρας, η μεγάλη οδός, το μεγάλο όνομα</span>.</li>
+          <li>The adjective's ending often differs from the noun's: <span class="g">τον καλό πατέρα, της ωραίας πόλης</span>. Match the gender, number and case, not the letters.</li>
+          <li><span class="g">την</span> keeps its ν before a vowel and before κ, π, τ, ξ, ψ: <span class="g">την καλή, την άσχημη</span>, but <span class="g">τη μεγάλη</span>.</li>
+          <li>Neuter nominative and accusative are always the same. The genitive plural is <span class="g">των</span> for every gender.</li>
+          <li>Some nouns have no genitive plural in use. The drill leaves those out.</li>
+          <li>See <a href="../grammar/articles/" target="_top">Articles</a> and <a href="../grammar/adjectives/" target="_top">Adjectives</a> for the full tables.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/noun-drill.js"></script>
+<script src="../javascripts/drill-kit.js"></script>
+<script>
+"use strict";
+const ND = window.NounDrill, VD = window.VoiceDrill, K = window.DrillKit, $ = K.$;
+// Each case's sentences: Greek with ___ for the gap, then English for one and for several.
+const FRAMES = {
+  nominative: [["___ είναι εδώ.", "___ is here.", "___ are here."], ["Πού είναι ___;", "Where is ___?", "Where are ___?"]],
+  accusative: [["Βλέπω ___.", "I see ___."], ["Ψάχνω ___.", "I'm looking for ___."]],
+  genitive: [["Έχω μια φωτογραφία ___.", "I have a photo of ___."], ["Αυτή είναι η ιστορία ___.", "This is the story of ___."]],
+};
+const WHY = {
+  nominative: "It's the subject, so it's nominative.",
+  accusative: "It's the object of the verb, so it's accusative.",
+  genitive: "It's \"of\" something, so it's genitive, after the thing it belongs to.",
+};
+const ROLE = { article: "The article", adjective: "The adjective", noun: "The noun" };
+const RESULT = { correct: "Σωστά!", n: "Almost: the ν.", accent: "Almost. Check the accent.", spelling: "Right forms, a spelling slip.", extra: "Just the three words.",
+  form: "Check the endings.", missing: "A word is missing.", wrong: "Not quite.", shown: "Answer" };
+const OPTS = ["nominative", "accusative", "genitive", "singular", "plural", "adjective"];
+
+let settings = { nominative: true, accusative: true, genitive: true, singular: true, plural: true, adjective: true, marking: VD.DEFAULT_MARKING, ...K.store.get("gag-settings", {}) };
+let history = K.store.get("gag-history", []);  // [{ c: case, n: number, g: gender, r: result, a, j, o: article / adjective / noun result }]
+let nouns = [], adjectives = new Map(), english = new Map(), retry = [], recent = [];
+let item = null, answered = false;
+const session = K.score();
+
+// ---------- Loading ----------
+
+Promise.all(["words", "declensions"].map(n => fetch(`../data/${n}.json`).then(r => r.json())))
+  .then(([words, tables]) => { build(words, tables); renderTables(); renderSlips(); next(); })
+  .catch(() => { $("english").textContent = "Couldn't load the words. Open this page through the site (make serve), not straight from disk."; });
+
+function build(words, tables) {
+  const byWord = new Map(tables.map(t => [t.greek, t]));
+  for (const w of words) {
+    const t = byWord.get(w.greek);
+    if (!t) continue;
+    english.set(w.greek, ND.gloss(w.english));
+    if (t.pos === "adjective") adjectives.set(w.greek, t);
+    // One gender, not a name, and something to agree with.
+    else if (t.gender.length === 1 && !t.name && ND.adjectivesFor(w.tag).length) nouns.push({ ...t, tag: w.tag });
+  }
+  renderOptions();
+}
+
+// ---------- Choosing ----------
+
+const right = r => K.counts(r, settings.marking);
+
+// Cases and numbers you miss come up more often.
+function pickItem() {
+  const due = retry.findIndex(r => r.due <= session.q && settings[r.it.case] && settings[r.it.number] && (settings.adjective === !!r.it.adjective));
+  if (due >= 0) return retry.splice(due, 1)[0].it;
+  const rows = history.slice(-200);
+  const rate = (c, n) => { const x = rows.filter(r => r.c === c && r.n === n); return x.length ? x.filter(r => !right(r.r)).length / x.length : 0.3; };
+  const combos = ND.CASES.filter(c => settings[c]).flatMap(c => ND.NUMBERS.filter(n => settings[n]).map(n => [c, n]));
+  for (let tries = 0; tries < 100; tries++) {
+    const [c, n] = K.weighted(combos, ([c, n]) => 1 + 3 * rate(c, n));
+    const pool = nouns.filter(x => !recent.includes(x.greek));
+    const noun = K.pick(pool.length ? pool : nouns);
+    const fits = ND.adjectivesFor(noun.tag).filter(a => adjectives.has(a));
+    const adjective = settings.adjective && fits.length ? adjectives.get(K.pick(fits)) : null;
+    if (settings.adjective && !adjective) continue;
+    const slots = ND.phrase({ noun, adjective, case: c, number: n });
+    if (!slots) continue;
+    recent = [...recent, noun.greek].slice(-12);
+    return { noun, adjective, case: c, number: n, slots, frame: K.pick(FRAMES[c]), gender: noun.gender[0] };
+  }
+  return null;
+}
+
+// ---------- One phrase ----------
+
+const enPhrase = it => {
+  const noun = english.get(it.noun.greek) || it.noun.greek;
+  const words = (it.adjective ? (english.get(it.adjective.greek) || "") + " " : "") + (it.number === "plural" ? ND.pluralEn(noun) : noun);
+  return "the " + words.trim();
+};
+const answerText = it => it.slots.map(s => s.forms[0]).join(" ");
+
+function next() {
+  item = pickItem();
+  if (!item) { $("english").textContent = "No words match these settings."; return; }
+  answered = false; session.q++;
+  $("counter").textContent = "Phrase " + session.q;
+  const [el, sg, pl] = item.frame;
+  const [pre, post] = (item.number === "plural" && pl ? pl : sg).split("___");
+  const phrase = enPhrase(item);
+  const b = document.createElement("b");
+  // "The" at the start of a sentence.
+  b.textContent = pre ? phrase : phrase[0].toUpperCase() + phrase.slice(1);
+  $("english").replaceChildren(pre, b, post);
+  const [before, after] = el.split("___");
+  const blank = document.createElement("span"); blank.className = "blank"; blank.textContent = " ";
+  $("gapped").replaceChildren(before, blank, after);
+  const cue = (g, en) => `<li><span class="g" lang="el">${K.esc(g)}</span> ${en ? K.esc(en) : ""}</li>`;
+  $("cues").innerHTML = (item.adjective ? cue(item.adjective.greek, english.get(item.adjective.greek)) : "") +
+    cue(item.noun.greek, english.get(item.noun.greek)) + `<li class="tag">${item.number}</li>`;
+  $("answer").value = ""; $("answer").disabled = false;
+  $("check").disabled = false; $("show").disabled = false; $("next").disabled = true;
+  $("feedback").hidden = true; $("reveal").hidden = true;
+  K.focus($("answer"));
+}
+
+function check(e) {
+  e && e.preventDefault();
+  if (answered) { next(); return; }
+  const raw = $("answer").value.trim();
+  if (!raw) return;
+  finish(ND.gradePhrase(raw, item.slots, { case: item.case, number: item.number, gender: item.gender }));
+}
+
+function finish(g) {
+  answered = true;
+  const result = g ? g.result : "shown";
+  session.add(right(result));
+  if (!right(result)) retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
+  if (g) {
+    const by = role => { const k = item.slots.findIndex(s => s.role === role); return k < 0 ? undefined : g.words[k].result; };
+    const formOf = role => { const k = item.slots.findIndex(s => s.role === role); return k < 0 || !g.words[k].hit ? [] : ND.diffs(g.words[k].hit, want()); };
+    history = [...history, { c: item.case, n: item.number, g: item.gender, r: result, a: by("article"), j: by("adjective"), o: by("noun"),
+      d: [...new Set(["article", "adjective", "noun"].flatMap(formOf))] }].slice(-400);
+    K.store.set("gag-history", history); renderSlips();
+  }
+  const kind = !g ? "bad" : right(result) ? "good" : ["accent", "spelling", "n", "extra"].includes(result) ? "warn" : "bad";
+  // A forgiven slip still shows the right spelling.
+  const clean = result === "correct";
+  const msgs = g ? g.words.map((w, k) => wordMessage(w, item.slots[k])).filter(Boolean) : ["This one will come back later."];
+  if (g && g.extra.length) msgs.push(`${g.extra.join(" ")}: not part of the phrase.`);
+  K.feedback($("feedback"), { kind, title: K.forgiven(result, settings.marking) ? K.FORGIVEN : RESULT[result], msg: msgs, highlight: K.isSlip(result), typed: g && !clean ? g.words.map(w => w.typed || "…").join(" ") : "", answer: clean ? "" : answerText(item) });
+  showReveal(g);
+  $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
+  K.focus($("next"));
+}
+
+const want = () => ({ case: item.case, number: item.number, gender: item.gender });
+function wordMessage(w, slot) {
+  if (w.result === "missing") return `${ROLE[slot.role]} is missing.`;
+  if (w.result === "n") return "τη keeps its ν before a vowel and before κ, π, τ, ξ, ψ: την.";
+  if (w.result === "form") {
+    const wrong = ND.diffs(w.hit, want());
+    const told = wrong.map(k => (k === "gender" ? `${item.noun.greek} is ${item.gender}` : k === "case" ? `here it's ${item.case}` : `here it's ${item.number}`));
+    return `${ROLE[slot.role]} ${w.typed} is ${ND.describe(w.hit, want())}; ${told.join(", ")}.` + (w.misspelled ? " Check the spelling too." : "");
+  }
+  if (w.result === "spelling") return `${ROLE[slot.role]}: check the spelling.`;
+  if (w.result === "accent") return `${ROLE[slot.role]}: check the accent.`;
+  return w.result === "wrong" ? `${ROLE[slot.role]} ${w.typed} isn't a form of ${slot.word || "the article"}.` : "";
+}
+
+function showReveal(g) {
+  const [el] = item.frame;
+  const [before, after] = el.split("___");
+  const b = document.createElement("b"); b.textContent = answerText(item);
+  $("greek").replaceChildren(before, b, after);
+  $("reason").textContent = `${item.case} · ${item.number} · ${item.gender}`;
+  $("why").textContent = WHY[item.case];
+  renderParadigm(g);
+  $("reveal").hidden = false;
+}
+
+// The whole phrase in every case and number, the answer and a wrong guess marked.
+function renderParadigm(g) {
+  const t = $("para"); t.innerHTML = "";
+  const head = t.insertRow();
+  head.append(document.createElement("th"));
+  for (const n of ND.NUMBERS) { const th = document.createElement("th"); th.textContent = n; th.lang = "en"; if (n === item.number) th.className = "cur"; head.append(th); }
+  const wrongHit = g && g.words.map(w => w.hit).find(h => h && h.case);
+  for (const c of ND.CASES) {
+    const tr = t.insertRow();
+    const who = tr.insertCell(); who.className = "who"; who.textContent = c; who.lang = "en";
+    for (const n of ND.NUMBERS) {
+      const td = tr.insertCell();
+      const slots = ND.phrase({ noun: item.noun, adjective: item.adjective, case: c, number: n });
+      td.innerHTML = slots ? slots.map(s => (s.role === "article" ? `<span class="pre">${K.esc(s.forms[0])}</span>` : K.markHTML(s.marked[0]))).join(" ") : "–";
+      if (c === item.case && n === item.number) td.className = "hit";
+      else if (wrongHit && wrongHit.case === c && wrongHit.number === n) td.className = "miss";
+    }
+  }
+}
+
+// ---------- Panels ----------
+
+function renderOptions() {
+  for (const k of OPTS) $("opt-" + k).checked = settings[k];
+  $("bankInfo").textContent = `${nouns.length} nouns and ${adjectives.size} adjectives from your word list. Adjectives are paired only with nouns they suit.`;
+}
+
+function setOption(key, value) {
+  settings[key] = value;
+  const groups = [ND.CASES, ND.NUMBERS];
+  for (const group of groups) if (group.includes(key) && !group.some(k => settings[k])) { settings[key] = true; renderOptions(); return; }
+  K.store.set("gag-settings", settings);
+}
+
+function renderSlips() {
+  const rows = history.slice(-200);
+  const has = rows.length > 0;
+  $("slipInfo").textContent = has
+    ? `Your last ${rows.length} phrase${rows.length === 1 ? "" : "s"} on this device. The cases and numbers you miss come up more often.`
+    : "Answer a few phrases and this shows which cases and words trip you up.";
+  $("slip").hidden = !has; $("errs").hidden = !has; $("reset").hidden = !has;
+  if (!has) return;
+  const grid = $("slip"); grid.innerHTML = "";
+  grid.append(K.div("h", ""), K.div("h", "Singular"), K.div("h", "Plural"));
+  for (const c of ND.CASES) {
+    grid.append(K.div("rl", c));
+    for (const n of ND.NUMBERS) grid.append(K.rateCell(rows.filter(r => r.c === c && r.n === n), r => right(r.r)));
+  }
+  const bad = r => r && !right(r) && r !== "accent" && r !== "spelling";
+  K.errList($("errs"), [
+    ["Article", rows.filter(r => bad(r.a)).length],
+    ["Adjective ending", rows.filter(r => bad(r.j)).length],
+    ["Noun ending", rows.filter(r => bad(r.o)).length],
+    ["Wrong gender", rows.filter(r => (r.d || []).includes("gender")).length],
+    ["Wrong case", rows.filter(r => (r.d || []).includes("case")).length],
+    ["Wrong number", rows.filter(r => (r.d || []).includes("number")).length],
+    ["Accent", rows.filter(r => r.r === "accent").length],
+    ["Spelling", rows.filter(r => r.r === "spelling").length],
+  ]);
+}
+
+function renderTables() {
+  // The article, and one adjective with a noun of each gender.
+  const articleRows = ND.CASES.map(c => `<tr><td class="who">${c}</td>${ND.GENDERS.map(g => `<td>${ND.ARTICLES[g][c].join(", ")}</td>`).join("")}</tr>`).join("");
+  let html = `<div class="tcard"><h3>The article</h3><p>Singular, plural. την drops its ν before most consonants: τη μέρα.</p>` +
+    `<table lang="el"><tr><th></th><th>masc.</th><th>fem.</th><th>neut.</th></tr>${articleRows}</table></div>`;
+  const adj = adjectives.get("καλός");
+  for (const g of ND.GENDERS) {
+    const noun = nouns.find(n => n.gender[0] === g && ["φίλος", "πόλη", "παιδί"].includes(n.greek));
+    if (!adj || !noun) continue;
+    const rows = ND.CASES.map(c => `<tr><td class="who">${c}</td>${ND.NUMBERS.map(n => {
+      const s = ND.phrase({ noun, adjective: adj, case: c, number: n });
+      return `<td>${s ? s.map(x => (x.role === "article" ? `<span class="pre">${K.esc(x.forms[0])}</span>` : K.markHTML(x.marked[0]))).join(" ") : "–"}</td>`;
+    }).join("")}</tr>`).join("");
+    html += `<div class="tcard"><h3 lang="el">${K.esc(noun.greek)}</h3><p>${g}</p><table lang="el"><tr><th></th><th>sing.</th><th>plural</th></tr>${rows}</table></div>`;
+  }
+  $("tables").innerHTML = html;
+}
+
+// ---------- Wiring ----------
+
+$("form").addEventListener("submit", check);
+$("show").addEventListener("click", () => { if (!answered && item) finish(null); });
+$("next").addEventListener("click", next);
+for (const k of OPTS) $("opt-" + k).addEventListener("change", e => setOption(k, e.target.checked));
+$("reset").addEventListener("click", () => { history = []; K.store.set("gag-history", history); renderSlips(); });
+K.marking(settings, () => K.store.set("gag-settings", settings), renderSlips);
+K.enterForNext(() => answered, "panel-drill", next);
+K.tabs([["drill", "tab-drill", "panel-drill"], ["tables", "tab-tables", "panel-tables"]], name => { if (name === "drill" && !answered) K.focus($("answer")); });
+</script>
+</body>
+</html>

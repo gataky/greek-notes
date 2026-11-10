@@ -13,14 +13,14 @@ docs/                   the site (MkDocs serves everything here)
   drills/, tools/       pages that embed an app; their URLs are linked from outside, keep them
   apps/                 standalone HTML apps, embedded by the pages above
   javascripts/          all JS: site-wide scripts (listed in mkdocs.yml) and the apps' modules
-  stylesheets/          all CSS: site-wide (listed in mkdocs.yml) and verb-grid.css for the apps
+  stylesheets/          all CSS: site-wide (listed in mkdocs.yml), and verb-grid.css and drill.css for the apps
   data/                 JSON the apps fetch, and the gzipped dictionary (downloaded, not in git)
   vendor/sql.js/        third-party code, vendored for offline use
   fonts/, icons/        self-hosted Greek font, app icons
   manifest.webmanifest, sw.js   must stay at the site root (service worker scope)
 overrides/              theme templates (custom_dir)
 hooks/                  MkDocs hooks
-scripts/                build_*.py: write the files in docs/data/; build_anki_verbs.js writes exports/
+scripts/                build_*.py, build_declensions.js: write the files in docs/data/; build_anki_verbs.js writes exports/
 exports/                data for anki/, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
 sqlite-database.md      the lemma dictionary's developer guide (a copy)
@@ -39,13 +39,14 @@ make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
 make check     # all tests, the Go tests, then strict build: what CI runs before deploying, plus Go
-make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js, test_aspect_forks.js and test_dictionary.js
+make test      # node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js, test_aspect_forks.js, test_nouns.js, test_numbers.js, test_pronoun_sentences.js, test_preposition_sentences.js and test_dictionary.js
 make dump      # print every verb's conjugations for review
-make sync      # pull verbs from the Google Sheet into docs/data/verbs.json, then test
+make sync      # pull verbs, nouns and adjectives from the Google Sheet into docs/data/verbs.json, words.json and declensions.json, then test
 make fetch-dictionary  # download the pinned dictionary into docs/data/ (build, serve and test do this)
 make dictionary  # gzip a new lemma dictionary build into docs/data/, then test
 make publish-dictionary  # upload docs/data's dictionary as a GitHub release and pin the Makefile to it
 make verb-forms  # copy our verbs' forms from the dictionary into docs/data/verb-forms.json, then test
+make declensions  # copy our nouns' and adjectives' tables from the dictionary into docs/data/declensions.json, then test
 make anki-verbs  # write the verb cards for anki/ into exports/anki-verbs.json (sync and verb-forms do too)
 make anki-build  # go build anki/sync
 make anki-test   # go test ./... in anki/
@@ -191,13 +192,35 @@ Active verbs only, since the owner hasn't learned the passive past yet. The lear
   - Marking works as in the active or passive drill.
   - Progress is per device, in localStorage (`gta-history`, `gta-seen`, `gta-settings`).
 
+## Noun drills (`docs/drills/noun-gender.md`, `agreement.md`, `numbers.md`, `prepositions.md`)
+
+Noun gender, agreement (article + adjective + noun in a case), numbers and prepositions draw from the word list's nouns and adjectives, with the dictionary's forms. No noun or adjective form is generated; only the article and the numbers are fixed tables in code.
+
+- **`words.json`**: the words tab's nouns and adjectives (`greek`, `english`, `pos`, `gender`, `tag`), written by `scripts/build_verbs.py` next to `verbs.json`. `gender` is the sheet's `attributes` column, `invariable` for ο/η γιατρός.
+- **`declensions.json`** (`scripts/build_declensions.js`, Node, through `greek-dictionary.js`'s `declensions()` and `adjectiveDeclensions()`, so the cells are the dictionary page's): one word per line, `{ greek, pos, gender, cells }`, plus `name: true` for proper names (Ελλάδα, Απρίλιος; `declensions(word, "name")`) and `indeclinable: true` (ταξί). The word list's gender wins over the table's; the script prints disagreements and the words with no table (about 55: multi-word nouns, plurals the dictionary files under a singular, spellings it files under another, like αυγό for αβγό). Rebuild with `make declensions` after `make sync` (which runs it) or a new dictionary.
+- **`noun-drill.js`** (browser and Node): articles and the ν rule (`articleForms`: τη before most consonants, την before a vowel and κ π τ ξ ψ), phrases as slots (`phrase()`), and `gradePhrase()`, which aligns the typed words to the slots and names a wrong form by its case, number or gender. `ADJECTIVE_TAGS` is a small hand-made list of which adjectives suit which noun tags, so the agreement drill doesn't pair "hungry" with "spoon"; adjectives not in it aren't drilled.
+- **`number-words.js`**: cardinals 0 to 999.999.999 in words, by gender and case, with spelling variants (εφτά/επτά), following `grammar/numerals.md`.
+- **`preposition-drill.js`** and `preposition-sentences.json`: one object per line, `prep` (`σε`, `από`, `δίπλα σε`… or `none`), `noun` (word list spelling), `en` with the phrase `*marked*`, `el`, `answer` (as it appears in `el`), optional `also` (other accepted answers) and `note`. `analyse()` reads the answer as preposition + accusative against the noun's table.
+- Progress is per device in localStorage: `gng-*` (noun gender), `gag-*` (agreement), `gnm-*` (numbers), `gpp-*` (prepositions).
+- `tests/test_nouns.js` checks the data and grades every phrase the agreement drill can ask for against its own answer; `test_numbers.js` checks hand-checked numbers; `test_preposition_sentences.js` checks every sentence against its noun's table and the grader.
+
+## Object pronoun drill (`docs/drills/object-pronouns.md`, `docs/apps/object-pronouns.html`)
+
+Weak pronouns and where they go. `pronoun-sentences.json`: one object per line, `rule` (`before`, `negation`, `particle`, `imperative`, `dont`), `en` with the verb phrase `*marked*`, `el` (with the referent before the gap, so its gender shows), `answer`, optional `also` and `note`. **`pronoun-drill.js`** grades: correct, accent (the second accent of διάβασέ το), order, pronoun, particle, spelling, verb. τη/την, δε/δεν and μη/μην are accepted wherever the ν may drop. `tests/test_pronoun_sentences.js` checks each answer is built the way its rule says (`ruleProblem`). Progress: `gop-*`.
+
+## Shared drill pieces
+
+The five newer drill apps share `docs/stylesheets/drill.css` (layout and colour tokens) and `docs/javascripts/drill-kit.js` (storage, feedback box, score, tabs, slip cells). The two gap-fill drills, prepositions and object pronouns, also share `gap-drill-page.js` (the page) and `gap-sentences.js` (finding and blanking the answer in the Greek). The older passive and tense-aspect apps still inline their own.
+
+Marking works in these drills as in the verb drills, through `voice-drill.js`'s `MARKING` and `countsAsRight()`: `DrillKit.marking()` draws the radios, and `DrillKit.counts()` maps their slips onto it (`accent`, `spelling`, and `n` for τη where the ν must stay, marked like a typo). Forgiven slips also count as right in Where you slip; the feedback lights up the letters that differ (`changes()`).
+
 ## Dictionary (`docs/apps/dictionary.html`)
 
 A Greek ↔ English dictionary that runs entirely in the browser. It's the home page, so `/#σπίτι` opens a word.
 
 - **Home page:** `docs/index.md` is only the iframe. Its template, `overrides/home.html`, adds a menu button (top left, the side the menu slides in from) and a `<dialog>` built from `nav`, and a light/dark button (top right), both in `docs/javascripts/home.js`. Below about 880px the dictionary's text would sit under the menu button, so `home.css` starts the frame 32px lower there. The theme button picks the next palette through Material's own radio inputs, still in the hidden header, so the choice is saved for every page and `drill-frame.js` passes it into the dictionary. It reads the current palette from `body[data-md-color-scheme]`, because on a first visit neither input is checked. `docs/stylesheets/home.css` hides the site's header and footer with `body:has(.dict-home)`. They stay in the page because instant navigation needs them. The point is that the site looks like a dictionary until you open the menu, so don't add links to the notes there.
 
-- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 4, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms`, then `make publish-dictionary`.
+- **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 4, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms` and `make declensions`, then `make publish-dictionary`.
   - **It isn't in git** (23 MB; ignored). It's an asset on a GitHub release of this repo (`dictionary-YYYYMMDD`). The Makefile pins it by `DICT_URL` and `DICT_SHA256`, and `make fetch-dictionary` downloads it when missing; `build`, `serve`, `test` and CI run that first. A local file that isn't the pinned build is left alone, with a note, so a fresh `make dictionary` isn't overwritten. `publish-dictionary` creates the release with `gh` and rewrites the two pin lines; commit the Makefile after. Older copies remain in git history (before 2026-11-07); history was deliberately not rewritten.
   - Never write to the database, and refer to words by spelling (`#σπίτι`), since row ids change between builds.
 - **Engine:** sql.js 1.14.2 is vendored in `docs/vendor/sql.js/` (no CDN, so it works offline). The app unzips the file with `DecompressionStream` and opens it in memory.
