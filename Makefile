@@ -7,8 +7,8 @@ DICT_DB   := ../lemma/lemma_greek_en/lemma_greek_en.db
 # The dictionary isn't kept in git: it's an asset on a GitHub release, pinned here by URL and
 # checksum. `make publish-dictionary` uploads a new build and rewrites these two lines.
 DICT_GZ     := docs/data/lemma_greek_en.db.gz
-DICT_URL    := https://github.com/gataky/greek-notes/releases/download/dictionary-20261107/lemma_greek_en.db.gz
-DICT_SHA256 := 5fc29721d7e7233d8c3f89e26471b78a237179d173ac4f303a89aaf8baae3adc
+DICT_URL    := https://github.com/gataky/greek-notes/releases/download/dictionary-20261110/lemma_greek_en.db.gz
+DICT_SHA256 := c2c15db29f60f070f045dd86102a55e7d86e1078e06925acb0989b022cb1d4e8
 
 # The Anki sync tool (Go) in anki/. Its config and keys live in ~/.config/sync/, not here.
 # DRY=1 makes the push targets preview what they'd change.

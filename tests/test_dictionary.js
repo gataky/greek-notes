@@ -85,7 +85,8 @@ initSqlJs().then(SQL => {
   for (const q of ["σπ", "σπι", "σπίτ", "sp", "spi", "spit"]) check(`complete ${q}`, dict.complete(q)[0].word, "σπίτι");
   check("complete είπ", [dict.complete("είπ")[0].word, dict.complete("είπ")[0].matchedForm], ["λέω", "είπα"]);
   check("complete σπη (misspelt) has σπίτι", dict.complete("σπη").some(h => h.word === "σπίτι" && h.kind === D.PHONETIC), true);
-  check("complete kal (no odd forms on top)", dict.complete("kal").slice(0, 3).map(h => h.word), ["καλά", "καλός", "καλημέρα"]);
+  // καλό ("good", the noun) is a headword of its own, not just a form of καλός.
+  check("complete kal (no odd forms on top)", dict.complete("kal").slice(0, 4).map(h => h.word), ["καλά", "καλό", "καλός", "καλημέρα"]);
   check("complete σ (one letter)", dict.complete("σ"), []);
   check("lookup σπίτι", dict.lookup("σπίτι").entries[0].pos, "noun");
   check("lookup forms of σπίτι", dict.lookup("σπίτι").forms.includes("σπιτιού"), true);
