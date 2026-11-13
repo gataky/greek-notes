@@ -160,17 +160,16 @@
   const SELECT_FORMS = `SELECT f.headword_id, f.form, h.word, h.frequency, f.phonetic, f.is_primary
     FROM form f JOIN headword h ON h.id = f.headword_id`;
   const PREFER_HEADWORD = " ORDER BY f.form = h.word DESC";
-  // One meaning to show next to a headword in a list, skipping "plural of …" when possible.
-  const FIRST_GLOSS = `SELECT s.gloss FROM entry e JOIN sense s ON s.entry_id = e.id
+  // One meaning to show next to a headword in a list, skipping "plural of …" when possible,
+  // and the part of speech of its entry.
+  const FIRST_GLOSS = `SELECT s.gloss, e.pos_display FROM entry e JOIN sense s ON s.entry_id = e.id
     WHERE e.headword_id = ? ORDER BY s.is_reference, e.ord, s.ord LIMIT 1`;
 
-  const SELECT_EN = `SELECT e.greek, e.headword_id, e.score,
-      COALESCE(s.gloss, (SELECT s2.gloss FROM entry e2 JOIN sense s2 ON s2.entry_id = e2.id
-        WHERE e2.headword_id = e.headword_id ORDER BY s2.is_reference, e2.ord, s2.ord LIMIT 1)),
-      e.note
+  const SELECT_EN = `SELECT e.greek, e.headword_id, e.score, s.gloss, se.pos_display, e.note
     FROM en_index e
     LEFT JOIN headword h ON h.id = e.headword_id
     LEFT JOIN sense s ON s.id = e.sense_id
+    LEFT JOIN entry se ON se.id = s.entry_id
     WHERE e.term = ?
     ORDER BY e.score DESC, COALESCE(h.frequency, 0) DESC, e.greek
     LIMIT ?`;
@@ -307,13 +306,18 @@
       }
     };
     const value = (sql, params) => rows(sql, params)[0]?.[0] ?? null;
+    const firstGloss = headwordId => {
+      const [gloss = null, pos = null] = rows(FIRST_GLOSS, [headwordId])[0] || [];
+      return { gloss, pos };
+    };
 
     const version = value("SELECT value FROM meta WHERE key = 'schema_version'");
     if (version !== "4") throw new Error(`expected dictionary schema_version 4, got ${version}`);
     const meta = Object.fromEntries(rows("SELECT key, value FROM meta"));
 
     // Greek or Greeklish query -> hits, best first:
-    // { headwordId, word, matchedForm, kind (EXACT/NORM/PHONETIC), penalty, isPrimary, frequency, gloss }
+    // { headwordId, word, matchedForm, kind (EXACT/NORM/PHONETIC), penalty, isPrimary, frequency, gloss, pos }
+    // pos is the pos_display of the gloss's entry.
     // A spelling several headwords share ranks its main owner first (is_primary): πήγα finds
     // πηγαίνω before πάω, though πάω is more frequent.
     function searchGreek(query, limit = 10) {
@@ -345,7 +349,7 @@
       return [...best.values()]
         .sort((a, b) => a.kind - b.kind || a.penalty - b.penalty || b.isPrimary - a.isPrimary || b.frequency - a.frequency || cmp(a.word, b.word))
         .slice(0, limit)
-        .map(hit => ({ ...hit, gloss: value(FIRST_GLOSS, [hit.headwordId]) }));
+        .map(hit => ({ ...hit, ...firstGloss(hit.headwordId) }));
     }
 
     // Words that start with what's typed so far, for filtering as you type (searchGreek only
@@ -393,16 +397,19 @@
         const bySound = range("phonetic", keys);
         add(select(bySound.where, bySound.params), PHONETIC);
       }
-      return hits.map(hit => ({ ...hit, gloss: value(FIRST_GLOSS, [hit.headwordId]) }));
+      return hits.map(hit => ({ ...hit, ...firstGloss(hit.headwordId) }));
     }
 
     // English query -> hits, best first:
-    // { greek, headwordId (null when the Greek has no entry), score, gloss, note, fullText }
+    // { greek, headwordId (null when the Greek has no entry), score, gloss, pos, note, fullText }
+    // gloss is the matched sense, else the headword's first; pos is the part of speech of its entry.
     function searchEnglish(query, limit = 10) {
       const term = normalizeTerm(query);
       if (!term) return [];
-      const hits = rows(SELECT_EN, [term, limit]).map(([greek, headwordId, score, gloss, note]) =>
-        ({ greek, headwordId, score, gloss, note, fullText: false }));
+      const hits = rows(SELECT_EN, [term, limit]).map(([greek, headwordId, score, gloss, pos, note]) => {
+        const shown = gloss != null ? { gloss, pos } : headwordId != null ? firstGloss(headwordId) : { gloss: null, pos: null };
+        return { greek, headwordId, score, ...shown, note, fullText: false };
+      });
       return hits.length ? hits : searchGlosses(term, limit);
     }
 
@@ -414,18 +421,18 @@
       const like = words.map(() => "s.gloss LIKE ? ESCAPE '\\'").join(" AND ");
       const wordRes = words.map(w => new RegExp(`(^|[^\\p{L}])${escapeRegExp(w)}`, "iu"));
       const phrase = new RegExp(`(^|[^\\p{L}])${escapeRegExp(term)}`, "iu");
-      const found = rows(`SELECT h.word, h.id, s.gloss, h.frequency FROM sense s
+      const found = rows(`SELECT h.word, h.id, s.gloss, en.pos_display, h.frequency FROM sense s
           JOIN entry en ON en.id = s.entry_id JOIN headword h ON h.id = en.headword_id
           WHERE s.is_reference = 0 AND ${like}`, words.map(w => `%${escapeLike(w)}%`))
         .filter(([, , gloss]) => wordRes.every(re => re.test(gloss)))
         // The whole phrase first, then common words, then short glosses.
-        .map(([greek, headwordId, gloss, frequency]) => ({ greek, headwordId, gloss, frequency, phrase: phrase.test(gloss) }))
+        .map(([greek, headwordId, gloss, pos, frequency]) => ({ greek, headwordId, gloss, pos, frequency, phrase: phrase.test(gloss) }))
         .sort((a, b) => b.phrase - a.phrase || b.frequency - a.frequency || a.gloss.length - b.gloss.length);
       const seen = new Set(), hits = [];
-      for (const { greek, headwordId, gloss } of found) {
+      for (const { greek, headwordId, gloss, pos } of found) {
         if (seen.has(headwordId)) continue;
         seen.add(headwordId);
-        hits.push({ greek, headwordId, score: 0, gloss, note: null, fullText: true });
+        hits.push({ greek, headwordId, score: 0, gloss, pos, note: null, fullText: true });
         if (hits.length >= limit) break;
       }
       return hits;

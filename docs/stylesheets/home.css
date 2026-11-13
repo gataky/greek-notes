@@ -2,8 +2,8 @@
    behind a menu. Uses :has() so this applies however the page was reached, including
    instant navigation, which swaps the content but keeps the <body>. */
 
-body:has(.dict-home) { --md-default-bg-color: #f4f7fb; }
-body[data-md-color-scheme="slate"]:has(.dict-home) { --md-default-bg-color: #0c141f; }
+body:has(.dict-home) { --md-default-bg-color: #f2e5bc; }
+body[data-md-color-scheme="slate"]:has(.dict-home) { --md-default-bg-color: #282828; }
 
 body:has(.dict-home) .md-header,
 body:has(.dict-home) .md-tabs,

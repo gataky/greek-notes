@@ -6,10 +6,46 @@
 <title>Greek Dictionary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 <link rel="stylesheet" href="../stylesheets/verb-grid.css">
 <link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <style>
+/* Gruvbox, for this page only (home.css matches its background): the page's own tokens from
+   verb-grid.css and aspect-fork.css, then the part-of-speech and gender colours, in gruvbox's
+   normal shades on light and its bright ones on dark. Greek is in GFS Neohellenic here. */
+:root {
+  --display: "GFS Neohellenic", "Noto Sans", system-ui, sans-serif;
+  --bg: #f2e5bc; --surface: #fbf1c7; --ink: #3c3836; --muted: #7c6f64; --line: #d5c4a1;
+  --accent: #076678; --accent-soft: #ebdbb2; --warn: #af3a03; --aug: #8f3f71;
+  --verb: #d65d0e; --noun: #458588; --adj: #98971a; --adv: #b16286; --prep: #d79921; --other: #bdae93;
+  --masculine: #458588; --feminine: #cc241d; --neuter: #689d6a;
+  --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
+    --accent: #83a598; --accent-soft: #3c3836; --warn: #fabd2f; --aug: #d3869b;
+    --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
+    --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c; --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
+  --accent: #83a598; --accent-soft: #3c3836; --warn: #fabd2f; --aug: #d3869b;
+  --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
+  --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c; --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
+}
+.pos-verb { --pos: var(--verb); }
+.pos-noun { --pos: var(--noun); }
+.pos-adj { --pos: var(--adj); }
+.pos-adv { --pos: var(--adv); }
+.pos-prep { --pos: var(--prep); }
+.pos-other { --pos: var(--other); }
+.gender.masculine { --gender: var(--masculine); }
+.gender.feminine { --gender: var(--feminine); }
+.gender.neuter { --gender: var(--neuter); }
+.gender { color: var(--surface); background: var(--gender); }
+
 /* Search box */
 #search { width: 100%; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
 #search:focus { border-color: var(--accent); outline: none; }
@@ -20,7 +56,9 @@
 #results { display: flex; flex-direction: column; gap: 14px; }
 .group h2 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
 .group ul { list-style: none; margin: 0; padding: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
-.group a, .group .nolink { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+.group a, .group .nolink { position: relative; display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; padding: 7px 10px 7px 20px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+/* The part of speech of the meaning shown, as a bar on the left */
+.group [class*="pos-"]::before { content: ""; position: absolute; left: 7px; top: 9px; bottom: 9px; width: 4px; border-radius: 2px; background: var(--pos); }
 /* .first is what Enter opens */
 .group a:hover, .group a:focus-visible, .group a.first { background: var(--accent-soft); outline: none; }
 .group .g { font-family: var(--display); font-size: 20px; }
@@ -35,8 +73,9 @@
 /* One section per part of speech: heading, headword line, senses, then its own tables */
 .entry { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .entry + .entry { border-top: 2px solid var(--line); margin-top: 10px; padding-top: 22px; }
-.entry .pos { font-size: 20px; font-weight: 600; line-height: 1.2; margin: 0 0 2px; padding-left: 10px; border-left: 3px solid var(--accent); }
+.entry .pos { font-size: 20px; font-weight: 600; line-height: 1.2; margin: 0 0 2px; padding-left: 10px; border-left: 4px solid var(--pos, var(--accent)); }
 .entry .head { color: var(--muted); font-size: 15px; margin: 0; }
+.head .gender { font-size: 14px; font-weight: 600; padding: 1px 9px; border-radius: 999px; }
 .senses { margin: 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; }
 .senses li::marker { color: var(--muted); font-size: 14px; }
 .entry > .conjugation, .entry > .declension { margin-top: 10px; }
@@ -188,7 +227,7 @@ function linkWords(text) {
 
 function greekItem(hit) {
   const from = hit.matchedForm !== hit.word ? `<span class="from" lang="el">← ${esc(hit.matchedForm)}</span>` : "";
-  return `<li><a href="${wordHref(hit.word)}"><span class="g" lang="el">${esc(hit.word)}</span>${from}<span class="e">${esc(hit.gloss || "")}</span></a></li>`;
+  return `<li><a href="${wordHref(hit.word)}"${posAttrs(hit.pos)}><span class="g" lang="el">${esc(hit.word)}</span>${from}<span class="e">${esc(hit.gloss || "")}</span></a></li>`;
 }
 
 function englishItem(hit) {
@@ -196,7 +235,7 @@ function englishItem(hit) {
   const inner = `<span class="g" lang="el">${esc(hit.greek)}</span><span class="e">${esc(hit.gloss || "")}${note}</span>`;
   return hit.headwordId == null
     ? `<li><span class="nolink" title="No full entry for this word">${inner}</span></li>`
-    : `<li><a href="${wordHref(hit.greek)}">${inner}</a></li>`;
+    : `<li><a href="${wordHref(hit.greek)}"${posAttrs(hit.pos)}>${inner}</a></li>`;
 }
 
 const group = (title, items) => items.length ? `<section class="group"><h2>${title}</h2><ul>${items.join("")}</ul></section>` : "";
@@ -254,6 +293,22 @@ const POS_NAMES = {
   adj: "adjective", adv: "adverb", name: "proper noun", num: "numeral", intj: "interjection",
   pron: "pronoun", prep: "preposition", conj: "conjunction", prep_phrase: "prepositional phrase", det: "determiner",
 };
+const posName = pos => POS_NAMES[pos] || pos.replace(/_/g, " ");
+
+// The colour of a part of speech, shared by the search results and the entry's headings. The
+// rest (pronouns, conjunctions, phrases...) share a neutral one.
+const POS_COLOURS = { verb: "verb", noun: "noun", name: "noun", adj: "adj", participle: "adj", adv: "adv", prep: "prep", prep_phrase: "prep" };
+const posClass = pos => "pos-" + (POS_COLOURS[pos] || "other");
+const posAttrs = pos => (pos ? ` class="${posClass(pos)}" title="${esc(posName(pos))}"` : "");
+
+// A noun's headword line with its gender in the gender's colour: "masculine or feminine (plural γιατροί)".
+const GENDER_HEAD = /^((?:masculine|feminine|neuter)(?: or (?:masculine|feminine|neuter))*)\b/;
+function headHTML(entry) {
+  const m = POS_COLOURS[entry.pos] === "noun" && GENDER_HEAD.exec(entry.head);
+  if (!m) return linkWords(entry.head);
+  const genders = m[1].split(" or ").map(g => `<span class="gender ${g}">${g}</span>`).join(" or ");
+  return genders + linkWords(entry.head.slice(m[1].length));
+}
 
 // One section per entry: its part of speech, headword line, senses and etymology, then its own
 // tables, so καλός the adjective is followed by the adjective's declension and καλός the noun by
@@ -275,8 +330,8 @@ function entryHTML(found) {
       + declensionHTML(nouns.filter(t => t.entry === entry.id))
       + adjectiveHTML(adjectives.filter(t => t.entry === entry.id));
     return `<section class="entry">
-      <h3 class="pos">${esc(POS_NAMES[entry.pos] || entry.pos.replace(/_/g, " "))}</h3>
-      ${entry.head ? `<p class="head">${linkWords(entry.head)}</p>` : ""}
+      <h3 class="pos ${posClass(entry.pos)}">${esc(posName(entry.pos))}</h3>
+      ${entry.head ? `<p class="head">${headHTML(entry)}</p>` : ""}
       <ol class="senses">${senses}</ol>${etymology}${tables}</section>`;
   }).join("");
   const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
@@ -314,7 +369,7 @@ function declensionHTML(tables) {
     const withArticle = (c, n, f) => (article(gender, c, n) && !f.includes(" ") ? article(gender, c, n) + " " + f : f);
     const rows = CASES.map(c => `<tr><td class="who">${c}</td>${numbers.map(n =>
       `<td>${VerbGrid.cellHTML((cells[c][n] || []).map(f => withArticle(c, n, f)))}</td>`).join("")}</tr>`).join("");
-    const tag = gender ? `<span class="tag card-tag">${gender}</span>` : "";
+    const tag = gender ? `<span class="tag card-tag gender ${gender}">${gender}</span>` : "";
     return `<section class="declension"><h4>Declension${tag}</h4>
       <div class="scroll"><table lang="el"><thead><tr><th></th>${numbers.map(n => `<th class="sub">${n}</th>`).join("")}</tr></thead>
       <tbody>${rows}</tbody></table></div></section>`;
