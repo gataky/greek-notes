@@ -18,9 +18,11 @@
     <link rel="apple-touch-icon" href="{{ ('icons/' ~ app.id ~ '-180.png') | url }}">
     <meta name="apple-mobile-web-app-title" content="{{ app.short_name }}">
   {% endif %}
-  {# The header's colour (stylesheets/theme.css) #}
-  <meta name="theme-color" content="#ebdbb2" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#3c3836" media="(prefers-color-scheme: dark)">
+  {# The phone's status and navigation bars: the page's background (--bg in stylesheets/theme.css).
+     These follow the phone's setting; pwa.js keeps them in step with the site's own light/dark
+     toggle. They come before the one Material adds (the header's colour), so they win. #}
+  <meta name="theme-color" content="#f2e5bc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1d2021" media="(prefers-color-scheme: dark)">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
