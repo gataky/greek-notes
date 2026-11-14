@@ -23,8 +23,8 @@
   --warn-soft: #fbf0dc;
   --bad: #b23434;
   --bad-soft: #f9e4e4;
-  --display: "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
-  --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
+  --display: "Chosen Greek", "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
+  --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {

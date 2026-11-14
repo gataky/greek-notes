@@ -1,5 +1,5 @@
 // Embedded drills: hide their own header, size the frame to its content and
-// follow the site's light/dark toggle.
+// follow the site's light/dark toggle and Greek font (greek-font.js).
 
 function syncTheme(doc) {
   const dark = document.body.getAttribute("data-md-color-scheme") === "slate";
@@ -14,6 +14,7 @@ function setupFrame(frame) {
   if (header && !frame.hasAttribute("data-keep-header")) header.hidden = true;
 
   syncTheme(doc);
+  window.GreekFont?.sync(frame.contentWindow);
   new MutationObserver(() => syncTheme(doc)).observe(document.body, {
     attributes: true,
     attributeFilter: ["data-md-color-scheme"],

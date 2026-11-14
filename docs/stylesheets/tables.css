@@ -27,8 +27,8 @@
   --gn-muted: #5a6a80;
   --gn-line: #d6dee9;
   --gn-accent: #1f5fa8;
-  --gn-body: "Commissioner", "Noto Sans", system-ui, sans-serif;
-  --gn-greek: "Greek Didot", var(--gn-body);
+  --gn-body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
+  --gn-greek: "Chosen Greek", "Greek Didot", var(--gn-body);
 }
 [data-md-color-scheme="slate"] {
   --gn-surface: #132031;

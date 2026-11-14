@@ -1,0 +1,64 @@
+/* The Greek font picker (javascripts/greek-font.js): its header button and dialog, and the
+   chosen font in the notes' own text. "Chosen Greek" covers Greek letters only and exists only
+   once one is picked; until then this stack is Material's, which uses the theme's text font. */
+
+body {
+  --md-text-font-family: "Chosen Greek", var(--md-text-font, _), -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+}
+
+.greek-font__open { cursor: pointer; }
+
+.greek-font {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--gn-line);
+  border-radius: 12px;
+  background: var(--gn-surface);
+  color: var(--gn-ink);
+  font: 400 15px/1.4 var(--gn-body);
+}
+.greek-font::backdrop { background: rgb(0 0 0 / 0.4); }
+.greek-font form { padding: 20px; }
+
+.greek-font h2 {
+  margin: 0 0 6px;
+  color: var(--gn-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.greek-font p { margin: 0 0 14px; color: var(--gn-muted); font-size: 14px; }
+
+.greek-font__options { display: grid; gap: 6px; }
+.greek-font__option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--gn-line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.greek-font__option:has(input:checked) { border-color: var(--gn-accent); }
+.greek-font__option input { grid-row: span 2; margin: 0; accent-color: var(--gn-accent); }
+.greek-font__name { font-weight: 600; }
+.greek-font__name small { margin-left: 8px; color: var(--gn-muted); font-size: 12px; font-weight: 400; }
+.greek-font__sample { font-size: 20px; line-height: 1.3; }
+
+.greek-font p.greek-font__status { margin: 10px 0 0; color: var(--gn-accent); }
+.greek-font p.greek-font__status:empty { display: none; }
+
+.greek-font__done {
+  display: block;
+  margin: 14px 0 0 auto;
+  padding: 6px 16px;
+  border: 1px solid var(--gn-line);
+  border-radius: 8px;
+  color: var(--gn-ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+.greek-font__done:hover { border-color: var(--gn-accent); color: var(--gn-accent); }

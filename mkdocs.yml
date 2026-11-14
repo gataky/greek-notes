@@ -35,8 +35,10 @@ extra_css:
   - stylesheets/frames.css
   - stylesheets/tables.css
   - stylesheets/home.css
+  - stylesheets/greek-font.css
 
 extra_javascript:
+  - javascripts/greek-font.js
   - javascripts/drill-frame.js
   - javascripts/home.js
   - javascripts/tables.js

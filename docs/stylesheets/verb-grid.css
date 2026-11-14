@@ -10,8 +10,8 @@
   --accent-soft: #e2ecf8;
   --warn: #9a620e;
   --warn-soft: #fbf0dc;
-  --display: "GFS Didot", "Noto Serif", Georgia, serif;
-  --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
+  --display: "Chosen Greek", "GFS Didot", "Noto Serif", Georgia, serif;
+  --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
