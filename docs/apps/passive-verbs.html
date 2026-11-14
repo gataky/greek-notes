@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="../stylesheets/theme.css">
 <script src="../javascripts/greek-font.js"></script>
 <style>
 /* One calm column: the drill card is the hero; endings and stats sit around it. */
@@ -17,36 +18,10 @@
   size-adjust: 118%;
   font-display: swap;
 }
+/* Colours: theme.css */
 :root {
-  --bg: #f4f7fb;
-  --surface: #ffffff;
-  --ink: #10233f;
-  --muted: #5a6a80;
-  --line: #d6dee9;
-  --accent: #1f5fa8;
-  --accent-soft: #e2ecf8;
-  --good: #2b7a48;
-  --good-soft: #e3f3e8;
-  --warn: #9a620e;
-  --warn-soft: #fbf0dc;
-  --bad: #b23434;
-  --bad-soft: #f9e4e4;
   --display: "Chosen Greek", "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
   --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
-    --accent: #80b3ee; --accent-soft: #1a2d46;
-    --good: #6cc68e; --good-soft: #15301f; --warn: #e3ad58; --warn-soft: #33270f; --bad: #ef8585; --bad-soft: #3a1b1b;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
-  --accent: #80b3ee; --accent-soft: #1a2d46;
-  --good: #6cc68e; --good-soft: #15301f; --warn: #e3ad58; --warn-soft: #33270f; --bad: #ef8585; --bad-soft: #3a1b1b;
-  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }

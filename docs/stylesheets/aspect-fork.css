@@ -2,11 +2,6 @@
    past and future. Used with verb-grid.css, whose tokens it shares: the imperfective is the
    accent colour, the perfective the warm one. */
 
-:root { --aug: #7646bd; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --aug: #b995f3; }
-}
-:root[data-theme="dark"] { --aug: #b995f3; }
 
 /* Markup inside forms */
 .aug { color: var(--aug); font-weight: 600; }

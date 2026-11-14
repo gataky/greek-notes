@@ -7,34 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<link rel="stylesheet" href="../stylesheets/theme.css">
 <link rel="stylesheet" href="../stylesheets/verb-grid.css">
 <link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <script src="../javascripts/greek-font.js"></script>
 <style>
-/* Gruvbox, for this page only (home.css matches its background): the page's own tokens from
-   verb-grid.css and aspect-fork.css, then the part-of-speech and gender colours, in gruvbox's
-   normal shades on light and its bright ones on dark. Greek is in GFS Neohellenic here. */
+/* Greek is in GFS Neohellenic here. The colours, the part-of-speech and gender ones included,
+   are theme.css's. */
 :root {
   --display: "Chosen Greek", "GFS Neohellenic", "Noto Sans", system-ui, sans-serif;
-  --bg: #f2e5bc; --surface: #fbf1c7; --ink: #3c3836; --muted: #7c6f64; --line: #d5c4a1;
-  --accent: #076678; --accent-soft: #ebdbb2; --warn: #af3a03; --aug: #8f3f71;
-  --verb: #d65d0e; --noun: #458588; --adj: #98971a; --adv: #b16286; --prep: #d79921; --other: #bdae93;
-  --masculine: #458588; --feminine: #cc241d; --neuter: #689d6a;
-  --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
-    --accent: #83a598; --accent-soft: #3c3836; --warn: #fabd2f; --aug: #d3869b;
-    --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
-    --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c; --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
-  --accent: #83a598; --accent-soft: #3c3836; --warn: #fabd2f; --aug: #d3869b;
-  --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
-  --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c; --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
 }
 .pos-verb { --pos: var(--verb); }
 .pos-noun { --pos: var(--noun); }

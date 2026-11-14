@@ -2,9 +2,6 @@
    light/dark buttons. Uses :has() so this applies however the page was reached, including
    instant navigation, which swaps the content but keeps the <body>. */
 
-body:has(.dict-home) { --md-default-bg-color: #f2e5bc; }
-body[data-md-color-scheme="slate"]:has(.dict-home) { --md-default-bg-color: #282828; }
-
 body:has(.dict-home) .md-header,
 body:has(.dict-home) .md-tabs,
 body:has(.dict-home) .md-sidebar,
@@ -21,10 +18,10 @@ body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 
   display: flex;
   padding: 8px;
   border-radius: 8px;
-  color: var(--gn-muted);
+  color: var(--muted);
   cursor: pointer;
 }
-.dict-home__button:hover { color: var(--gn-ink); }
+.dict-home__button:hover { color: var(--ink); }
 .dict-home__button svg { width: 24px; height: 24px; fill: currentColor; }
 
 /* In the top right, the font button to the left of the theme button */

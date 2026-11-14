@@ -1,0 +1,91 @@
+/* The colours of all three apps, in gruvbox: gruvbox's normal shades on light, its bright ones on
+   dark. Loaded by every app in docs/apps/ (before its own stylesheet) and by the site's pages
+   (mkdocs.yml), so the notes, the drills and the dictionary look alike. Only colours are here;
+   each stylesheet keeps its own fonts.
+
+   The apps pick dark from prefers-color-scheme unless drill-frame.js sets data-theme on their
+   root. The site's pages follow Material's palette instead, which it sets on <body> as
+   data-md-color-scheme: those rules sit on the body, so they win over :root's media query. */
+
+:root,
+[data-md-color-scheme="default"] {
+  --bg: #f2e5bc; --surface: #fbf1c7; --ink: #3c3836; --muted: #7c6f64; --line: #d5c4a1;
+  --accent: #076678; --accent-soft: #ebdbb2; --aug: #8f3f71;
+  --good: #79740e; --warn: #af3a03; --bad: #9d0006;
+  /* Parts of speech and genders (the dictionary's bars, headings and pills) */
+  --verb: #d65d0e; --noun: #458588; --adj: #98971a; --adv: #b16286; --prep: #d79921; --other: #bdae93;
+  --masculine: #458588; --feminine: #cc241d; --neuter: #689d6a;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
+    --accent: #83a598; --accent-soft: #3c3836; --aug: #d3869b;
+    --good: #b8bb26; --warn: #fabd2f; --bad: #fb4934;
+    --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
+    --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"],
+[data-md-color-scheme="slate"] {
+  --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
+  --accent: #83a598; --accent-soft: #3c3836; --aug: #d3869b;
+  --good: #b8bb26; --warn: #fabd2f; --bad: #fb4934;
+  --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
+  --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c;
+  color-scheme: dark;
+}
+
+/* Tints of the feedback colours, worked out where the colours are set so they follow the theme */
+:root,
+[data-md-color-scheme] {
+  --good-soft: color-mix(in srgb, var(--good) 14%, var(--surface));
+  --warn-soft: color-mix(in srgb, var(--warn) 14%, var(--surface));
+  --bad-soft: color-mix(in srgb, var(--bad) 14%, var(--surface));
+}
+
+/* Material's own colours on the site's pages (palette "custom" in mkdocs.yml). The page is the
+   apps' background, so an embedded app has no visible frame; the header and footer are a shade
+   darker. */
+[data-md-color-scheme] {
+  --md-default-bg-color: var(--bg);
+  --md-default-bg-color--light: color-mix(in srgb, var(--bg) 54%, transparent);
+  --md-default-bg-color--lighter: color-mix(in srgb, var(--bg) 26%, transparent);
+  --md-default-bg-color--lightest: color-mix(in srgb, var(--bg) 7%, transparent);
+  --md-default-fg-color: var(--ink);
+  --md-default-fg-color--light: var(--muted);
+  --md-default-fg-color--lighter: color-mix(in srgb, var(--muted) 55%, transparent);
+  --md-default-fg-color--lightest: color-mix(in srgb, var(--muted) 18%, transparent);
+
+  --md-primary-fg-color: var(--accent-soft);
+  --md-primary-fg-color--light: var(--surface);
+  --md-primary-fg-color--dark: var(--line);
+  --md-primary-bg-color: var(--ink);
+  --md-primary-bg-color--light: var(--muted);
+  --md-accent-fg-color: var(--accent);
+  --md-accent-fg-color--transparent: color-mix(in srgb, var(--accent) 10%, transparent);
+  --md-accent-bg-color: var(--surface);
+  --md-accent-bg-color--light: color-mix(in srgb, var(--surface) 70%, transparent);
+
+  --md-typeset-color: var(--ink);
+  --md-typeset-a-color: var(--accent);
+  --md-typeset-mark-color: color-mix(in srgb, var(--warn) 25%, transparent);
+  --md-code-fg-color: var(--ink);
+  --md-code-bg-color: var(--accent-soft);
+  --md-code-bg-color--light: color-mix(in srgb, var(--accent-soft) 90%, transparent);
+  --md-code-bg-color--lighter: color-mix(in srgb, var(--accent-soft) 54%, transparent);
+
+  --md-footer-fg-color: var(--ink);
+  --md-footer-fg-color--light: var(--muted);
+  --md-footer-fg-color--lighter: color-mix(in srgb, var(--muted) 60%, transparent);
+  --md-footer-bg-color: var(--accent-soft);
+  --md-footer-bg-color--dark: var(--line);
+}
+
+/* The header's search box: Material darkens it with a fixed translucent black, made for a
+   coloured header. On this light one it's a box in the surface colour, like the dictionary's. */
+@media screen and (min-width: 60em) {
+  .md-header .md-search__form,
+  .md-header .md-search__form:hover { background-color: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+}

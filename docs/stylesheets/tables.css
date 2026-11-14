@@ -21,31 +21,20 @@
   font-display: swap;
 }
 
+/* Fonts; the colours (--surface, --ink ...) are theme.css's */
 :root {
-  --gn-surface: #ffffff;
-  --gn-ink: #10233f;
-  --gn-muted: #5a6a80;
-  --gn-line: #d6dee9;
-  --gn-accent: #1f5fa8;
   --gn-body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
   --gn-greek: "Chosen Greek", "Greek Didot", var(--gn-body);
-}
-[data-md-color-scheme="slate"] {
-  --gn-surface: #132031;
-  --gn-ink: #e5ecf5;
-  --gn-muted: #94a4b9;
-  --gn-line: #24354b;
-  --gn-accent: #80b3ee;
 }
 
 /* ---------- The card, shared by both kinds ---------- */
 
 .md-typeset table:not([class]),
 .md-typeset .grid-card {
-  background: var(--gn-surface);
-  border: 1px solid var(--gn-line);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 0.7rem;
-  color: var(--gn-ink);
+  color: var(--ink);
 }
 
 /* ---------- Markdown tables ---------- */
@@ -65,11 +54,11 @@
   background: none;
   min-width: 0;
   padding: 0 0.6rem 0.3rem 0;
-  border-bottom: 2px solid var(--gn-accent);
+  border-bottom: 2px solid var(--accent);
   font: 600 0.6rem/1.4 var(--gn-body);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gn-ink);
+  color: var(--ink);
   vertical-align: bottom;
 }
 .md-typeset table:not([class]) th.has-greek {
@@ -80,7 +69,7 @@
 }
 .md-typeset table:not([class]) td {
   padding: 0.3rem 0.6rem 0.3rem 0;
-  border-top: 1px solid var(--gn-line);
+  border-top: 1px solid var(--line);
   vertical-align: top;
 }
 .md-typeset table:not([class]) tbody tr:first-child td { border-top: 0; }
@@ -88,13 +77,13 @@
 
 /* In a table with Greek, Greek cells carry the content and the rest are glosses or labels. */
 .md-typeset table:not([class]):has(td:lang(el)) td:not(:lang(el)) {
-  color: var(--gn-muted);
+  color: var(--muted);
   font-size: 0.72rem;
   padding-top: 0.42rem;
 }
 /* Bold inside Greek marks the part to notice, like the highlighted endings on the verb pages. */
 .md-typeset table td:lang(el) strong {
-  color: var(--gn-accent);
+  color: var(--accent);
   font-weight: inherit;
 }
 
@@ -117,13 +106,13 @@
   font: 600 0.6rem/1.4 var(--gn-body);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gn-muted);
+  color: var(--muted);
   padding: 0 0.6rem 0.2rem 0;
   vertical-align: bottom;
 }
 .md-typeset table.grid th.group {
-  color: var(--gn-ink);
-  border-bottom: 2px solid var(--gn-accent);
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
   padding-bottom: 0.3rem;
 }
 /* A heading row inside the body, starting a second block in the same grid (singular, then plural) */
@@ -138,7 +127,7 @@
 .md-typeset table.grid th.gap,
 .md-typeset table.grid td.gap { width: 0.7rem; padding: 0; border: 0; }
 .md-typeset table.grid td {
-  border-top: 1px solid var(--gn-line);
+  border-top: 1px solid var(--line);
   padding: 0.25rem 0.6rem 0.25rem 0;
   vertical-align: top;
   font-family: var(--gn-greek);
@@ -148,32 +137,32 @@
 .md-typeset table.grid td.who {
   font-family: var(--gn-body);
   font-size: 0.7rem;
-  color: var(--gn-muted);
+  color: var(--muted);
   padding-top: 0.4rem;
 }
 .md-typeset table.grid td.gloss {
   font-family: var(--gn-body);
   font-size: 0.72rem;
-  color: var(--gn-muted);
+  color: var(--muted);
   padding-top: 0.4rem;
   white-space: normal;
 }
-.md-typeset table.grid td.span { color: var(--gn-muted); }
-.md-typeset table.grid .end { color: var(--gn-accent); }
-.md-typeset table.grid .pre { color: var(--gn-muted); }
-.md-typeset table.grid .alt { display: block; font-size: 0.8rem; color: var(--gn-muted); }
+.md-typeset table.grid td.span { color: var(--muted); }
+.md-typeset table.grid .end { color: var(--accent); }
+.md-typeset table.grid .pre { color: var(--muted); }
+.md-typeset table.grid .alt { display: block; font-size: 0.8rem; color: var(--muted); }
 
 /* A note under the grid, like the legend under the verb grid */
 .md-typeset .grid-card .grid-note {
   margin: 0.5rem 0 0;
   padding-top: 0.5rem;
-  border-top: 1px solid var(--gn-line);
+  border-top: 1px solid var(--line);
   font-family: var(--gn-greek);  /* Greek letters in Didot, the rest in Commissioner */
   font-size: 0.7rem;
   line-height: 1.6;
-  color: var(--gn-muted);
+  color: var(--muted);
 }
-.md-typeset .grid-card .grid-note strong { color: var(--gn-ink); }
+.md-typeset .grid-card .grid-note strong { color: var(--ink); }
 
 .md-typeset table.grid :is(td, th):last-child { padding-right: 0; }
 .md-typeset table.grid .abbr { display: none; }

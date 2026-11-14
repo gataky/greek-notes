@@ -1,30 +1,9 @@
 /* Shared by the verb tables and conjugation patterns pages: theme, page frame and the conjugation grid. */
 
+/* Colours: theme.css, which every page loads first */
 :root {
-  --bg: #f4f7fb;
-  --surface: #ffffff;
-  --ink: #10233f;
-  --muted: #5a6a80;
-  --line: #d6dee9;
-  --accent: #1f5fa8;
-  --accent-soft: #e2ecf8;
-  --warn: #9a620e;
-  --warn-soft: #fbf0dc;
   --display: "Chosen Greek", "GFS Didot", "Noto Serif", Georgia, serif;
   --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
-    --accent: #80b3ee; --accent-soft: #1a2d46; --warn: #e3ad58; --warn-soft: #33270f;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0c141f; --surface: #132031; --ink: #e5ecf5; --muted: #94a4b9; --line: #24354b;
-  --accent: #80b3ee; --accent-soft: #1a2d46; --warn: #e3ad58; --warn-soft: #33270f;
-  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
