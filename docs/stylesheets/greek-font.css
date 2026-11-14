@@ -1,9 +1,10 @@
 /* The Greek font picker (javascripts/greek-font.js): its header button and dialog, and the
    chosen font in the notes' own text. "Chosen Greek" covers Greek letters only and exists only
-   once one is picked; until then this stack is Material's, which uses the theme's text font. */
+   once one is picked; until then Greek is in GFS Neohellenic ("Greek Neohellenic", tables.css),
+   as everywhere else, and the rest in the theme's text font. */
 
 body {
-  --md-text-font-family: "Chosen Greek", var(--md-text-font, _), -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  --md-text-font-family: "Chosen Greek", "Greek Neohellenic", var(--md-text-font, _), -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
 }
 
 .greek-font__open { cursor: pointer; }

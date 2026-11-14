@@ -17,8 +17,7 @@
   // size: CSS size-adjust, so the Greek letters stand as tall as Commissioner's (Didot keeps the
   // 118% it has everywhere else). file: a self-hosted Greek subset instead of Google Fonts.
   const FONTS = [
-    { id: "default", name: "Default", note: "Didot, and GFS Neohellenic in the dictionary" },
-    { id: "neohellenic", name: "GFS Neohellenic", family: "GFS Neohellenic", size: "124%" },
+    { id: "default", name: "Default", note: "GFS Neohellenic" },
     { id: "alegreya", name: "Alegreya", family: "Alegreya", size: "109%" },
     { id: "wenkai", name: "LXGW WenKai Mono TC", family: "LXGW WenKai Mono TC", size: "103%" },
     { id: "didot", name: "GFS Didot", file: "../fonts/gfs-didot-greek.woff2", size: "118%" },
@@ -142,7 +141,7 @@
         <label class="greek-font__option">
           <input type="radio" name="greek-font" value="${font.id}">
           <span class="greek-font__name">${font.name}${font.note ? `<small>${font.note}</small>` : ""}</span>
-          <span class="greek-font__sample" lang="el" style="font-family: 'Greek Sample ${font.id}', 'Greek Didot', serif">${SAMPLE}</span>
+          <span class="greek-font__sample" lang="el" style="font-family: 'Greek Sample ${font.id}', 'Greek Neohellenic', 'GFS Neohellenic', sans-serif">${SAMPLE}</span>
         </label>`).join("")}
       </div>
       <p class="greek-font__status" role="status"></p>

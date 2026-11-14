@@ -2,7 +2,7 @@
 
 /* Colours: theme.css, which every page loads first */
 :root {
-  --display: "Chosen Greek", "GFS Didot", "Noto Serif", Georgia, serif;
+  --display: "Chosen Greek", "GFS Neohellenic", "Noto Sans", system-ui, sans-serif;
   --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }

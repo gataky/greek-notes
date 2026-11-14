@@ -19,32 +19,33 @@ svg{display:block;width:100vw;height:100vh}
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop id="bg-top" offset="0" stop-color="#2f7fd6"/>
-      <stop id="bg-bottom" offset="1" stop-color="#0e2f5c"/>
+      <stop id="bg-top" offset="0" stop-color="#458588"/>
+      <stop id="bg-bottom" offset="1" stop-color="#1f3f45"/>
     </linearGradient>
     <radialGradient id="glow" cx="0.5" cy="0.4" r="0.55">
       <stop offset="0" stop-color="#fff" stop-opacity="0.18"/>
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f6dc8c"/>
-      <stop offset="1" stop-color="#d4a640"/>
+      <stop offset="0" stop-color="#fbd56a"/>
+      <stop offset="1" stop-color="#d79921"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
   <rect width="512" height="512" fill="url(#glow)"/>
-  <text x="256" y="296" text-anchor="middle" font-family="GD" font-size="228" fill="#fbf7ec"
+  <text x="256" y="296" text-anchor="middle" font-family="GD" font-size="228" fill="#fbf1c7"
         style="filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))">Α<tspan fill="url(#gold)">α</tspan></text>
   <g transform="translate(148,334) scale(7.2)" fill="none" stroke="url(#gold)" stroke-width="1.15" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M0,4 L0,0 L4,0 L4,2 L2,2 L2,4 L6,4 L6,0 L10,0 L10,2 L8,2 L8,4 L12,4 L12,0 L16,0 L16,2 L14,2 L14,4 L18,4 L18,0 L22,0 L22,2 L20,2 L20,4 L24,4 L24,0 L28,0 L28,2 L26,2 L26,4 L30,4"/>
   </g>
 </svg>
 <script>
-// Each app's background, top left to bottom right. The dictionary keeps the first icon's blue.
+// Each app's background, top left to bottom right: gruvbox's blue, orange and aqua (theme.css),
+// darkening towards the corner. The letters are gruvbox's cream and yellow.
 const BACKGROUNDS = {
-  dictionary: ["#2f7fd6", "#0e2f5c"],
-  drills: ["#c8553a", "#5a1a10"],
-  notes: ["#3d9468", "#103c28"],
+  dictionary: ["#458588", "#1f3f45"],
+  drills: ["#d65d0e", "#6e2a05"],
+  notes: ["#689d6a", "#2a4a35"],
 };
 const [start, end] = BACKGROUNDS[new URLSearchParams(location.search).get("app")] || BACKGROUNDS.dictionary;
 document.getElementById("bg-top").setAttribute("stop-color", start);

@@ -1,16 +1,25 @@
 /* Shared by the drill apps in docs/apps/ (noun gender, agreement, numbers, object pronouns,
    prepositions): one calm column, the drill card first, the tables and stats around it. The
-   colours are theme.css's, which the apps load before this. */
+   colours are theme.css's, which the apps load before this. Greek is in GFS Neohellenic, as in
+   the dictionary: Greek letters from the self-hosted subset, lined up with Commissioner. */
 @font-face {
-  font-family: "Greek Didot";
-  src: url("../fonts/gfs-didot-greek.woff2") format("woff2");
+  font-family: "Greek Neohellenic";
+  src: url("../fonts/gfs-neohellenic-greek.woff2") format("woff2");
   unicode-range: U+0370-03FF;
-  size-adjust: 118%;
+  size-adjust: 124%;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Greek Neohellenic";
+  src: url("../fonts/gfs-neohellenic-greek-bold.woff2") format("woff2");
+  font-weight: 700;
+  unicode-range: U+0370-03FF;
+  size-adjust: 124%;
   font-display: swap;
 }
 /* Colours: theme.css */
 :root {
-  --display: "Chosen Greek", "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
+  --display: "Chosen Greek", "Greek Neohellenic", "GFS Neohellenic", "Noto Sans", system-ui, sans-serif;
   --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }

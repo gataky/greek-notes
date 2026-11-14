@@ -6,21 +6,29 @@
 <title>Active or Passive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 <link rel="stylesheet" href="../stylesheets/theme.css">
 <script src="../javascripts/greek-font.js"></script>
 <style>
 /* One calm column: the drill card is the hero; endings and stats sit around it. */
 @font-face {
-  font-family: "Greek Didot";
-  src: url("../fonts/gfs-didot-greek.woff2") format("woff2");
+  font-family: "Greek Neohellenic";
+  src: url("../fonts/gfs-neohellenic-greek.woff2") format("woff2");
   unicode-range: U+0370-03FF;
-  size-adjust: 118%;
+  size-adjust: 124%;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Greek Neohellenic";
+  src: url("../fonts/gfs-neohellenic-greek-bold.woff2") format("woff2");
+  font-weight: 700;
+  unicode-range: U+0370-03FF;
+  size-adjust: 124%;
   font-display: swap;
 }
 /* Colours: theme.css */
 :root {
-  --display: "Chosen Greek", "Greek Didot", "GFS Didot", "Noto Serif", Georgia, serif;
+  --display: "Chosen Greek", "Greek Neohellenic", "GFS Neohellenic", "Noto Sans", system-ui, sans-serif;
   --body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }

@@ -1,5 +1,5 @@
 /* Tables on the note pages, styled like the grid on the verb pages (docs/stylesheets/verb-grid.css):
-   a card, small uppercase headings, Greek in GFS Didot with Latin text in Commissioner,
+   a card, small uppercase headings, Greek in GFS Neohellenic with Latin text in Commissioner,
    thin row rules and highlighted parts in the accent colour.
 
    Two kinds of table get this look:
@@ -9,22 +9,31 @@
      th.group / th.sub headings, td.who row labels, span.end and span.pre like the verb grid. */
 
 /* Same stylesheet the tool pages load, so the offline app caches it once (only Commissioner is used here) */
-@import url("https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Didot&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 /* Greek letters only: anything else in the same cell falls through to Commissioner.
-   size-adjust lines Didot's small letters up with Commissioner's. (OFL, see fonts/OFL-GFS-Didot.txt) */
+   size-adjust lines Neohellenic's small letters up with Commissioner's. (OFL, see
+   fonts/OFL-GFS-Neohellenic.txt) The prose's Greek uses it too (greek-font.css). */
 @font-face {
-  font-family: "Greek Didot";
-  src: url("../fonts/gfs-didot-greek.woff2") format("woff2");
+  font-family: "Greek Neohellenic";
+  src: url("../fonts/gfs-neohellenic-greek.woff2") format("woff2");
   unicode-range: U+0370-03FF;
-  size-adjust: 118%;
+  size-adjust: 124%;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Greek Neohellenic";
+  src: url("../fonts/gfs-neohellenic-greek-bold.woff2") format("woff2");
+  font-weight: 700;
+  unicode-range: U+0370-03FF;
+  size-adjust: 124%;
   font-display: swap;
 }
 
 /* Fonts; the colours (--surface, --ink ...) are theme.css's */
 :root {
   --gn-body: "Chosen Greek", "Commissioner", "Noto Sans", system-ui, sans-serif;
-  --gn-greek: "Chosen Greek", "Greek Didot", var(--gn-body);
+  --gn-greek: "Chosen Greek", "Greek Neohellenic", var(--gn-body);
 }
 
 /* ---------- The card, shared by both kinds ---------- */
@@ -157,7 +166,7 @@
   margin: 0.5rem 0 0;
   padding-top: 0.5rem;
   border-top: 1px solid var(--line);
-  font-family: var(--gn-greek);  /* Greek letters in Didot, the rest in Commissioner */
+  font-family: var(--gn-greek);  /* Greek letters in Neohellenic, the rest in Commissioner */
   font-size: 0.7rem;
   line-height: 1.6;
   color: var(--muted);
