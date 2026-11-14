@@ -1,5 +1,9 @@
-/* The colours of all three apps, in gruvbox: gruvbox's normal shades on light, its bright ones on
-   dark. Loaded by every app in docs/apps/ (before its own stylesheet) and by the site's pages
+/* The colours of all three apps, in gruvbox's hard-contrast variant: the darkest text and lightest
+   cards on light, with gruvbox's faded shades for colour (green darker still); the darkest
+   background and brightest text on dark, with its bright shades. --ink and --muted stay at least
+   4.5:1 on --bg, --surface and --accent-soft in both; check that when changing them.
+
+   Loaded by every app in docs/apps/ (before its own stylesheet) and by the site's pages
    (mkdocs.yml), so the notes, the drills and the dictionary look alike. Only colours are here;
    each stylesheet keeps its own fonts.
 
@@ -9,30 +13,30 @@
 
 :root,
 [data-md-color-scheme="default"] {
-  --bg: #f2e5bc; --surface: #fbf1c7; --ink: #3c3836; --muted: #7c6f64; --line: #d5c4a1;
+  --bg: #f2e5bc; --surface: #f9f5d7; --ink: #282828; --muted: #665c54; --line: #bdae93;
   --accent: #076678; --accent-soft: #ebdbb2; --aug: #8f3f71;
-  --good: #79740e; --warn: #af3a03; --bad: #9d0006;
+  --good: #66620b; --warn: #af3a03; --bad: #9d0006;
   /* Parts of speech and genders (the dictionary's bars, headings and pills) */
-  --verb: #d65d0e; --noun: #458588; --adj: #98971a; --adv: #b16286; --prep: #d79921; --other: #bdae93;
-  --masculine: #458588; --feminine: #cc241d; --neuter: #689d6a;
+  --verb: #af3a03; --noun: #076678; --adj: #79740e; --adv: #8f3f71; --prep: #b57614; --other: #928374;
+  --masculine: #076678; --feminine: #9d0006; --neuter: #427b58;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
+    --bg: #1d2021; --surface: #282828; --ink: #fbf1c7; --muted: #bdae93; --line: #665c54;
     --accent: #83a598; --accent-soft: #3c3836; --aug: #d3869b;
     --good: #b8bb26; --warn: #fabd2f; --bad: #fb4934;
-    --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
+    --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #928374;
     --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"],
 [data-md-color-scheme="slate"] {
-  --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #a89984; --line: #504945;
+  --bg: #1d2021; --surface: #282828; --ink: #fbf1c7; --muted: #bdae93; --line: #665c54;
   --accent: #83a598; --accent-soft: #3c3836; --aug: #d3869b;
   --good: #b8bb26; --warn: #fabd2f; --bad: #fb4934;
-  --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #7c6f64;
+  --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #928374;
   --masculine: #83a598; --feminine: #fb4934; --neuter: #8ec07c;
   color-scheme: dark;
 }
