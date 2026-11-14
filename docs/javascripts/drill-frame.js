@@ -1,5 +1,5 @@
 // Embedded drills: hide their own header, size the frame to its content and
-// follow the site's light/dark toggle and Greek font (greek-font.js).
+// follow the site's light/dark toggle, colour theme (palette.js) and Greek font (greek-font.js).
 
 function syncTheme(doc) {
   const dark = document.body.getAttribute("data-md-color-scheme") === "slate";
@@ -15,6 +15,7 @@ function setupFrame(frame) {
 
   syncTheme(doc);
   window.GreekFont?.sync(frame.contentWindow);
+  window.Palette?.sync(frame.contentWindow);
   new MutationObserver(() => syncTheme(doc)).observe(document.body, {
     attributes: true,
     attributeFilter: ["data-md-color-scheme"],

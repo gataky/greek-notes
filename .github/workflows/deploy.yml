@@ -35,6 +35,8 @@ jobs:
       - run: uv sync --locked
       # The dictionary isn't in git: download the build the Makefile pins, checking its SHA-256.
       - run: make fetch-dictionary
+      # theme.css and palette.js match scripts/build_themes.py's colours
+      - run: python3 scripts/build_themes.py --check
       - run: node tests/test_verbs.js
       - run: node tests/test_verb_forms.js
       - run: node tests/test_voice_sentences.js

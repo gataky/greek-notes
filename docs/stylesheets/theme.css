@@ -1,24 +1,28 @@
-/* The colours of all three apps, in gruvbox's hard-contrast variant: the darkest text and lightest
-   cards on light, the darkest background and brightest text on dark. The colours are gruvbox's
-   hues made more vivid (more chroma in OKLCH), and the accent bluer than gruvbox's teal, each as
-   vivid as it can be while staying readable: text colours, the gender pills behind --surface text
-   included, at least 4.5:1 on --bg, --surface and --accent-soft; the part-of-speech bars at
-   least 3:1. --ink and --muted keep 4.5:1 too. Check those when changing a colour.
+/* The colours of all three apps, as themes the learner picks from (javascripts/palette.js): the
+   default, the site's own high-contrast gruvbox, then Gruvbox, Kanagawa, Tokyo Night and Melange
+   after the Neovim colour schemes. Each has a light and a dark set of the same tokens.
+
+   The themes between BEGIN and END are written by scripts/build_themes.py (make themes) from its
+   table of colours, which also checks them: text 4.5:1 on the backgrounds it sits on, the
+   part-of-speech bars 3:1. Change colours there, not here. The rest of this file is by hand.
 
    Loaded by every app in docs/apps/ (before its own stylesheet) and by the site's pages
    (mkdocs.yml), so the notes, the drills and the dictionary look alike. Only colours are here;
    each stylesheet keeps its own fonts.
 
-   The apps pick dark from prefers-color-scheme unless drill-frame.js sets data-theme on their
-   root. The site's pages follow Material's palette instead, which it sets on <body> as
-   data-md-color-scheme: those rules sit on the body, so they win over :root's media query. */
+   A theme other than the default is data-palette on <html>, set by palette.js (and early, before
+   the page draws, by overrides/main.html). The apps pick dark from prefers-color-scheme unless
+   drill-frame.js sets data-theme on their root. The site's pages follow Material's palette
+   instead, which it sets on <body> as data-md-color-scheme: those rules sit on the body, so they
+   win over :root's media query. Each theme's rules are more specific than the default's. */
 
+/* BEGIN THEMES (scripts/build_themes.py) */
+/* Default: Gruvbox, high contrast */
 :root,
 [data-md-color-scheme="default"] {
   --bg: #f2e5bc; --surface: #f9f5d7; --ink: #282828; --muted: #665c54; --line: #bdae93;
-  --accent: #0075af; --accent-soft: #ebdbb2; --aug: #a21f79;
+  --accent: #006598; --accent-soft: #ebdbb2; --aug: #a21f79;
   --good: #686300; --warn: #ad3800; --bad: #c00009;
-  /* Parts of speech and genders (the dictionary's bars, headings and pills) */
   --verb: #da5c00; --noun: #0075af; --adj: #888700; --adv: #c64d89; --prep: #b77500; --other: #967f68;
   --masculine: #0075af; --feminine: #c00009; --neuter: #15804c;
   color-scheme: light;
@@ -42,6 +46,127 @@
   --masculine: #5eb3cc; --feminine: #ff7965; --neuter: #7ac75c;
   color-scheme: dark;
 }
+
+/* Gruvbox: the original */
+:root[data-palette="gruvbox"],
+[data-palette="gruvbox"] [data-md-color-scheme="default"] {
+  --bg: #fbf1c7; --surface: #f9f5d7; --ink: #3c3836; --muted: #6b5e53; --line: #ccbb98;
+  --accent: #076678; --accent-soft: #ebdbb2; --aug: #8f3f71;
+  --good: #676200; --warn: #ae3901; --bad: #9d0006;
+  --verb: #d65d0e; --noun: #458588; --adj: #908e05; --adv: #b16286; --prep: #b98000; --other: #928374;
+  --masculine: #076678; --feminine: #9d0006; --neuter: #427b58;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="gruvbox"]:not([data-theme="light"]) {
+    --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #b0a08b; --line: #59524e;
+    --accent: #87a99c; --accent-soft: #3c3836; --aug: #da8ca1;
+    --good: #b8bb26; --warn: #fabd2f; --bad: #ff8d7b;
+    --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #928374;
+    --masculine: #83a598; --feminine: #ff6550; --neuter: #8ec07c;
+    color-scheme: dark;
+  }
+}
+:root[data-palette="gruvbox"][data-theme="dark"],
+[data-palette="gruvbox"] [data-md-color-scheme="slate"] {
+  --bg: #282828; --surface: #32302f; --ink: #ebdbb2; --muted: #b0a08b; --line: #59524e;
+  --accent: #87a99c; --accent-soft: #3c3836; --aug: #da8ca1;
+  --good: #b8bb26; --warn: #fabd2f; --bad: #ff8d7b;
+  --verb: #fe8019; --noun: #83a598; --adj: #b8bb26; --adv: #d3869b; --prep: #fabd2f; --other: #928374;
+  --masculine: #83a598; --feminine: #ff6550; --neuter: #8ec07c;
+  color-scheme: dark;
+}
+
+/* Kanagawa: Wave and Lotus */
+:root[data-palette="kanagawa"],
+[data-palette="kanagawa"] [data-md-color-scheme="default"] {
+  --bg: #e5ddb0; --surface: #f2ecbc; --ink: #545464; --muted: #5f5c4f; --line: #bdb68b;
+  --accent: #415c8d; --accent-soft: #dcd5ac; --aug: #624c83;
+  --good: #4b6329; --warn: #8e4a00; --bad: #ad253e;
+  --verb: #be6500; --noun: #4d699b; --adj: #6c854b; --adv: #b35b79; --prep: #a87200; --other: #7e7d74;
+  --masculine: #327186; --feminine: #be364b; --neuter: #4f706b;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="kanagawa"]:not([data-theme="light"]) {
+    --bg: #1f1f28; --surface: #2a2a37; --ink: #dcd7ba; --muted: #a1a097; --line: #54546d;
+    --accent: #82a0dc; --accent-soft: #363646; --aug: #ac96d1;
+    --good: #98bb6c; --warn: #e6c384; --bad: #fd7f8c;
+    --verb: #ffa066; --noun: #7e9cd8; --adj: #98bb6c; --adv: #d27e99; --prep: #e6c384; --other: #717c7c;
+    --masculine: #7fb4ca; --feminine: #e76b78; --neuter: #7aa89f;
+    color-scheme: dark;
+  }
+}
+:root[data-palette="kanagawa"][data-theme="dark"],
+[data-palette="kanagawa"] [data-md-color-scheme="slate"] {
+  --bg: #1f1f28; --surface: #2a2a37; --ink: #dcd7ba; --muted: #a1a097; --line: #54546d;
+  --accent: #82a0dc; --accent-soft: #363646; --aug: #ac96d1;
+  --good: #98bb6c; --warn: #e6c384; --bad: #fd7f8c;
+  --verb: #ffa066; --noun: #7e9cd8; --adj: #98bb6c; --adv: #d27e99; --prep: #e6c384; --other: #717c7c;
+  --masculine: #7fb4ca; --feminine: #e76b78; --neuter: #7aa89f;
+  color-scheme: dark;
+}
+
+/* Tokyo Night: Night and Day */
+:root[data-palette="tokyonight"],
+[data-palette="tokyonight"] [data-md-color-scheme="default"] {
+  --bg: #d0d5e3; --surface: #e1e2e7; --ink: #284fac; --muted: #4b527a; --line: #a7adca;
+  --accent: #0051ae; --accent-soft: #c4c8da; --aug: #7325c5;
+  --good: #405c1f; --warn: #854300; --bad: #a31f27;
+  --verb: #b15c00; --noun: #2675e1; --adj: #587539; --adv: #9651ee; --prep: #8c6c3e; --other: #6f7697;
+  --masculine: #006d92; --feminine: #c9004c; --neuter: #00725e;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="tokyonight"]:not([data-theme="light"]) {
+    --bg: #1a1b26; --surface: #1f2335; --ink: #c0caf5; --muted: #8d94be; --line: #404767;
+    --accent: #7aa2f7; --accent-soft: #292e42; --aug: #bb9af7;
+    --good: #9ece6a; --warn: #e0af68; --bad: #f7768e;
+    --verb: #ff9e64; --noun: #7aa2f7; --adj: #9ece6a; --adv: #bb9af7; --prep: #e0af68; --other: #737aa2;
+    --masculine: #7dcfff; --feminine: #f7768e; --neuter: #73daca;
+    color-scheme: dark;
+  }
+}
+:root[data-palette="tokyonight"][data-theme="dark"],
+[data-palette="tokyonight"] [data-md-color-scheme="slate"] {
+  --bg: #1a1b26; --surface: #1f2335; --ink: #c0caf5; --muted: #8d94be; --line: #404767;
+  --accent: #7aa2f7; --accent-soft: #292e42; --aug: #bb9af7;
+  --good: #9ece6a; --warn: #e0af68; --bad: #f7768e;
+  --verb: #ff9e64; --noun: #7aa2f7; --adj: #9ece6a; --adv: #bb9af7; --prep: #e0af68; --other: #737aa2;
+  --masculine: #7dcfff; --feminine: #f7768e; --neuter: #73daca;
+  color-scheme: dark;
+}
+
+/* Melange: warm */
+:root[data-palette="melange"],
+[data-palette="melange"] [data-md-color-scheme="default"] {
+  --bg: #e9e1db; --surface: #f1f1f1; --ink: #54433a; --muted: #6e574a; --line: #c8b7ad;
+  --accent: #7c5400; --accent-soft: #d9d3ce; --aug: #8d3f7e;
+  --good: #376547; --warn: #934700; --bad: #bb0020;
+  --verb: #bc5c00; --noun: #465aa4; --adj: #3a684a; --adv: #904180; --prep: #a06d00; --other: #997a69;
+  --masculine: #465aa4; --feminine: #bf0021; --neuter: #3d6568;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="melange"]:not([data-theme="light"]) {
+    --bg: #292522; --surface: #34302c; --ink: #ece1d7; --muted: #c1a78e; --line: #5d5247;
+    --accent: #ebc06d; --accent-soft: #403a36; --aug: #cf9bc2;
+    --good: #87b997; --warn: #e79e60; --bad: #f59583;
+    --verb: #e49b5d; --noun: #a3a9ce; --adj: #85b695; --adv: #cf9bc2; --prep: #ebc06d; --other: #887664;
+    --masculine: #a3a9ce; --feminine: #dc7e6d; --neuter: #89b3b6;
+    color-scheme: dark;
+  }
+}
+:root[data-palette="melange"][data-theme="dark"],
+[data-palette="melange"] [data-md-color-scheme="slate"] {
+  --bg: #292522; --surface: #34302c; --ink: #ece1d7; --muted: #c1a78e; --line: #5d5247;
+  --accent: #ebc06d; --accent-soft: #403a36; --aug: #cf9bc2;
+  --good: #87b997; --warn: #e79e60; --bad: #f59583;
+  --verb: #e49b5d; --noun: #a3a9ce; --adj: #85b695; --adv: #cf9bc2; --prep: #ebc06d; --other: #887664;
+  --masculine: #a3a9ce; --feminine: #dc7e6d; --neuter: #89b3b6;
+  color-scheme: dark;
+}
+/* END THEMES */
 
 /* Tints of the feedback colours, worked out where the colours are set so they follow the theme */
 :root,

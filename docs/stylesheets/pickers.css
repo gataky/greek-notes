@@ -1,0 +1,76 @@
+/* The pickers' dialogs: the Greek font (javascripts/greek-font.js) and the colour theme
+   (javascripts/palette.js). One look for both: a card with a short explanation, a list of
+   options as radio rows, and a Done button. */
+
+.picker {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 15px/1.4 var(--gn-body);
+}
+.picker::backdrop { background: rgb(0 0 0 / 0.4); }
+.picker form { padding: 20px; }
+
+.picker h2 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.picker p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+
+.picker__options { display: grid; gap: 6px; }
+.picker__option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.picker__option:has(input:checked) { border-color: var(--accent); }
+.picker__option input { grid-row: span 2; margin: 0; accent-color: var(--accent); }
+.picker__name { font-weight: 600; }
+.picker__name small { margin-left: 8px; color: var(--muted); font-size: 12px; font-weight: 400; }
+
+.picker p.picker__status { margin: 10px 0 0; color: var(--accent); }
+.picker p.picker__status:empty { display: none; }
+
+.picker__done {
+  display: block;
+  margin: 14px 0 0 auto;
+  padding: 6px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+.picker__done:hover { border-color: var(--accent); color: var(--accent); }
+
+/* The theme picker: each theme's light and dark set in miniature, drawn in that theme's own
+   colours (palette.js), whatever the page's theme is. */
+.palette__option { grid-template-columns: auto 1fr auto; grid-template-rows: auto; }
+.palette__option input { grid-row: auto; }
+.palette__option .picker__name small { display: block; margin: 0; }
+.palette__previews { display: flex; gap: 6px; }
+.palette__preview { display: flex; padding: 5px; border: 1px solid; border-radius: 8px; }
+.palette__card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 3px 7px 5px;
+  border: 1px solid;
+  border-radius: 5px;
+  font: 400 15px/1.2 var(--gn-greek);
+}
+.palette__dots { display: flex; gap: 3px; }
+.palette__dots i { width: 7px; height: 7px; border-radius: 50%; }

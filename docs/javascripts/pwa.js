@@ -6,7 +6,8 @@ if ("serviceWorker" in navigator) {
 
 // The phone's status and navigation bars take the page's background. overrides/main.html sets
 // theme-color for the phone's light or dark setting; when the site's own toggle picks the other
-// one, both tags take the background actually shown, read from theme.css's --bg on the body.
+// one, or a colour theme (palette.js) is picked, both tags take the background actually shown, read from
+// theme.css's --bg on the body.
 (function () {
   const metas = [...document.querySelectorAll('meta[name="theme-color"][media]')];
   if (!metas.length) return;
@@ -16,4 +17,5 @@ if ("serviceWorker" in navigator) {
   };
   sync();
   new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ["data-md-color-scheme"] });
+  new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ["data-palette"] });
 })();

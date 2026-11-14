@@ -37,9 +37,11 @@ extra_css:
   - stylesheets/tables.css
   - stylesheets/home.css
   - stylesheets/greek-font.css
+  - stylesheets/pickers.css
 
 extra_javascript:
   - javascripts/greek-font.js
+  - javascripts/palette.js
   - javascripts/drill-frame.js
   - javascripts/home.js
   - javascripts/tables.js

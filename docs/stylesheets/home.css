@@ -24,15 +24,17 @@ body:has(.dict-home) .md-typeset iframe.drill-frame { margin: 0; border-radius: 
 .dict-home__button:hover { color: var(--ink); }
 .dict-home__button svg { width: 24px; height: 24px; fill: currentColor; }
 
-/* In the top right, the font button to the left of the theme button */
+/* In the top right: the colour theme, the font, then the light/dark button */
 .dict-home__theme,
-.dict-home__font {
+.dict-home__font,
+.dict-home__palette {
   position: absolute;
   z-index: 1;
   top: max(10px, env(safe-area-inset-top, 0px));
   right: max(10px, env(safe-area-inset-right, 0px));
 }
 .dict-home__font { right: calc(max(10px, env(safe-area-inset-right, 0px)) + 40px); }
+.dict-home__palette { right: calc(max(10px, env(safe-area-inset-right, 0px)) + 80px); }
 
 /* The theme button shows where it goes: the moon in light mode, the sun in dark */
 .dict-home__theme span { display: flex; }

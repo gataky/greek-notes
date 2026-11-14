@@ -23,6 +23,8 @@
      toggle. They come before the one Material adds (the header's colour), so they win. #}
   <meta name="theme-color" content="#f2e5bc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1d2021" media="(prefers-color-scheme: dark)">
+  {# The saved colour theme (javascripts/palette.js), set before the page draws #}
+  <script>try{var p=localStorage.getItem("palette");if(p)document.documentElement.setAttribute("data-palette",p)}catch(e){}</script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">

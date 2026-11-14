@@ -132,23 +132,23 @@
 
   function build() {
     dialog = document.createElement("dialog");
-    dialog.className = "greek-font";
+    dialog.className = "picker";
     dialog.setAttribute("aria-label", "Greek font");
     dialog.innerHTML = `<form method="dialog">
       <h2>Greek font</h2>
       <p>For every Greek word in the notes, the drills and the dictionary. English text keeps its font. Saved on this device.</p>
-      <div class="greek-font__options">${FONTS.map(font => `
-        <label class="greek-font__option">
+      <div class="picker__options">${FONTS.map(font => `
+        <label class="picker__option">
           <input type="radio" name="greek-font" value="${font.id}">
-          <span class="greek-font__name">${font.name}${font.note ? `<small>${font.note}</small>` : ""}</span>
+          <span class="picker__name">${font.name}${font.note ? `<small>${font.note}</small>` : ""}</span>
           <span class="greek-font__sample" lang="el" style="font-family: 'Greek Sample ${font.id}', 'Greek Neohellenic', 'GFS Neohellenic', sans-serif">${SAMPLE}</span>
         </label>`).join("")}
       </div>
-      <p class="greek-font__status" role="status"></p>
-      <button class="greek-font__done" value="done">Done</button>
+      <p class="picker__status" role="status"></p>
+      <button class="picker__done" value="done">Done</button>
     </form>`;
     dialog.addEventListener("change", async e => {
-      const status = dialog.querySelector(".greek-font__status");
+      const status = dialog.querySelector(".picker__status");
       status.textContent = "";
       try {
         await choose(e.target.value);

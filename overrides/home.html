@@ -1,12 +1,16 @@
 {% extends "main.html" %}
 
-{# The dictionary app's page: the dictionary alone, with Greek font and light/dark buttons. It has no menu,
-   since the notes and the drills are apps of their own. stylesheets/home.css hides the site's
-   own header and footer on this page; they stay in the page because instant navigation
-   expects them. #}
+{# The dictionary app's page: the dictionary alone, with colour theme, Greek font and light/dark
+   buttons. It has no menu, since the notes and the drills are apps of their own.
+   stylesheets/home.css hides the site's own header and footer on this page; they stay in the
+   page because instant navigation expects them. #}
 
 {% block hero %}
   <div class="dict-home">
+    {# Opens the colour theme picker (palette.js), left of the font button #}
+    <button class="dict-home__button dict-home__palette" type="button" data-palette-open aria-label="Colour theme" title="Colour theme">
+      {% include ".icons/material/palette-outline.svg" %}
+    </button>
     {# Opens the Greek font picker (greek-font.js), left of the theme button #}
     <button class="dict-home__button dict-home__font" type="button" data-greek-font-open aria-label="Greek font" title="Greek font">
       {# Material Symbols' "translate", as in greek-font.js #}

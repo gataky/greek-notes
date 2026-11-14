@@ -16,7 +16,7 @@ ANKI        := anki/sync
 DRY_RUN     := $(if $(DRY),--dry-run)
 
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade sync fetch-dictionary dictionary publish-dictionary verb-forms declensions anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet
+.PHONY: help install upgrade themes sync fetch-dictionary dictionary publish-dictionary verb-forms declensions anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-18s %s\n", $$1, $$2}'
@@ -97,7 +97,11 @@ push-verbs: anki-build anki-verbs ## Push exports/anki-verbs.json to the Greek V
 
 anki: sync push-words push-verbs ## After editing the sheet: pull it, check it, push both decks (DRY=1 to preview)
 
-test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills, the aspect forks and the dictionary lookup
+themes: ## Write the colour themes into docs/stylesheets/theme.css and docs/javascripts/palette.js
+	python3 scripts/build_themes.py
+
+test: fetch-dictionary ## Check the conjugation engine, the verb forms, the drills, the aspect forks, the dictionary lookup and the themes
+	python3 scripts/build_themes.py --check
 	$(NODE) tests/test_verbs.js
 	$(NODE) tests/test_verb_forms.js
 	$(NODE) tests/test_voice_sentences.js
