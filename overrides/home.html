@@ -1,51 +1,17 @@
 {% extends "main.html" %}
 
-{# The landing page: the dictionary alone, with everything else behind the menu button.
-   The menu is built from nav in mkdocs.yml. stylesheets/home.css hides the site's own
-   header and footer on this page; they stay in the page because instant navigation
+{# The dictionary app's page: the dictionary alone, with a light/dark button. It has no menu,
+   since the notes and the drills are apps of their own. stylesheets/home.css hides the site's
+   own header and footer on this page; they stay in the page because instant navigation
    expects them. #}
-
-{% macro links(items) %}
-  <ul>
-    {% for item in items %}
-      {% if item.children %}
-        <li>
-          <details>
-            <summary>{{ item.title }}</summary>
-            {{ links(item.children) }}
-          </details>
-        </li>
-      {% else %}
-        <li><a href="{{ item.url | url }}">{{ item.title }}</a></li>
-      {% endif %}
-    {% endfor %}
-  </ul>
-{% endmacro %}
 
 {% block hero %}
   <div class="dict-home">
-    {# Top left, on the side the menu slides in from #}
-    <button class="dict-home__button dict-home__open" id="site-menu-open" type="button" aria-label="Menu" aria-haspopup="dialog">
-      {% include ".icons/material/menu.svg" %}
-    </button>
     {# Top right. Flips the site's light/dark palette (home.js). Shows the moon in light mode, the sun in dark. #}
     <button class="dict-home__button dict-home__theme" id="site-theme" type="button" aria-label="Switch between light and dark" title="Switch between light and dark">
       <span class="dict-home__to-dark">{% include ".icons/material/weather-night.svg" %}</span>
       <span class="dict-home__to-light">{% include ".icons/material/weather-sunny.svg" %}</span>
     </button>
-    <dialog class="dict-home__menu" id="site-menu" aria-label="Menu">
-      <button class="dict-home__close" id="site-menu-close" type="button" aria-label="Close menu">
-        {% include ".icons/material/close.svg" %}
-      </button>
-      <nav>
-        {% for section in nav %}
-          {% if section.children %}
-            <h2>{{ section.title }}</h2>
-            {{ links(section.children) }}
-          {% endif %}
-        {% endfor %}
-      </nav>
-    </dialog>
   </div>
 {% endblock %}
 

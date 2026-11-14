@@ -1,4 +1,4 @@
-"""MkDocs hook that makes the built site an installable app that works offline.
+"""MkDocs hook that makes the built site's apps (hooks/apps.py) work offline.
 
 After every build it fills in site/sw.js (from docs/sw.js) with the list of every file in
 the site, the Google Fonts stylesheets the pages use, and a version stamp taken from the

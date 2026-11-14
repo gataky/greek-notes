@@ -1,12 +1,35 @@
 {% extends "base.html" %}
 
-{# Installable app: manifest, icons and home-screen settings (see hooks/pwa.py) #}
+{# Installable apps: the page's app (hooks/apps.py) picks the manifest, icon and home-screen
+   name, so the dictionary, the drills and the notes each install on their own (hooks/pwa.py
+   makes them work offline) #}
+{# An app's first page is titled with the app's name alone, as the site's home page is #}
+{% block htmltitle %}
+  {% if app and page.url == app.path %}
+    <title>{{ config.site_name }}</title>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block extrahead %}
-  <link rel="manifest" href="{{ 'manifest.webmanifest' | url }}">
-  <link rel="apple-touch-icon" href="{{ 'icons/apple-touch-icon.png' | url }}">
+  {% if app %}
+    <link rel="manifest" href="{{ (app.path ~ 'manifest.webmanifest') | url }}">
+    <link rel="apple-touch-icon" href="{{ ('icons/' ~ app.id ~ '-180.png') | url }}">
+    <meta name="apple-mobile-web-app-title" content="{{ app.short_name }}">
+  {% endif %}
   <meta name="theme-color" content="#2094f3">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Dictionary">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  {% if page and page.is_homepage %}
+    {# The dictionary used to be the home page: send its links (#σπίτι) on to where it is now #}
+    <script>
+      try {
+        if (/[Ͱ-Ͽἀ-῿]/.test(decodeURIComponent(location.hash))) {
+          location.replace("{{ 'dictionary/' | url }}" + location.hash);
+        }
+      } catch (err) {}
+    </script>
+  {% endif %}
 {% endblock %}

@@ -2,24 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Personal Modern Greek study notes: an MkDocs Material site deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
+Personal Modern Greek study notes: an MkDocs Material site, installable as three apps (notes, drills, dictionary), deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
 
 ## Layout
 
 ```
 docs/                   the site (MkDocs serves everything here)
-  index.md              home page: the dictionary app
+  index.md              home page of the notes app
   grammar/              notes (articles.md ..., pronouns/)
-  drills/, tools/       pages that embed an app; their URLs are linked from outside, keep them
+  tools/                pages that embed an app (notes app); their URLs are linked from outside, keep them
+  drills/               the drills app: index.md, one page per drill, its manifest; URLs kept as for tools/
+  dictionary/           the dictionary app: index.md and its manifest
   apps/                 standalone HTML apps, embedded by the pages above
   javascripts/          all JS: site-wide scripts (listed in mkdocs.yml) and the apps' modules
   stylesheets/          all CSS: site-wide (listed in mkdocs.yml), and verb-grid.css and drill.css for the apps
   data/                 JSON the apps fetch, and the gzipped dictionary (downloaded, not in git)
   vendor/sql.js/        third-party code, vendored for offline use
   fonts/, icons/        self-hosted Greek font, app icons
-  manifest.webmanifest, sw.js   must stay at the site root (service worker scope)
+  sw.js                 must stay at the site root (service worker scope)
+  manifest.webmanifest  the notes app's (its scope is the whole site)
 overrides/              theme templates (custom_dir)
-hooks/                  MkDocs hooks
+hooks/                  MkDocs hooks: apps.py (which app a page is in), pwa.py (offline)
 scripts/                build_*.py, build_declensions.js: write the files in docs/data/; build_anki_verbs.js writes exports/
 exports/                data for anki/, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
@@ -64,7 +67,7 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
 
 ## Content
 
-- Notes are Markdown in `docs/grammar/`. Each must be added to `nav` in `mkdocs.yml`, which also builds the menu on the home page. A note's path is its URL (`grammar/articles.md` is `grammar/articles/`), so moving or renaming one breaks links to it.
+- Notes are Markdown in `docs/grammar/`. Each must be added to `nav` in `mkdocs.yml`. Each app's menu shows only its own part of `nav` (see Apps below). A note's path is its URL (`grammar/articles.md` is `grammar/articles/`), so moving or renaming one breaks links to it.
 - Every table on the note pages is styled by `docs/stylesheets/tables.css` to match the verb grid (`docs/stylesheets/verb-grid.css`). Keep the two looking alike: card, uppercase headings, row rules, accent highlights.
   - **Plain Markdown tables** need no markup. `docs/javascripts/tables.js` sets `lang="el"` on cells with Greek, which get the Greek font while the other cells in that table are muted as glosses. Bold inside Greek cells shows in the accent colour. Header cells with Greek aren't uppercased.
   - **Grid layouts** (paradigms with grouped columns) are hand-written HTML: `<div class="grid-card"><table class="grid">` with `th.group`/`th.sub`, `td.who` row labels, `td.gloss`, `span.end` (accent), `span.pre` (muted), `td.gap` spacer columns, and an optional `p.grid-note` underneath. Row labels can shorten on phones: `masc<span class="full">uline</span><span class="abbr">.</span>`.
@@ -72,10 +75,28 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
 - Interactive pages are standalone HTML apps in `docs/apps/`, embedded in a Markdown page with `<iframe class="drill-frame" src="../../apps/x.html">` (relative to the page's URL, `tools/x/`). `docs/javascripts/drill-frame.js` (loaded site-wide) hides the app's `<header>`, sizes the iframe to its content, and syncs the light/dark theme by setting `data-theme` on the app's root. Apps therefore define colour tokens on `:root` with dark variants under both `prefers-color-scheme` and `[data-theme="dark"]`. Add `data-pass-hash` to an iframe to forward the page's `#fragment` into it, which is how `tools/verb-tables/#γράφω` opens a verb. Add `data-keep-header` to keep the app's header showing.
 - Drills move focus to their answer box only with a mouse or trackpad (`AUTO_FOCUS`, `(hover: hover) and (pointer: fine)`). On a phone, focusing it opens the on-screen keyboard and the page jumps, so there the learner taps the box.
 
-## Offline app (PWA)
+## Apps
 
-The whole site installs as a phone app and works offline:
-- `overrides/main.html` (theme `custom_dir`) adds the manifest (`docs/manifest.webmanifest`) and home-screen tags. Icons are in `docs/icons/`.
+One site and one build, installable as three apps so a drill and the dictionary can be open at once. Each has a manifest in its folder:
+- **Greek Dictionary:** `dictionary/` (`docs/dictionary/manifest.webmanifest`).
+- **Greek Drills:** `drills/` (`docs/drills/manifest.webmanifest`).
+- **Greek Notes:** the rest, the grammar and the tools (`docs/manifest.webmanifest`, scope the whole site; the other two are nested in it, and a more specific scope wins).
+
+`hooks/apps.py` (`APPS`) puts each page in the app whose folder holds it, and gives the templates:
+- `app`: that app's names, read from its manifest. `overrides/main.html` uses it for the manifest link, the apple-touch-icon and the home-screen name.
+- `nav` with only that app's top-level sections: one `nav` in `mkdocs.yml` serves all three. Its homepage, which the logo links to, is the app's first page.
+- `config.site_name`: the app's name, so the header and titles say Greek Drills, and an app's first page is titled with the name alone.
+
+Links between apps are ordinary links. Inside an installed app, one that leaves the app's scope still works, shown with the browser's address bar. Search still covers the whole site.
+
+Icons are `docs/icons/<app>-{512,192,180}.png`: the same Αα and Greek key, with the background colour per app (dictionary blue, drills terracotta, notes green). `scripts/icon.html?app=` is the source, with the commands to render them. The favicon is the notes app's.
+
+The dictionary used to be the home page. The home page sends a Greek `#fragment` (`/#σπίτι`) on to `dictionary/#σπίτι`, so old links still open the word.
+
+## Offline (PWA)
+
+All three apps work offline through one service worker:
+- `overrides/main.html` (theme `custom_dir`) adds the page's app's manifest and the home-screen tags.
 - `docs/javascripts/pwa.js` registers `docs/sw.js`.
 - `hooks/pwa.py` (an MkDocs hook, so it also runs in CI) fills placeholders in the built `sw.js` after every build:
   - the list of every built file, skipping `*.map` and lunr language packs for languages search doesn't use;
@@ -83,7 +104,7 @@ The whole site installs as a phone app and works offline:
   - a version stamp: a hash of every listed file plus the worker's own source.
 - A new stamp makes installed apps cache the new copy and delete the old one. The worker also caches the Latin and Greek font subsets, kept across versions.
 - Nothing needs updating when pages are added. Pages are cached under their directory URL (`tools/verb-tables/`), matching how they're linked.
-- Large data files (`*.db.gz`, the dictionary) stay out of the file list and the version stamp. The hook lists them in `DATA` with their own content hash, and the worker keeps them in a separate `data` cache, so a deploy doesn't download them again unless they changed.
+- Large data files (`*.db.gz`, the dictionary) stay out of the file list and the version stamp. The hook lists them in `DATA` with their own content hash, and the worker keeps them in a separate `data` cache, so a deploy doesn't download them again unless they changed. A new version only pre-downloads the data files this browser has saved before. Otherwise a file waits for its first use, since only the dictionary reads it and a phone may give each home-screen app its own storage.
 - `mkdocs serve` hands out the unfilled `docs/sw.js`. Its empty file list caches nothing, so dev edits show on reload; keep the template valid JS for that reason.
 
 ## Verb tables (`docs/tools/`, `docs/apps/verb-tables.html`)
@@ -216,9 +237,9 @@ Marking works in these drills as in the verb drills, through `voice-drill.js`'s 
 
 ## Dictionary (`docs/apps/dictionary.html`)
 
-A Greek ↔ English dictionary that runs entirely in the browser. It's the home page, so `/#σπίτι` opens a word.
+A Greek ↔ English dictionary that runs entirely in the browser. It's an app of its own at `dictionary/`, so `dictionary/#σπίτι` opens a word.
 
-- **Home page:** `docs/index.md` is only the iframe. Its template, `overrides/home.html`, adds a menu button (top left, the side the menu slides in from) and a `<dialog>` built from `nav`, and a light/dark button (top right), both in `docs/javascripts/home.js`. Below about 880px the dictionary's text would sit under the menu button, so `home.css` starts the frame 32px lower there. The theme button picks the next palette through Material's own radio inputs, still in the hidden header, so the choice is saved for every page and `drill-frame.js` passes it into the dictionary. It reads the current palette from `body[data-md-color-scheme]`, because on a first visit neither input is checked. `docs/stylesheets/home.css` hides the site's header and footer with `body:has(.dict-home)`. They stay in the page because instant navigation needs them. The point is that the site looks like a dictionary until you open the menu, so don't add links to the notes there.
+- **Page:** `docs/dictionary/index.md` is only the iframe. Its template, `overrides/home.html`, adds a light/dark button (top right, `docs/javascripts/home.js`) and no menu, since the notes and drills are other apps. The theme button picks the next palette through Material's own radio inputs, still in the hidden header, so the choice is saved for every page and `drill-frame.js` passes it into the dictionary. It reads the current palette from `body[data-md-color-scheme]`, because on a first visit neither input is checked. `docs/stylesheets/home.css` hides the site's header and footer with `body:has(.dict-home)`. They stay in the page because instant navigation needs them. The point is that the app is only a dictionary, so don't add links to the notes there.
 
 - **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 4, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms` and `make declensions`, then `make publish-dictionary`.
   - **It isn't in git** (23 MB; ignored). It's an asset on a GitHub release of this repo (`dictionary-YYYYMMDD`). The Makefile pins it by `DICT_URL` and `DICT_SHA256`, and `make fetch-dictionary` downloads it when missing; `build`, `serve`, `test` and CI run that first. A local file that isn't the pinned build is left alone, with a note, so a fresh `make dictionary` isn't overwritten. `publish-dictionary` creates the release with `gh` and rewrites the two pin lines; commit the Makefile after. Older copies remain in git history (before 2026-11-07); history was deliberately not rewritten.

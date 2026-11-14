@@ -22,12 +22,18 @@ The vocabulary sheet (`make sheet` opens it) feeds both the site and Anki. After
 ## Adding a note
 
 1. Put the `.md` file in `docs/grammar/`.
-2. Add it to `nav` in `mkdocs.yml`. The menu on the home page is built from `nav`.
+2. Add it to `nav` in `mkdocs.yml`. The menus are built from `nav`: each app shows its own part.
 3. Commit and push to `main`. The site rebuilds automatically.
 
 ## Installing on a phone
 
-The site is an installable app that works offline. Open https://gataky.github.io/greek-notes/ and add it to the home screen: on iPhone, Safari → Share → Add to Home Screen; on Android, Chrome → Install app. The first visit online saves the whole site (every page, the verb data, search and fonts). After that it opens without a connection, and it picks up new deploys the next time it's opened online.
+The site installs as three apps that work offline, so a drill and the dictionary can be open side by side:
+
+- **Greek Notes:** the grammar notes and the verb tools, https://gataky.github.io/greek-notes/
+- **Greek Drills:** https://gataky.github.io/greek-notes/drills/
+- **Greek Dictionary:** https://gataky.github.io/greek-notes/dictionary/
+
+Open each one's page and add it to the home screen: on iPhone, Safari → Share → Add to Home Screen; on Android, Chrome → Install app. The first visit online saves the whole site (every page, the verb data, search and fonts), and the dictionary saves its data the first time it opens. After that each app opens without a connection, and picks up new deploys the next time it's opened online.
 
 ## Working locally
 

@@ -1,12 +1,14 @@
 <!doctype html><meta charset="utf-8">
 <!--
-  Source of the app icons in docs/icons/. To re-render, from the repo root:
+  Source of the app icons in docs/icons/: one per app (hooks/apps.py), the same but for the
+  background colour, picked with ?app=. To re-render, from the repo root:
     CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    "$CH" --headless --hide-scrollbars --force-device-scale-factor=2 --window-size=512,512 \
-      --screenshot=$PWD/icon-1024.png file://$PWD/scripts/icon.html
-    sips -s format png -Z 512 icon-1024.png --out docs/icons/icon-512.png
-    sips -s format png -Z 192 icon-1024.png --out docs/icons/icon-192.png
-    sips -s format png -Z 180 icon-1024.png --out docs/icons/apple-touch-icon.png
+    for app in dictionary drills notes; do
+      "$CH" --headless --hide-scrollbars --force-device-scale-factor=2 --window-size=512,512 \
+        --screenshot=$PWD/icon-1024.png "file://$PWD/scripts/icon.html?app=$app"
+      for size in 512 192 180; do sips -s format png -Z $size icon-1024.png --out docs/icons/$app-$size.png; done
+    done
+    rm icon-1024.png
   Keep the letters and the key inside the centre circle (radius 205 of 512): the manifest marks the icons maskable.
 -->
 <style>
@@ -17,8 +19,8 @@ svg{display:block;width:100vw;height:100vh}
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2f7fd6"/>
-      <stop offset="1" stop-color="#0e2f5c"/>
+      <stop id="bg-top" offset="0" stop-color="#2f7fd6"/>
+      <stop id="bg-bottom" offset="1" stop-color="#0e2f5c"/>
     </linearGradient>
     <radialGradient id="glow" cx="0.5" cy="0.4" r="0.55">
       <stop offset="0" stop-color="#fff" stop-opacity="0.18"/>
@@ -37,3 +39,14 @@ svg{display:block;width:100vw;height:100vh}
     <path d="M0,4 L0,0 L4,0 L4,2 L2,2 L2,4 L6,4 L6,0 L10,0 L10,2 L8,2 L8,4 L12,4 L12,0 L16,0 L16,2 L14,2 L14,4 L18,4 L18,0 L22,0 L22,2 L20,2 L20,4 L24,4 L24,0 L28,0 L28,2 L26,2 L26,4 L30,4"/>
   </g>
 </svg>
+<script>
+// Each app's background, top left to bottom right. The dictionary keeps the first icon's blue.
+const BACKGROUNDS = {
+  dictionary: ["#2f7fd6", "#0e2f5c"],
+  drills: ["#c8553a", "#5a1a10"],
+  notes: ["#3d9468", "#103c28"],
+};
+const [start, end] = BACKGROUNDS[new URLSearchParams(location.search).get("app")] || BACKGROUNDS.dictionary;
+document.getElementById("bg-top").setAttribute("stop-color", start);
+document.getElementById("bg-bottom").setAttribute("stop-color", end);
+</script>

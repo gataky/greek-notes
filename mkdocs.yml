@@ -1,10 +1,10 @@
-site_name: Greek Dictionary
-site_description: A Greek and English dictionary that works offline
+site_name: Greek Notes
+site_description: Modern Greek grammar notes, drills and a dictionary that work offline
 
 theme:
   name: material
   custom_dir: overrides
-  favicon: icons/icon-192.png
+  favicon: icons/notes-192.png
   language: en
   font:
     text: Noto Serif
@@ -43,6 +43,7 @@ extra_javascript:
   - javascripts/pwa.js
 
 hooks:
+  - hooks/apps.py
   - hooks/pwa.py
 
 plugins:
@@ -53,8 +54,9 @@ markdown_extensions:
   - toc:
       permalink: true
 
+# One nav for the three apps: each page's menu shows only its own app's part (hooks/apps.py).
 nav:
-  - Dictionary: index.md
+  - Home: index.md
   - Grammar:
       - Articles: grammar/articles.md
       - Adjectives: grammar/adjectives.md
@@ -72,6 +74,7 @@ nav:
       - Prepositions: grammar/prepositions.md
       - Passive verbs: grammar/passive-verbs.md
   - Drills:
+      - Overview: drills/index.md
       - Passive verbs: drills/passive-verbs.md
       - Tense and aspect: drills/tense-aspect.md
       - Object pronouns: drills/object-pronouns.md
@@ -83,3 +86,4 @@ nav:
       - Verb tables: tools/verb-tables.md
       - Conjugation patterns: tools/conjugation-patterns.md
       - Aspect forks: tools/aspect-forks.md
+  - Dictionary: dictionary/index.md

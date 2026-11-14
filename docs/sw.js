@@ -1,4 +1,5 @@
-// Service worker: keeps a copy of the whole site so the installed app works offline.
+// Service worker: keeps a copy of the whole site so the installed apps (the notes, the drills
+// and the dictionary, see hooks/apps.py) work offline.
 // hooks/pwa.py fills in VERSION, FILES, DATA and FONT_CSS after every build; a new VERSION
 // makes browsers install the new copy and drop the old one. Left unfilled (as under
 // `mkdocs serve`), FILES and DATA are empty, so nothing is saved and requests go to the server.
@@ -78,11 +79,15 @@ async function fromData(request, key) {
   return response;
 }
 
-// Download the DATA files this version doesn't have yet.
+// Download the new copy of each DATA file this browser has saved before. One it has never
+// used waits for its first use: only the dictionary reads the dictionary, and a phone can give
+// each home-screen app its own storage, so the notes and drills apps would save it for nothing.
 async function cacheData() {
   const cache = await caches.open(DATA_CACHE);
+  const saved = (await cache.keys()).map(request => request.url);
   for (const [url, key] of DATA_KEYS) {
     if (await cache.match(key)) continue;
+    if (!saved.some(other => other.startsWith(`${url}?v=`))) continue;
     const response = await fetch(url, { cache: "reload" });
     if (response.ok) await cache.put(key, response);
   }
