@@ -231,6 +231,14 @@ Active verbs only, since the owner hasn't learned the passive past yet. The lear
   - Marking works as in the active or passive drill.
   - Progress is per device, in localStorage (`gta-history`, `gta-seen`, `gta-settings`).
 
+## Verb groups drill (`docs/drills/verb-groups.md`, `docs/apps/verb-groups.html`)
+
+The word list's active verbs, as the aspect forks page groups them: the learner picks the group (`AspectFork.GROUPS`) from buttons with each group's name and rule, then sees the verb's fork. Nothing new is stored or generated; the groups come from `analyse()` on `verbToShow()`'s forms, so they follow `verb-forms.json` and the rules in `aspect-fork.js`, which `test_aspect_forks.js` checks.
+
+- Only groups with a verb in the word list are offered (`aino` has none now). "Show the past and future" (on by default) shows the past continuous, aorist and future without highlights; off, it's from memory.
+- A group is picked first, weighted by the square root of its size and by how often it's missed, then one of its verbs, unseen ones first. Missed verbs come back a few turns later. Chips turn groups off, which also takes them out of the answers.
+- Progress is per device, in localStorage (`gvg-history`, `gvg-seen`, `gvg-settings`).
+
 ## Noun drills (`docs/drills/noun-gender.md`, `agreement.md`, `numbers.md`, `prepositions.md`)
 
 Noun gender, agreement (article + adjective + noun in a case), numbers and prepositions draw from the word list's nouns and adjectives, with the dictionary's forms. No noun or adjective form is generated; only the article and the numbers are fixed tables in code.
@@ -249,7 +257,7 @@ Weak pronouns and where they go. `pronoun-sentences.json`: one object per line, 
 
 ## Shared drill pieces
 
-The five newer drill apps share `docs/stylesheets/drill.css` (layout and fonts) and `docs/javascripts/drill-kit.js` (storage, feedback box, score, tabs, slip cells). The two gap-fill drills, prepositions and object pronouns, also share `gap-drill-page.js` (the page) and `gap-sentences.js` (finding and blanking the answer in the Greek). The older passive and tense-aspect apps still inline their own.
+The six newer drill apps share `docs/stylesheets/drill.css` (layout and fonts) and `docs/javascripts/drill-kit.js` (storage, feedback box, score, tabs, slip cells). The two gap-fill drills, prepositions and object pronouns, also share `gap-drill-page.js` (the page) and `gap-sentences.js` (finding and blanking the answer in the Greek). The older passive and tense-aspect apps still inline their own.
 
 Marking works in these drills as in the verb drills, through `voice-drill.js`'s `MARKING` and `countsAsRight()`: `DrillKit.marking()` draws the radios, and `DrillKit.counts()` maps their slips onto it (`accent`, `spelling`, and `n` for τη where the ν must stay, marked like a typo). Forgiven slips also count as right in Where you slip; the feedback lights up the letters that differ (`changes()`).
 
