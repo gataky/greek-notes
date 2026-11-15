@@ -96,7 +96,7 @@ One site and one build. The root page is a hub, "Greek", with a card for each of
 
 Links between apps are ordinary links. Inside an installed app, one that leaves the app's scope still works, shown with the browser's address bar. Search still covers the whole site.
 
-Icons are `docs/icons/<app>-{512,192,180}.png`: the same Αα and Greek key, with gruvbox's blue, orange, aqua or purple behind them (dictionary, drills, notes, and `home` for the hub). `scripts/icon.html?app=` is the source, with the commands to render them. The favicon is the hub's.
+Icons are `docs/icons/<app>-{512,192,180}.png`, on gruvbox's blue, orange, aqua or purple (dictionary, drills, notes, and `home` for the hub). The hub's has the Αα and Greek key; the others a cream Material Symbols glyph: an open book with an A (dictionary), a dumbbell (drills), a page (notes). The hub's cards show them too. `scripts/icon.html?app=` is the source, with the commands to render them. The favicon is the hub's.
 
 The dictionary used to be the home page. The home page sends a Greek `#fragment` (`/#σπίτι`) on to `dictionary/#σπίτι`, so old links still open the word.
 
