@@ -13,11 +13,10 @@
 <link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <script src="../javascripts/greek-font.js"></script>
 <style>
-/* Group choices: a name and its rule, more of them than the three articles */
-.choices.groups { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
-.choices.groups .choice { align-items: flex-start; text-align: left; gap: 4px; padding: 10px 12px; font: 600 15px/1.25 var(--body); }
-.choices.groups .choice small { font: 400 15px/1.3 var(--display); letter-spacing: 0; text-transform: none; white-space: pre-wrap; }
-.cues .lbl { color: var(--muted); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; margin-right: 6px; }
+/* Four group choices: a name and its rule */
+.choices.groups { grid-template-columns: 1fr 1fr; gap: 10px; }
+.choices.groups .choice { align-items: flex-start; text-align: left; gap: 6px; padding: 14px 16px; font: 600 16px/1.25 var(--body); }
+.choices.groups .choice small { font: 400 17px/1.3 var(--display); letter-spacing: 0; text-transform: none; white-space: pre-wrap; }
 .reveal .links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; }
 .reveal .links a { color: var(--accent); }
 .slip { grid-template-columns: minmax(0, 1.4fr) 1fr; }
@@ -26,9 +25,8 @@
 .tcard .rule { font-family: var(--display); font-size: 17px; color: var(--ink); white-space: pre-wrap; }
 .tcard .verbs { font-family: var(--display); font-size: 18px; color: var(--ink); line-height: 1.5; }
 @media (max-width: 480px) {
-  .choices.groups { grid-template-columns: 1fr 1fr; }
-  .choices.groups .choice { font-size: 14px; padding: 9px 10px; }
-  .choices.groups .choice small { font-size: 14px; }
+  .choices.groups .choice { font-size: 14px; padding: 10px 12px; }
+  .choices.groups .choice small { font-size: 15px; }
 }
 </style>
 </head>
@@ -37,7 +35,7 @@
   <header>
     <div class="eyebrow">Verbs · groups</div>
     <h1>Verb Groups</h1>
-    <p class="sub">An active verb from your word list. Pick its group: the rule that turns its present stem into its perfective one, as on the aspect forks page.</p>
+    <p class="sub">An active verb from your word list, in the present. Pick its group, the rule that turns its present stem into its perfective one, from four. Then see its fork: the past and future each stem makes.</p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -54,7 +52,6 @@
         </div>
         <p class="big" id="word" lang="el">…</p>
         <p class="sub" id="gloss" aria-live="polite">Loading verbs…</p>
-        <ul class="cues" id="cues" hidden></ul>
       </div>
 
       <div class="choices groups" id="choices"></div>
@@ -82,10 +79,9 @@
     <div class="section">
       <h2>Practise</h2>
       <div class="chips">
-        <label class="chip"><input type="checkbox" id="opt-forms"> Show the past and future</label>
         <label class="chip"><input type="checkbox" id="opt-english"> Show the English</label>
       </div>
-      <p class="help">With the past and future showing, you work out the rule from the forms. Without them, it's from memory: some groups can't be told apart from the present alone (most <span class="g">-ζω</span> verbs are dentals, a few take ξ).</p>
+      <p class="help">Four groups to choose from: the right one and three others at random. The past and future only show once you've answered. Keys 1 to 4 pick an answer.</p>
     </div>
 
     <div class="section">
@@ -119,7 +115,7 @@ const AF = window.AspectFork, K = window.DrillKit, $ = K.$;
 const forksHref = id => `../notes/tools/aspect-forks/#${encodeURIComponent(id)}`;
 const tablesHref = greek => `../notes/tools/verb-tables/#${encodeURIComponent(greek)}`;
 
-let settings = { forms: true, english: true, off: [], ...K.store.get("gvg-settings", {}) };
+let settings = { english: true, off: [], ...K.store.get("gvg-settings", {}) };
 let history = K.store.get("gvg-history", []);  // [{ v: verb, g: its group, a: the group picked, or null when shown }]
 let seen = new Set(K.store.get("gvg-seen", []));
 let verbs = [], byGroup = new Map(), groups = [], retry = [], recent = [];
@@ -185,7 +181,7 @@ function pickVerb() {
 // ---------- One verb ----------
 
 function next() {
-  if (!verbs.length || onGroups().length < 2) return;
+  if (!verbs.length || !onGroups().length) return;
   item = pickVerb();
   session.q++;
   seen.add(item.greek); K.store.set("gvg-seen", [...seen]);
@@ -194,26 +190,28 @@ function next() {
   $("word").textContent = item.greek;
   $("gloss").textContent = item.english;
   $("gloss").hidden = !settings.english;
-  renderCues();
+  item.choices = shuffle([item.group, ...distractors(item.group)]);
   renderChoices();
   $("feedback").hidden = true; $("reveal").hidden = true;
   $("show").disabled = false; $("next").disabled = true;
   K.focus($("choices").children[0]);
 }
 
-// The past continuous, aorist and future simple, without the fork's highlights, which would
-// give the answer away.
-function renderCues() {
-  const f = item.fork, plain = s => AF.plainText(s || "");
-  const cues = [["past continuous", plain(f.imperfect)],
-    ["aorist", f.group === "no-perf" ? "none" : plain(f.aorist)],
-    ["future simple", f.group === "no-perf" ? "θα " + f.present : "θα " + plain(f.dependent)]];
-  $("cues").innerHTML = cues.map(([l, form]) => `<li><span class="lbl">${l}</span><span class="g" lang="el">${K.esc(form)}</span></li>`).join("");
-  $("cues").hidden = !settings.forms;
+// Three wrong groups at random: from the groups that are on, then from the rest if that's too few.
+function distractors(right) {
+  const others = list => shuffle(list.map(g => g.id).filter(id => id !== right));
+  const on = others(onGroups());
+  return [...on, ...others(groups.filter(g => !isOn(g.id)))].slice(0, 3);
+}
+
+function shuffle(list) {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
 }
 
 function renderChoices() {
-  $("choices").innerHTML = onGroups().map(g =>
+  $("choices").innerHTML = item.choices.map(id => AF.GROUP[id]).map(g =>
     `<button class="choice" type="button" data-group="${g.id}">${K.esc(g.name)}<small lang="el">${K.esc(g.rule)}</small></button>`).join("");
   for (const b of $("choices").children) b.addEventListener("click", () => choose(b.dataset.group));
 }
@@ -247,7 +245,6 @@ function finish(picked) {
   history = [...history, { v: item.greek, g: item.group, a: picked }].slice(-400);
   K.store.set("gvg-history", history); renderSlips();
   for (const b of $("choices").children) b.disabled = true;
-  $("cues").hidden = false;
   $("fork").innerHTML = AF.forkHTML(item.fork, { group: false });
   $("legend").innerHTML = item.group === "irregular" ? "" : AF.LEGEND;
   $("links").innerHTML = `<a href="${tablesHref(item.greek)}" target="_top">${K.esc(item.greek)} in the verb tables</a>`
@@ -260,7 +257,7 @@ function finish(picked) {
 // ---------- Panels ----------
 
 function renderOptions() {
-  for (const k of ["forms", "english"]) $("opt-" + k).checked = settings[k];
+  $("opt-english").checked = settings.english;
   const box = $("groupChips"); box.innerHTML = "";
   for (const g of groups) {
     const chip = document.createElement("label"); chip.className = "chip";
@@ -268,9 +265,8 @@ function renderOptions() {
     input.addEventListener("change", () => {
       settings.off = input.checked ? settings.off.filter(id => id !== g.id) : [...settings.off, g.id];
       saveSettings(); bankInfo();
-      // A question still being asked gets the new choices; its own group stays.
-      if (stage === "ask" && isOn(item.group) && onGroups().length >= 2) renderChoices();
-      else if (stage !== "done") next();
+      // A question whose group was just turned off moves on.
+      if (stage === "idle" || (stage === "ask" && !isOn(item.group))) next();
     });
     chip.append(input, ` ${g.name} `);
     const n = document.createElement("span"); n.style.color = "var(--muted)"; n.textContent = byGroup.get(g.id).length;
@@ -283,16 +279,15 @@ function renderOptions() {
 function bankInfo() {
   const on = onGroups();
   const n = on.reduce((s, g) => s + byGroup.get(g.id).length, 0);
-  $("bankInfo").textContent = on.length < 2
-    ? "Turn on at least two groups."
-    : `${n} of the ${verbs.length} active verbs in your word list, in ${on.length} groups. Only the groups that are on are offered as answers.`;
+  $("bankInfo").textContent = !on.length
+    ? "Turn on at least one group."
+    : `${n} of the ${verbs.length} active verbs in your word list, in ${on.length} group${on.length === 1 ? "" : "s"}. The wrong answers come from the groups that are on, then from the others.`;
 }
 
 function setOption(key, value) {
   settings[key] = value; saveSettings();
   if (!item) return;
   if (key === "english") $("gloss").hidden = !value;
-  if (key === "forms" && stage === "ask") $("cues").hidden = !value;
 }
 
 // One card per group: its rule, note, and your verbs in it.
@@ -336,7 +331,12 @@ function renderSlips() {
 
 $("show").addEventListener("click", showAnswer);
 $("next").addEventListener("click", next);
-for (const k of ["forms", "english"]) $("opt-" + k).addEventListener("change", e => setOption(k, e.target.checked));
+$("opt-english").addEventListener("change", e => setOption("english", e.target.checked));
+document.addEventListener("keydown", e => {
+  if (stage !== "ask" || $("panel-drill").hidden || e.target.tagName === "INPUT" || e.metaKey || e.ctrlKey || e.altKey) return;
+  const b = $("choices").children[Number(e.key) - 1];
+  if (b && /^[1-4]$/.test(e.key)) { e.preventDefault(); choose(b.dataset.group); }
+});
 $("reset").addEventListener("click", () => { history = []; K.store.set("gvg-history", history); renderSlips(); });
 K.enterForNext(() => stage === "done", "panel-drill", next);
 K.tabs([["drill", "tab-drill", "panel-drill"], ["groups", "tab-groups", "panel-groups"]]);

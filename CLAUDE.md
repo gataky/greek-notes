@@ -233,10 +233,10 @@ Active verbs only, since the owner hasn't learned the passive past yet. The lear
 
 ## Verb groups drill (`docs/drills/verb-groups.md`, `docs/apps/verb-groups.html`)
 
-The word list's active verbs, as the aspect forks page groups them: the learner picks the group (`AspectFork.GROUPS`) from buttons with each group's name and rule, then sees the verb's fork. Nothing new is stored or generated; the groups come from `analyse()` on `verbToShow()`'s forms, so they follow `verb-forms.json` and the rules in `aspect-fork.js`, which `test_aspect_forks.js` checks.
+The word list's active verbs, as the aspect forks page groups them: the learner sees the present and picks its group (`AspectFork.GROUPS`) from four buttons, each with a group's name and rule, then sees the verb's fork. The past and future aren't shown before the answer, since working out the change is the point. Nothing new is stored or generated; the groups come from `analyse()` on `verbToShow()`'s forms, so they follow `verb-forms.json` and the rules in `aspect-fork.js`, which `test_aspect_forks.js` checks.
 
-- Only groups with a verb in the word list are offered (`aino` has none now). "Show the past and future" (on by default) shows the past continuous, aorist and future without highlights; off, it's from memory.
-- A group is picked first, weighted by the square root of its size and by how often it's missed, then one of its verbs, unseen ones first. Missed verbs come back a few turns later. Chips turn groups off, which also takes them out of the answers.
+- The four are the right group and three others at random: from the groups that are on, then from the rest if that's too few. Only groups with a verb in the word list are used (`aino` has none now). Keys 1–4 pick.
+- A group is picked first, weighted by the square root of its size and by how often it's missed, then one of its verbs, unseen ones first. Missed verbs come back a few turns later. Chips turn groups off.
 - Progress is per device, in localStorage (`gvg-history`, `gvg-seen`, `gvg-settings`).
 
 ## Noun drills (`docs/drills/noun-gender.md`, `agreement.md`, `numbers.md`, `prepositions.md`)
