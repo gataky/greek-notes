@@ -42,6 +42,7 @@ jobs:
       - run: node tests/test_voice_sentences.js
       - run: node tests/test_aspect_sentences.js
       - run: node tests/test_aspect_forks.js
+      - run: node tests/test_verb_buckets.js
       - run: node tests/test_nouns.js
       - run: node tests/test_numbers.js
       - run: node tests/test_pronoun_sentences.js

@@ -7,6 +7,6 @@ app: verb-groups.html
 
 # Verb groups
 
-Active verbs from your word list, in the present. Pick the group each one is in, the rule that turns its present stem into its perfective one (γράφω, θα γράψω: a labial), from four: the right one and three others at random. Then the verb's fork shows how its stems make the past and future. Groups you miss come up more often, and you can turn groups off to practise a few at a time.
+Active verbs from your word list, in the present. Sort each one by what its perfective stem does with σ: ψ (lip sounds, γράφω, θα γράψω), ξ (throat sounds, ανοίγω, θα ανοίξω), σ (τ, δ, θ, ζ, a vowel, or -νω), -ήσω (-άω and -ώ verbs), no σ, or irregular. Then type its simple future with θα. After each answer you see the verb's two stems side by side, continuous and simple, with θα, να and the past.
 
-The groups and verbs are the ones on the [aspect forks](../notes/tools/aspect-forks.md) page, with the forms the [verb tables](../notes/tools/verb-tables.md) show.
+Rounds of 10, and the groups you miss come up more often. The groups are the [aspect forks](../notes/tools/aspect-forks.md)' groups, folded into six, and the forms are the ones the [verb tables](../notes/tools/verb-tables.md) show.

@@ -13,29 +13,44 @@
 <link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <script src="../javascripts/greek-font.js"></script>
 <style>
-/* Four group choices: a name and its rule */
-.choices.groups { grid-template-columns: 1fr 1fr; gap: 10px; }
-.choices.groups .choice { align-items: flex-start; text-align: left; gap: 6px; padding: 14px 16px; font: 600 16px/1.25 var(--body); }
-.choices.groups .choice small { font: 400 17px/1.3 var(--display); letter-spacing: 0; text-transform: none; white-space: pre-wrap; }
+/* The six groups: what the stem does with σ, and the endings that lead there */
+.choice small { font: 400 15px/1.25 var(--display); letter-spacing: 0; text-transform: none; text-align: center; white-space: pre-wrap; }
+.why .reason { text-transform: none; letter-spacing: .02em; font-size: 14px; }
+.answer-row .theta { font: 400 24px var(--display); align-self: center; color: var(--muted); }
+/* The verb's two stems after the answer: the continuous forms, then the simple ones */
+.stems { display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; align-items: baseline; margin: 0; }
+.stems dt { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.stems dt.i { color: var(--accent); }
+.stems dt.p { color: var(--warn); }
+.stems dd { margin: 0; font-family: var(--display); font-size: 21px; line-height: 1.4; }
+.stems dd .pre { color: var(--muted); }
+.stems dd .sep { color: var(--muted); margin: 0 .35em; }
 .reveal .links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; }
 .reveal .links a { color: var(--accent); }
-.slip { grid-template-columns: minmax(0, 1.4fr) 1fr; }
-.slip .rl { color: var(--ink); }
+.round { display: flex; flex-direction: column; gap: 10px; }
+.round h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 32px; }
+.round p { margin: 0; color: var(--muted); font-size: 15px; }
+.round ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.round li { font-family: var(--display); font-size: 20px; }
+.slip { grid-template-columns: auto 1fr 1fr; }
 /* The groups tab */
-.tcard .rule { font-family: var(--display); font-size: 17px; color: var(--ink); white-space: pre-wrap; }
-.tcard .verbs { font-family: var(--display); font-size: 18px; color: var(--ink); line-height: 1.5; }
+.tcard .head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tcard .big-label { font-family: var(--display); font-size: 34px; line-height: 1; color: var(--accent); }
+.tcard .ends { font-family: var(--display); font-size: 17px; color: var(--muted); white-space: pre-wrap; }
+.tcard td.v { color: var(--muted); }
 @media (max-width: 480px) {
-  .choices.groups .choice { font-size: 14px; padding: 10px 12px; }
-  .choices.groups .choice small { font-size: 15px; }
+  .choices { grid-template-columns: 1fr 1fr; }
+  .stems { grid-template-columns: 1fr; gap: 2px; }
+  .stems dd { margin-bottom: 8px; }
 }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Verbs · groups</div>
+    <div class="eyebrow">Verbs · the perfective stem</div>
     <h1>Verb Groups</h1>
-    <p class="sub">An active verb from your word list, in the present. Pick its group, the rule that turns its present stem into its perfective one, from four. Then see its fork: the past and future each stem makes.</p>
+    <p class="sub">A verb in the present. Sort it by what its stem does with σ, then type its future with θα. The same stem makes να … and the simple past.</p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -45,24 +60,37 @@
 
   <section id="panel-drill" role="tabpanel" aria-labelledby="tab-drill" class="wrap">
     <div class="card">
-      <div class="prompt">
-        <div class="prompt-top">
-          <span class="eyebrow">Which group?</span>
-          <span class="counter" id="counter"></span>
+      <div id="play" style="display:contents">
+        <div class="prompt">
+          <div class="prompt-top">
+            <span class="eyebrow" id="ask">Which group?</span>
+            <span class="counter" id="counter"></span>
+          </div>
+          <p class="big" id="word" lang="el">…</p>
+          <p class="sub" id="gloss" aria-live="polite">Loading verbs…</p>
         </div>
-        <p class="big" id="word" lang="el">…</p>
-        <p class="sub" id="gloss" aria-live="polite">Loading verbs…</p>
+
+        <div class="choices" id="choices"></div>
+
+        <form class="answer-row" id="form" autocomplete="off" hidden>
+          <span class="theta" lang="el">θα</span>
+          <input class="answer" id="answer" type="text" lang="el" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="The simple future" aria-label="The simple future, after θα">
+          <button class="btn" id="check" type="submit">Check</button>
+        </form>
+
+        <div id="feedback" class="feedback" hidden></div>
+
+        <div class="reveal" id="reveal" hidden>
+          <div class="why">
+            <span class="reason" id="reason"></span>
+            <p id="why"></p>
+          </div>
+          <dl class="stems" id="stems" lang="el"></dl>
+          <div class="links" id="links"></div>
+        </div>
       </div>
 
-      <div class="choices groups" id="choices"></div>
-
-      <div id="feedback" class="feedback" hidden></div>
-
-      <div class="reveal" id="reveal" hidden>
-        <div id="fork"></div>
-        <div id="legend"></div>
-        <div class="links" id="links"></div>
-      </div>
+      <div class="round" id="round" hidden></div>
 
       <div class="actions">
         <div class="stats">
@@ -79,15 +107,22 @@
     <div class="section">
       <h2>Practise</h2>
       <div class="chips">
+        <label class="chip"><input type="checkbox" id="opt-future"> Then type the future</label>
         <label class="chip"><input type="checkbox" id="opt-english"> Show the English</label>
       </div>
-      <p class="help">Four groups to choose from: the right one and three others at random. The past and future only show once you've answered. Keys 1 to 4 pick an answer.</p>
+      <p class="help">Rounds of 10. Keys 1 to 6 sort a verb. The future is the simple one, on the perfective stem: <span class="g">θα γράψω</span>, not <span class="g">θα γράφω</span>.</p>
     </div>
 
     <div class="section">
-      <h2>Groups</h2>
-      <div class="chips" id="groupChips"></div>
+      <h2>Which verbs</h2>
+      <div class="chips" id="bucketChips"></div>
       <p class="help" id="bankInfo"></p>
+    </div>
+
+    <div class="section">
+      <h2>Marking</h2>
+      <div class="chips" id="marking" role="radiogroup" aria-label="Marking"></div>
+      <p class="help" id="markingInfo"></p>
     </div>
 
     <div class="section">
@@ -100,7 +135,18 @@
   </section>
 
   <section id="panel-groups" role="tabpanel" aria-labelledby="tab-groups" hidden>
-    <div class="wrap" style="gap:16px" id="groupCards"></div>
+    <div class="wrap" style="gap:16px">
+      <div class="tips">
+        <strong>The trick</strong>
+        <ul>
+          <li>The simple future, <span class="g">να</span> and the simple past all use the perfective stem: <span class="g">θα γράψω, να γράψω, έγραψα</span>. Learn it once, use it three times.</li>
+          <li>Most perfective stems add σ, and the σ merges with the sound before it. Lip sounds (<span class="g">π, β, φ</span>) + σ = ψ. Throat sounds (<span class="g">κ, γ, χ</span>) + σ = ξ. Tooth sounds (<span class="g">τ, δ, θ, ζ</span>) vanish into σ.</li>
+          <li>Say each pair out loud: <span class="g">Γράφω κάθε μέρα. Αύριο θα γράψω.</span></li>
+          <li>Each verb's fork, with the letters that change, is on the <a href="../notes/tools/aspect-forks/" target="_top">aspect forks</a> page.</li>
+        </ul>
+      </div>
+      <div class="wrap" style="gap:16px" id="bucketCards"></div>
+    </div>
   </section>
 </div>
 
@@ -108,20 +154,24 @@
 <script src="../javascripts/verb-forms.js"></script>
 <script src="../javascripts/aspect-fork.js"></script>
 <script src="../javascripts/voice-drill.js"></script>
+<script src="../javascripts/verb-buckets.js"></script>
 <script src="../javascripts/drill-kit.js"></script>
 <script>
 "use strict";
-const AF = window.AspectFork, K = window.DrillKit, $ = K.$;
-const forksHref = id => `../notes/tools/aspect-forks/#${encodeURIComponent(id)}`;
+const AF = window.AspectFork, VB = window.VerbBuckets, VD = window.VoiceDrill, K = window.DrillKit, $ = K.$;
+const ROUND = 10;
+const RESULT = { correct: "Σωστά!", accent: "Almost. Check the accent.", spelling: "Right form, misspelled.",
+  present: "That's the present stem.", wrong: "Not quite." };
+const forksHref = greek => `../notes/tools/aspect-forks/#${encodeURIComponent(greek)}`;
 const tablesHref = greek => `../notes/tools/verb-tables/#${encodeURIComponent(greek)}`;
 
-let settings = { english: true, off: [], ...K.store.get("gvg-settings", {}) };
-let history = K.store.get("gvg-history", []);  // [{ v: verb, g: its group, a: the group picked, or null when shown }]
-let seen = new Set(K.store.get("gvg-seen", []));
-let verbs = [], byGroup = new Map(), groups = [], retry = [], recent = [];
-let item = null, stage = "idle";  // idle | ask | done
+let settings = { future: true, english: true, off: [], marking: VD.DEFAULT_MARKING, ...K.store.get("gvb-settings", {}) };
+let history = K.store.get("gvb-history", []);  // [{ v: verb, b: its group, a: group picked or null, f: future result or absent }]
+let seen = new Set(K.store.get("gvb-seen", []));
+let verbs = [], byBucket = new Map(), retry = [], recent = [], round = [];
+let item = null, stage = "idle";  // idle | sort | future | done | round
 const session = K.score();
-const saveSettings = () => K.store.set("gvg-settings", settings);
+const saveSettings = () => K.store.set("gvb-settings", settings);
 
 // ---------- Loading ----------
 
@@ -129,44 +179,43 @@ Promise.all([
   fetch("../data/verbs.json").then(r => r.json()),
   fetch("../data/verb-forms.json").then(r => r.json()).catch(() => ({})),  // without it, the engine's forms
 ])
-  .then(([sheet, forms]) => { build(sheet, forms); renderGroups(); renderSlips(); next(); })
+  .then(([sheet, forms]) => { build(sheet, forms); renderChoices(); renderBuckets(); renderSlips(); next(); })
   .catch(() => { $("gloss").textContent = "Couldn't load the verbs. Open this page through the site (make serve), not straight from disk."; });
 
-// The word list's active verbs and their forks, as the aspect forks page groups them.
+// The word list's active verbs, with their aspect fork, group and simple future.
 function build(sheet, forms) {
   for (const v of sheet.filter(v => v.voice === "active")) {
     const shown = VerbForms.verbToShow(v.greek, { sheet, forms });
     const fork = shown && AF.analyse(shown.conjugation, shown.verb);
-    if (!fork || !AF.GROUP[fork.group]) continue;
-    verbs.push({ greek: v.greek, english: v.english || "", group: fork.group, fork });
+    const bucket = fork && VB.bucketOf(fork.group);
+    if (!bucket) continue;
+    const answers = VB.futureAnswers(shown.conjugation, fork);
+    verbs.push({ greek: v.greek, english: v.english || "", present: AF.plainText(fork.present), fork, bucket, answers, why: VB.why(fork, answers[0]) });
   }
-  for (const g of AF.GROUPS) {
-    const list = verbs.filter(v => v.group === g.id);
-    if (list.length) byGroup.set(g.id, list);
-  }
-  groups = AF.GROUPS.filter(g => byGroup.has(g.id));
-  settings.off = settings.off.filter(id => byGroup.has(id));
+  for (const b of VB.BUCKETS) byBucket.set(b.id, verbs.filter(v => v.bucket === b.id));
+  settings.off = settings.off.filter(id => byBucket.get(id)?.length);
   renderOptions();
 }
 
 const isOn = id => !settings.off.includes(id);
-const onGroups = () => groups.filter(g => isOn(g.id));
+const onBuckets = () => VB.BUCKETS.filter(b => isOn(b.id) && byBucket.get(b.id).length);
+const title = id => VB.BUCKET[id].label;
 
 // ---------- Choosing ----------
 
-// A group first, weighted by its size (dampened, so the small groups still come up) and by how
+// A group first, weighted by its size (dampened, so the small ones still come up) and by how
 // often you miss it; then one of its verbs, unseen ones first. A missed verb comes back a few
 // turns later.
 function pickVerb() {
-  const due = retry.findIndex(r => r.due <= session.q && isOn(r.it.group));
+  const due = retry.findIndex(r => r.due <= session.q && isOn(r.it.bucket));
   if (due >= 0) return retry.splice(due, 1)[0].it;
   const rows = history.slice(-200);
   const miss = id => {
-    const mine = rows.filter(r => r.g === id);
-    return mine.length ? mine.filter(r => r.a !== id).length / mine.length : 0.3;
+    const mine = rows.filter(r => r.b === id);
+    return mine.length ? mine.filter(r => !rowRight(r)).length / mine.length : 0.3;
   };
-  const g = K.weighted(onGroups(), g => Math.sqrt(byGroup.get(g.id).length) * (1 + 3 * miss(g.id)));
-  const list = byGroup.get(g.id);
+  const b = K.weighted(onBuckets(), b => Math.sqrt(byBucket.get(b.id).length) * (1 + 3 * miss(b.id)));
+  const list = byBucket.get(b.id);
   let pool = list.filter(v => !seen.has(v.greek) && !recent.includes(v.greek));
   if (!pool.length) {
     for (const v of list) seen.delete(v.greek);
@@ -178,167 +227,236 @@ function pickVerb() {
   return it;
 }
 
+const futureRight = f => !f || K.counts(f, settings.marking);
+const rowRight = r => r.a === r.b && futureRight(r.f);
+
 // ---------- One verb ----------
 
 function next() {
-  if (!verbs.length || !onGroups().length) return;
+  if (stage === "done" && round.length >= ROUND) { showRound(); return; }
+  if (stage === "round") round = [];
+  if (!verbs.length || !onBuckets().length) return;
   item = pickVerb();
+  item.picked = undefined; item.future = null;
   session.q++;
-  seen.add(item.greek); K.store.set("gvg-seen", [...seen]);
-  stage = "ask";
-  $("counter").textContent = "Verb " + session.q;
-  $("word").textContent = item.greek;
+  seen.add(item.greek); K.store.set("gvb-seen", [...seen]);
+  stage = "sort";
+  $("play").hidden = false; $("round").hidden = true;
+  $("counter").textContent = `${round.length + 1} / ${ROUND}`;
+  $("ask").textContent = "Which group?";
+  $("word").textContent = item.present;
   $("gloss").textContent = item.english;
   $("gloss").hidden = !settings.english;
-  item.choices = shuffle([item.group, ...distractors(item.group)]);
-  renderChoices();
+  for (const b of $("choices").children) { b.disabled = false; b.className = "choice"; }
+  $("form").hidden = true; $("answer").value = ""; $("answer").disabled = false; $("check").disabled = false;
   $("feedback").hidden = true; $("reveal").hidden = true;
-  $("show").disabled = false; $("next").disabled = true;
+  $("show").disabled = false; $("next").disabled = true; $("next").textContent = "Next";
   K.focus($("choices").children[0]);
 }
 
-// Three wrong groups at random: from the groups that are on, then from the rest if that's too few.
-function distractors(right) {
-  const others = list => shuffle(list.map(g => g.id).filter(id => id !== right));
-  const on = others(onGroups());
-  return [...on, ...others(groups.filter(g => !isOn(g.id)))].slice(0, 3);
-}
-
-function shuffle(list) {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
-
 function renderChoices() {
-  $("choices").innerHTML = item.choices.map(id => AF.GROUP[id]).map(g =>
-    `<button class="choice" type="button" data-group="${g.id}">${K.esc(g.name)}<small lang="el">${K.esc(g.rule)}</small></button>`).join("");
-  for (const b of $("choices").children) b.addEventListener("click", () => choose(b.dataset.group));
+  $("choices").innerHTML = VB.BUCKETS.map((b, i) =>
+    `<button class="choice" type="button" data-bucket="${b.id}" title="${i + 1}: ${K.esc(b.name)}" disabled><span lang="el">${K.esc(b.label)}</span><small lang="el">${K.esc(b.ends)}</small></button>`).join("");
+  for (const b of $("choices").children) b.addEventListener("click", () => sort(b.dataset.bucket));
 }
 
-function choose(id) {
-  if (stage !== "ask") return;
-  const G = AF.GROUP[item.group], ok = id === item.group;
-  for (const b of $("choices").children) {
-    if (b.dataset.group === item.group) b.className = "choice right";
-    else if (b.dataset.group === id) b.className = "choice wrong";
+function sort(id) {
+  if (stage !== "sort") return;
+  item.picked = id;
+  const ok = id === item.bucket;
+  markChoices(id);
+  if (settings.future) {
+    K.feedback($("feedback"), { kind: ok ? "good" : "bad", title: ok ? `Σωστά! ${title(item.bucket)}.` : `It's ${title(item.bucket)}.`, msg: "Now type the future." });
+    stage = "future";
+    $("ask").textContent = "Now the future";
+    $("form").hidden = false;
+    K.focus($("answer"));
+  } else {
+    K.feedback($("feedback"), ok ? { kind: "good", title: "Σωστά!" } : { kind: "bad", title: `It's ${title(item.bucket)}.` });
+    finish();
   }
-  K.feedback($("feedback"), ok
-    ? { kind: "good", title: "Σωστά! " + G.name + ".", msg: G.note }
-    : { kind: "bad", title: `It's ${G.name}, not ${AF.GROUP[id].name}.`, msg: G.note });
-  finish(id);
+}
+
+function markChoices(picked) {
+  for (const b of $("choices").children) {
+    b.disabled = true;
+    if (b.dataset.bucket === item.bucket) b.className = "choice right";
+    else if (b.dataset.bucket === picked) b.className = "choice wrong";
+  }
+}
+
+function checkFuture(e) {
+  e && e.preventDefault();
+  if (stage === "done" || stage === "round") { next(); return; }
+  if (stage !== "future") return;
+  const g = VB.gradeFuture($("answer").value, item.answers, item.present);
+  if (!g) return;
+  item.future = g.result;
+  const sortOk = item.picked === item.bucket;
+  const counted = K.counts(g.result, settings.marking), slip = K.forgiven(g.result, settings.marking);
+  const kind = !sortOk ? "bad" : counted ? "good" : K.isSlip(g.result) ? "warn" : "bad";
+  const msgs = [];
+  if (!sortOk) msgs.push(`The group is ${title(item.bucket)}.`);
+  if (g.result === "present") msgs.push(`θα ${item.present} is the continuous future, for something ongoing or repeated. The simple future is on the perfective stem.`);
+  const head = slip ? K.FORGIVEN : !sortOk && counted ? "The future is right." : RESULT[g.result];
+  const clean = g.result === "correct";
+  K.feedback($("feedback"), { kind, title: head, msg: msgs, typed: clean ? "" : "θα " + g.typed,
+    highlight: K.isSlip(g.result), answer: clean ? "" : "θα " + item.answers[0] });
+  finish();
 }
 
 function showAnswer() {
-  if (stage !== "ask") return;
-  const G = AF.GROUP[item.group];
-  for (const b of $("choices").children) if (b.dataset.group === item.group) b.className = "choice right";
-  K.feedback($("feedback"), { kind: "bad", title: `It's ${G.name}.`, msg: [G.note, "This one will come back later."] });
-  finish(null);
+  if (stage === "sort") {
+    item.picked = null;
+    markChoices(null);
+    K.feedback($("feedback"), { kind: "bad", title: `It's ${title(item.bucket)}.`, msg: "This one will come back later.", answer: "θα " + item.answers[0] });
+    finish();
+  } else if (stage === "future") {
+    item.future = "shown";
+    K.feedback($("feedback"), { kind: "warn", title: "The future", answer: "θα " + item.answers.join(" / θα ") });
+    finish();
+  }
 }
 
-function finish(picked) {
+function finish() {
   stage = "done";
-  const ok = picked === item.group;
+  const ok = item.picked === item.bucket && item.future !== "shown" && futureRight(item.future);
   session.add(ok);
+  round.push({ verb: item, ok });
   if (!ok) retry.push({ it: item, due: session.q + 3 + Math.floor(Math.random() * 4) });
-  history = [...history, { v: item.greek, g: item.group, a: picked }].slice(-400);
-  K.store.set("gvg-history", history); renderSlips();
-  for (const b of $("choices").children) b.disabled = true;
-  $("fork").innerHTML = AF.forkHTML(item.fork, { group: false });
-  $("legend").innerHTML = item.group === "irregular" ? "" : AF.LEGEND;
-  $("links").innerHTML = `<a href="${tablesHref(item.greek)}" target="_top">${K.esc(item.greek)} in the verb tables</a>`
-    + `<a href="${forksHref(item.group)}" target="_top">All of ${K.esc(AF.GROUP[item.group].name)}</a>`;
+  const row = { v: item.greek, b: item.bucket, a: item.picked };
+  if (item.future) row.f = item.future;
+  history = [...history, row].slice(-400);
+  K.store.set("gvb-history", history); renderSlips();
+  showReveal();
+  $("answer").disabled = true; $("check").disabled = true; $("show").disabled = true; $("next").disabled = false;
+  $("next").textContent = round.length >= ROUND ? "See the round" : "Next";
+  K.focus($("next"));
+}
+
+// The group, why, and the verb's two stems: the continuous forms, then the simple ones.
+function showReveal() {
+  const f = item.fork, B = VB.BUCKET[item.bucket];
+  $("reason").textContent = `${B.label} · ${B.name}`;
+  $("why").textContent = item.why;
+  const sep = `<span class="sep">·</span>`, theta = `<span class="pre">θα </span>`, na = `<span class="pre">να </span>`;
+  const present = AF.markHTML(f.present), imperfect = AF.markHTML(f.imperfect || "");
+  const perf = f.group === "no-perf" ? present : AF.markHTML(f.dependent || item.answers[0]);
+  const past = f.group === "no-perf" ? imperfect : AF.markHTML(f.aorist || "");
+  $("stems").innerHTML =
+    `<dt class="i">Continuous</dt><dd>${present}${sep}${theta}${present}${sep}${imperfect}</dd>`
+    + `<dt class="p">Simple</dt><dd>${theta}${perf}${sep}${na}${perf}${sep}${past}</dd>`;
+  $("links").innerHTML = `<a href="${forksHref(item.greek)}" target="_top">Its aspect fork</a><a href="${tablesHref(item.greek)}" target="_top">All its forms</a>`;
   $("reveal").hidden = false;
-  $("show").disabled = true; $("next").disabled = false;
+}
+
+// After ten: the score, and the pairs to say out loud.
+function showRound() {
+  stage = "round";
+  const right = round.filter(r => r.ok).length;
+  const missed = [...new Set(round.filter(r => !r.ok).map(r => r.verb))];
+  $("round").innerHTML = `<span class="eyebrow">Round done</span><h2>${right} of ${round.length}</h2>`
+    + (missed.length
+      ? `<p>Say these pairs out loud. They'll come back in the next round.</p><ul lang="el">${missed.map(v =>
+        `<li>${K.esc(v.present)} → θα ${K.esc(v.answers[0])}</li>`).join("")}</ul>`
+      : `<p>All ten. A round a day keeps them.</p>`);
+  $("play").hidden = true; $("round").hidden = false;
+  $("next").textContent = "Another 10"; $("next").disabled = false; $("show").disabled = true;
   K.focus($("next"));
 }
 
 // ---------- Panels ----------
 
 function renderOptions() {
-  $("opt-english").checked = settings.english;
-  const box = $("groupChips"); box.innerHTML = "";
-  for (const g of groups) {
+  for (const k of ["future", "english"]) $("opt-" + k).checked = settings[k];
+  const box = $("bucketChips"); box.innerHTML = "";
+  for (const b of VB.BUCKETS) {
+    const n = byBucket.get(b.id).length;
+    if (!n) continue;
     const chip = document.createElement("label"); chip.className = "chip";
-    const input = document.createElement("input"); input.type = "checkbox"; input.checked = isOn(g.id);
+    const input = document.createElement("input"); input.type = "checkbox"; input.checked = isOn(b.id);
     input.addEventListener("change", () => {
-      settings.off = input.checked ? settings.off.filter(id => id !== g.id) : [...settings.off, g.id];
+      settings.off = input.checked ? settings.off.filter(id => id !== b.id) : [...settings.off, b.id];
       saveSettings(); bankInfo();
-      // A question whose group was just turned off moves on.
-      if (stage === "idle" || (stage === "ask" && !isOn(item.group))) next();
+      if (stage === "idle" || (stage === "sort" && !isOn(item.bucket))) next();
     });
-    chip.append(input, ` ${g.name} `);
-    const n = document.createElement("span"); n.style.color = "var(--muted)"; n.textContent = byGroup.get(g.id).length;
-    chip.append(n);
+    const label = document.createElement("span"); label.className = "g"; label.lang = "el"; label.textContent = title(b.id);
+    const count = document.createElement("span"); count.style.color = "var(--muted)"; count.textContent = n;
+    chip.append(input, label, count);
     box.append(chip);
   }
   bankInfo();
 }
 
 function bankInfo() {
-  const on = onGroups();
-  const n = on.reduce((s, g) => s + byGroup.get(g.id).length, 0);
-  $("bankInfo").textContent = !on.length
-    ? "Turn on at least one group."
-    : `${n} of the ${verbs.length} active verbs in your word list, in ${on.length} group${on.length === 1 ? "" : "s"}. The wrong answers come from the groups that are on, then from the others.`;
+  const on = onBuckets(), n = on.reduce((s, b) => s + byBucket.get(b.id).length, 0);
+  $("bankInfo").textContent = on.length
+    ? `${n} of the ${verbs.length} active verbs in your word list. All six answers stay on the board either way.`
+    : "Turn on at least one group.";
 }
 
 function setOption(key, value) {
   settings[key] = value; saveSettings();
-  if (!item) return;
-  if (key === "english") $("gloss").hidden = !value;
+  if (key === "english" && item) $("gloss").hidden = !value;
 }
 
-// One card per group: its rule, note, and your verbs in it.
-function renderGroups() {
-  $("groupCards").innerHTML = groups.map(g => `<div class="tcard">
-      <h3>${K.esc(g.name)}</h3>
-      <span class="rule" lang="el">${K.esc(g.rule)}</span>
-      <p>${K.esc(g.note)}</p>
-      <div class="verbs" lang="el">${byGroup.get(g.id).map(v => K.esc(v.greek)).join(", ")}</div>
-    </div>`).join("")
-    + `<p class="help" style="margin:0;font-size:14px;color:var(--muted)">Each verb's fork, and the past and future it makes, are on the <a href="../notes/tools/aspect-forks/" target="_top" style="color:var(--accent)">aspect forks</a> page.</p>`;
+// One card per group: the rule, the endings, and your verbs with their futures.
+function renderBuckets() {
+  $("bucketCards").innerHTML = VB.BUCKETS.filter(b => byBucket.get(b.id).length).map(b => {
+    const irregular = b.id === "irregular";
+    const rows = [...byBucket.get(b.id)].sort((x, y) => x.present.localeCompare(y.present, "el")).map(v => `<tr><td>${K.esc(v.present)}</td><td>θα ${K.esc(v.answers[0])}</td>${irregular ? `<td class="v">${K.esc(AF.plainText(v.fork.aorist || ""))}</td>` : ""}</tr>`).join("");
+    return `<div class="tcard">
+      <div class="head"><span class="big-label" lang="el">${K.esc(b.label)}</span><h3>${K.esc(b.name)}</h3><span class="ends" lang="el">${K.esc(b.ends)}</span></div>
+      <p>${K.esc(b.rule)}</p>
+      <div class="scroll"><table lang="el">${rows}</table></div>
+    </div>`;
+  }).join("");
 }
 
 function renderSlips() {
-  const rows = history.slice(-200).filter(r => AF.GROUP[r.g]);
+  const rows = history.slice(-200).filter(r => VB.BUCKET[r.b]);
   const has = rows.length > 0;
   $("slipInfo").textContent = has
-    ? `Your last ${rows.length} verb${rows.length === 1 ? "" : "s"} on this device, by group. Groups you miss come up more often.`
+    ? `Your last ${rows.length} verb${rows.length === 1 ? "" : "s"} on this device. Groups you miss come up more often.`
     : "Answer a few verbs and this shows which groups trip you up.";
   $("slip").hidden = !has; $("errs").hidden = !has; $("reset").hidden = !has;
   if (!has) return;
   const grid = $("slip"); grid.innerHTML = "";
-  grid.append(K.div("h", ""), K.div("h", "Right"));
-  for (const g of AF.GROUPS) {
-    const mine = rows.filter(r => r.g === g.id);
-    if (mine.length) grid.append(K.div("rl", g.name), K.rateCell(mine, r => r.a === g.id));
+  grid.append(K.div("h", ""), K.div("h", "Sorted"), K.div("h", "Future"));
+  for (const b of VB.BUCKETS) {
+    const mine = rows.filter(r => r.b === b.id);
+    if (!mine.length) continue;
+    const label = K.div("rl g", title(b.id)); label.lang = "el";
+    grid.append(label, K.rateCell(mine, r => r.a === r.b), K.rateCell(mine.filter(r => r.f && r.f !== "shown"), r => futureRight(r.f)));
   }
-  // The groups you mix up most: "-ζω that take ξ, picked Dentals: 3".
   const mixed = {};
-  for (const r of rows) if (r.a && r.a !== r.g && AF.GROUP[r.a]) {
-    const k = `${AF.GROUP[r.g].name}, picked ${AF.GROUP[r.a].name}`;
+  for (const r of rows) if (r.a && r.a !== r.b && VB.BUCKET[r.a]) {
+    const k = `${title(r.b)} sorted as ${title(r.a)}`;
     mixed[k] = (mixed[k] || 0) + 1;
   }
   K.errList($("errs"), [
-    ...Object.entries(mixed).sort((a, b) => b[1] - a[1]).slice(0, 8),
-    ["Shown", rows.filter(r => r.a === null).length],
+    ...Object.entries(mixed).sort((a, b) => b[1] - a[1]).slice(0, 6),
+    ["θα + the present", rows.filter(r => r.f === "present").length],
+    ["Accent", rows.filter(r => r.f === "accent").length],
+    ["Spelling", rows.filter(r => r.f === "spelling").length],
+    ["Wrong future", rows.filter(r => r.f === "wrong").length],
   ]);
 }
 
 // ---------- Wiring ----------
 
+$("form").addEventListener("submit", checkFuture);
 $("show").addEventListener("click", showAnswer);
 $("next").addEventListener("click", next);
-$("opt-english").addEventListener("change", e => setOption("english", e.target.checked));
+for (const k of ["future", "english"]) $("opt-" + k).addEventListener("change", e => setOption(k, e.target.checked));
+$("reset").addEventListener("click", () => { history = []; K.store.set("gvb-history", history); renderSlips(); });
 document.addEventListener("keydown", e => {
-  if (stage !== "ask" || $("panel-drill").hidden || e.target.tagName === "INPUT" || e.metaKey || e.ctrlKey || e.altKey) return;
-  const b = $("choices").children[Number(e.key) - 1];
-  if (b && /^[1-4]$/.test(e.key)) { e.preventDefault(); choose(b.dataset.group); }
+  if (stage !== "sort" || $("panel-drill").hidden || e.target.tagName === "INPUT" || e.metaKey || e.ctrlKey || e.altKey) return;
+  const b = /^[1-6]$/.test(e.key) && $("choices").children[Number(e.key) - 1];
+  if (b) { e.preventDefault(); sort(b.dataset.bucket); }
 });
-$("reset").addEventListener("click", () => { history = []; K.store.set("gvg-history", history); renderSlips(); });
-K.enterForNext(() => stage === "done", "panel-drill", next);
+K.marking(settings, saveSettings, renderSlips);
+K.enterForNext(() => stage === "done" || stage === "round", "panel-drill", next);
 K.tabs([["drill", "tab-drill", "panel-drill"], ["groups", "tab-groups", "panel-groups"]]);
 </script>
 </body>

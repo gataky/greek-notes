@@ -36,6 +36,7 @@ sync: fetch-dictionary ## Pull verbs, nouns and adjectives from the Google Sheet
 	@$(NODE) tests/test_voice_sentences.js
 	@$(NODE) tests/test_aspect_sentences.js
 	@$(NODE) tests/test_aspect_forks.js
+	@$(NODE) tests/test_verb_buckets.js
 	@$(NODE) tests/test_nouns.js
 	@$(NODE) tests/test_preposition_sentences.js
 	@$(NODE) scripts/build_anki_verbs.js
@@ -71,6 +72,7 @@ verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (D
 	@$(NODE) tests/test_verb_forms.js
 	@$(NODE) tests/test_aspect_sentences.js
 	@$(NODE) tests/test_aspect_forks.js
+	@$(NODE) tests/test_verb_buckets.js
 	@$(NODE) scripts/build_anki_verbs.js
 
 declensions: fetch-dictionary ## Copy the word list's noun and adjective tables from the dictionary into declensions.json
@@ -107,6 +109,7 @@ test: fetch-dictionary ## Check the conjugation engine, the verb forms, the dril
 	$(NODE) tests/test_voice_sentences.js
 	$(NODE) tests/test_aspect_sentences.js
 	$(NODE) tests/test_aspect_forks.js
+	$(NODE) tests/test_verb_buckets.js
 	$(NODE) tests/test_nouns.js
 	$(NODE) tests/test_numbers.js
 	$(NODE) tests/test_pronoun_sentences.js

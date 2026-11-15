@@ -41,7 +41,7 @@ make install   # uv sync
 make serve     # dev server at http://127.0.0.1:8000
 make build     # mkdocs build --strict (CI fails on any warning)
 make check     # all tests, the Go tests, then strict build: what CI runs before deploying, plus Go
-make test      # build_themes.py --check, then node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js, test_aspect_forks.js, test_nouns.js, test_numbers.js, test_pronoun_sentences.js, test_preposition_sentences.js and test_dictionary.js
+make test      # build_themes.py --check, then node tests/test_verbs.js, test_verb_forms.js, test_voice_sentences.js, test_aspect_sentences.js, test_aspect_forks.js, test_verb_buckets.js, test_nouns.js, test_numbers.js, test_pronoun_sentences.js, test_preposition_sentences.js and test_dictionary.js
 make dump      # print every verb's conjugations for review
 make themes    # write the colour themes into theme.css and palette.js from scripts/build_themes.py
 make sync      # pull verbs, nouns and adjectives from the Google Sheet into docs/data/verbs.json, words.json and declensions.json, then test
@@ -233,11 +233,12 @@ Active verbs only, since the owner hasn't learned the passive past yet. The lear
 
 ## Verb groups drill (`docs/drills/verb-groups.md`, `docs/apps/verb-groups.html`)
 
-The word list's active verbs, as the aspect forks page groups them: the learner sees the present and picks its group (`AspectFork.GROUPS`) from four buttons, each with a group's name and rule, then sees the verb's fork. The past and future aren't shown before the answer, since working out the change is the point. Nothing new is stored or generated; the groups come from `analyse()` on `verbToShow()`'s forms, so they follow `verb-forms.json` and the rules in `aspect-fork.js`, which `test_aspect_forks.js` checks.
+The word list's active verbs, sorted by what the perfective stem does with σ, then the simple future typed after θα. The past and future aren't shown before the answer, since working out the change is the point.
 
-- The four are the right group and three others at random: from the groups that are on, then from the rest if that's too few. Only groups with a verb in the word list are used (`aino` has none now). Keys 1–4 pick.
-- A group is picked first, weighted by the square root of its size and by how often it's missed, then one of its verbs, unseen ones first. Missed verbs come back a few turns later. Chips turn groups off.
-- Progress is per device, in localStorage (`gvg-history`, `gvg-seen`, `gvg-settings`).
+- **`verb-buckets.js`** (browser and Node) folds the aspect forks' groups into six buckets with fixed buttons (keys 1–6): ψ (labials, -εύω), ξ (velars, -ζω that take ξ), σ (dentals, vowel stems, -νω, -αίνω → -ησ-), -ήσω (b1, b2), no σ (liquids, strong aorists, same form, no perfective) and irregular. `why()` writes the reason from the verb's own stem; `futureAnswers()` reads the simple future from `verbToShow()`'s forms (the present for έχω, ξέρω); `gradeFuture()` returns correct, accent, spelling, present (θα + the present, the continuous future) or wrong. Nothing is stored or generated: the group comes from `analyse()`, so it follows `verb-forms.json` and `aspect-fork.js`.
+- **`tests/test_verb_buckets.js`**: every group is in one bucket, hand-checked verbs land where they should, and every active verb gets a bucket, a reason with no bracket marks, and a future its own answer passes. `make sync` and `make verb-forms` run it.
+- **Page:** a group is picked first, weighted by the square root of its size and by misses, then one of its verbs, unseen ones first; missed verbs come back a few turns later. Rounds of 10 end with the missed pairs to say out loud. After each answer, the continuous (present, θα + present, past continuous) and simple (θα, να, aorist) forms side by side, with the fork's highlights. Chips choose which groups' verbs come up; all six buttons stay. Marking works as in the other drills.
+- Progress is per device, in localStorage (`gvb-history`, `gvb-seen`, `gvb-settings`).
 
 ## Noun drills (`docs/drills/noun-gender.md`, `agreement.md`, `numbers.md`, `prepositions.md`)
 
