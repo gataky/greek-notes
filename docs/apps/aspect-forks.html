@@ -85,7 +85,7 @@
   <div class="wrap" id="groups"></div>
 
   <p class="credit">
-    The active verbs from your word list, with the forms the <a href="../tools/verb-tables/" target="_top">verb tables</a> show (the dictionary's, from
+    The active verbs from your word list, with the forms the <a href="../notes/tools/verb-tables/" target="_top">verb tables</a> show (the dictionary's, from
     <a href="https://en.wiktionary.org/" target="_blank" rel="noopener">English Wiktionary</a> via <a href="https://kaikki.org/" target="_blank" rel="noopener">kaikki.org</a>,
     <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>). The groups and highlights are worked out from those forms.
     Superscripts are the word list's classes. Irregular verbs don't get a fork. Passive verbs are left out until you get to the passive past and future.
@@ -100,7 +100,7 @@ const { GROUPS, GROUP, analyse, forkHTML, markHTML, LEGEND } = AspectFork;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const fold = s => GreekVerbs.strip(s.toLowerCase().normalize("NFC")).replace(/ς/g, "σ");
-const tablesHref = greek => `../tools/verb-tables/#${encodeURIComponent(greek)}`;
+const tablesHref = greek => `../notes/tools/verb-tables/#${encodeURIComponent(greek)}`;
 
 $("legend").innerHTML = LEGEND;
 

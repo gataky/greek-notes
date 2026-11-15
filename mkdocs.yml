@@ -4,7 +4,7 @@ site_description: Modern Greek grammar notes, drills and a dictionary that work 
 theme:
   name: material
   custom_dir: overrides
-  favicon: icons/notes-192.png
+  favicon: icons/home-192.png
   language: en
   font:
     text: Noto Serif
@@ -35,7 +35,7 @@ extra_css:
   - stylesheets/theme.css
   - stylesheets/frames.css
   - stylesheets/tables.css
-  - stylesheets/home.css
+  - stylesheets/app-page.css
   - stylesheets/greek-font.css
   - stylesheets/pickers.css
 
@@ -43,12 +43,13 @@ extra_javascript:
   - javascripts/greek-font.js
   - javascripts/palette.js
   - javascripts/drill-frame.js
-  - javascripts/home.js
+  - javascripts/app-bar.js
   - javascripts/tables.js
   - javascripts/pwa.js
 
 hooks:
   - hooks/apps.py
+  - hooks/redirects.py
   - hooks/pwa.py
 
 plugins:
@@ -59,36 +60,39 @@ markdown_extensions:
   - toc:
       permalink: true
 
-# One nav for the three apps: each page's menu shows only its own app's part (hooks/apps.py).
+# One nav for the apps: each page's menu shows only its own app's part (hooks/apps.py). Drills,
+# tools and the dictionary are full-page (overrides/app.html) and show no menu, but their titles
+# here are their bars' titles.
 nav:
-  - Home: index.md
+  - Greek: index.md
+  - Notes: notes/index.md
   - Grammar:
-      - Articles: grammar/articles.md
-      - Adjectives: grammar/adjectives.md
+      - Articles: notes/grammar/articles.md
+      - Adjectives: notes/grammar/adjectives.md
       - Pronouns:
-          - Overview: grammar/pronouns/index.md
-          - Personal: grammar/pronouns/personal.md
-          - Possessive: grammar/pronouns/possessive.md
-          - Demonstrative: grammar/pronouns/demonstrative.md
-          - Interrogative: grammar/pronouns/interrogative.md
-          - Relative: grammar/pronouns/relative.md
-          - Indefinite: grammar/pronouns/indefinite.md
-          - Reflexive and emphatic: grammar/pronouns/reflexive.md
-      - Numerals: grammar/numerals.md
-      - Conjunctions: grammar/conjunctions.md
-      - Prepositions: grammar/prepositions.md
-      - Passive verbs: grammar/passive-verbs.md
+          - Overview: notes/grammar/pronouns/index.md
+          - Personal: notes/grammar/pronouns/personal.md
+          - Possessive: notes/grammar/pronouns/possessive.md
+          - Demonstrative: notes/grammar/pronouns/demonstrative.md
+          - Interrogative: notes/grammar/pronouns/interrogative.md
+          - Relative: notes/grammar/pronouns/relative.md
+          - Indefinite: notes/grammar/pronouns/indefinite.md
+          - Reflexive and emphatic: notes/grammar/pronouns/reflexive.md
+      - Numerals: notes/grammar/numerals.md
+      - Conjunctions: notes/grammar/conjunctions.md
+      - Prepositions: notes/grammar/prepositions.md
+      - Passive verbs: notes/grammar/passive-verbs.md
+  - Tools:
+      - Verb tables: notes/tools/verb-tables.md
+      - Conjugation patterns: notes/tools/conjugation-patterns.md
+      - Aspect forks: notes/tools/aspect-forks.md
   - Drills:
-      - Overview: drills/index.md
-      - Passive verbs: drills/passive-verbs.md
+      - Drills: drills/index.md
+      - Active or passive: drills/passive-verbs.md
       - Tense and aspect: drills/tense-aspect.md
       - Object pronouns: drills/object-pronouns.md
       - Noun gender: drills/noun-gender.md
       - Agreement: drills/agreement.md
       - Prepositions: drills/prepositions.md
       - Numbers: drills/numbers.md
-  - Tools:
-      - Verb tables: tools/verb-tables.md
-      - Conjugation patterns: tools/conjugation-patterns.md
-      - Aspect forks: tools/aspect-forks.md
   - Dictionary: dictionary/index.md

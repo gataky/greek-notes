@@ -379,7 +379,7 @@ function forkHTML(verb, conjugation) {
   const fork = AspectFork.analyse(conjugation, verb);
   if (!fork) return "";
   const inList = sheet.some(v => v.greek === verb.greek && v.voice === "active");
-  const href = `../tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
+  const href = `../notes/tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
   const drawn = fork.group !== "irregular" && fork.group !== "missing";
   return `<div class="fork-block"><h4 class="fork-title">Aspect fork<a href="${href}" target="_top">All the groups →</a></h4>
     ${AspectFork.forkHTML(fork)}${drawn ? AspectFork.LEGEND : ""}</div>`;

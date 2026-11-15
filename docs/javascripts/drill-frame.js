@@ -21,7 +21,15 @@ function setupFrame(frame) {
     attributeFilter: ["data-md-color-scheme"],
   });
 
-  const fit = () => { frame.style.height = Math.ceil(doc.body.offsetHeight) + "px"; };
+  // The frame is as tall as the app, and the page scrolls, never the frame. A frame that can
+  // scroll at all, even by a fraction of a pixel, takes a trackpad gesture that starts over it
+  // and keeps it until the fingers lift, so the page would need a second swipe. So the height
+  // is the exact one rounded up (offsetHeight rounds first, 784.4 to 784, which left 0.4px to
+  // scroll), and the app's own page can't scroll at all, even while the frame catches up with
+  // a change in its height.
+  frame.setAttribute("scrolling", "no");
+  doc.documentElement.style.overflow = "hidden";
+  const fit = () => { frame.style.height = Math.ceil(doc.body.getBoundingClientRect().height) + "px"; };
   new ResizeObserver(fit).observe(doc.body);
   fit();
 }

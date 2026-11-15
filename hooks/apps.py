@@ -1,6 +1,7 @@
-"""MkDocs hook that splits the site into three installable apps: the dictionary, the drills,
-and the notes (the grammar and the tools). Each has its own manifest in its folder, and a page
-belongs to the app whose folder holds it; the notes app has the rest of the site.
+"""MkDocs hook that splits the site into installable apps: the dictionary, the drills and the
+notes (the grammar and the tools), each in its own folder with its own manifest, and Greek, the
+hub at the root that links to the three (and has the rest of the site). A page belongs to the
+app whose folder holds it.
 
 For every page it gives the templates `app` (the names from that app's manifest, used by
 overrides/main.html), the app's name as the site name, and a nav with only that app's pages,
@@ -13,8 +14,9 @@ from pathlib import Path
 
 from mkdocs.structure.nav import Navigation
 
-# Folder of each app, most specific first: the notes' "" matches every page.
-APPS = {"dictionary": "dictionary/", "drills": "drills/", "notes": ""}
+# Folder of each app, most specific first: the hub's "" matches every page. The id names the
+# icons (icons/<id>-192.png).
+APPS = {"dictionary": "dictionary/", "drills": "drills/", "notes": "notes/", "home": ""}
 
 _apps = {}
 
@@ -44,8 +46,8 @@ def on_page_context(context, page, config, nav):
     name = app_of(page.url)
     items = [item for item in nav.items if (first := _first_page(item)) and app_of(first.url) == name]
     app_nav = Navigation(items, [p for p in nav.pages if app_of(p.url) == name])
-    # The logo links to the app's own home page.
-    app_nav.homepage = next((p for p in app_nav.pages if p.url == APPS[name]), None)
+    # The logo links to the hub, which links to every app.
+    app_nav.homepage = next((p for p in nav.pages if p.url == ""), None)
 
     site = copy.copy(config)
     site["site_name"] = _apps[name]["name"]

@@ -3,7 +3,7 @@
   Source of the app icons in docs/icons/: one per app (hooks/apps.py), the same but for the
   background colour, picked with ?app=. To re-render, from the repo root:
     CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    for app in dictionary drills notes; do
+    for app in home dictionary drills notes; do
       "$CH" --headless --hide-scrollbars --force-device-scale-factor=2 --window-size=512,512 \
         --screenshot=$PWD/icon-1024.png "file://$PWD/scripts/icon.html?app=$app"
       for size in 512 192 180; do sips -s format png -Z $size icon-1024.png --out docs/icons/$app-$size.png; done
@@ -40,12 +40,13 @@ svg{display:block;width:100vw;height:100vh}
   </g>
 </svg>
 <script>
-// Each app's background, top left to bottom right: gruvbox's blue, orange and aqua (theme.css),
+// Each app's background, top left to bottom right: gruvbox's blue, orange, aqua and purple (theme.css),
 // darkening towards the corner. The letters are gruvbox's cream and yellow.
 const BACKGROUNDS = {
   dictionary: ["#458588", "#1f3f45"],
   drills: ["#d65d0e", "#6e2a05"],
   notes: ["#689d6a", "#2a4a35"],
+  home: ["#b16286", "#4a2238"],  // Greek, the hub
 };
 const [start, end] = BACKGROUNDS[new URLSearchParams(location.search).get("app")] || BACKGROUNDS.dictionary;
 document.getElementById("bg-top").setAttribute("stop-color", start);

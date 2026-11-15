@@ -2,17 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Personal Modern Greek study notes: an MkDocs Material site, installable as three apps (notes, drills, dictionary), deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
+Personal Modern Greek study notes: an MkDocs Material site: a hub at the root linking to three apps (dictionary, drills, notes & tools), each installable on its own, deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
 
 ## Layout
 
 ```
 docs/                   the site (MkDocs serves everything here)
-  index.md              home page of the notes app
-  grammar/              notes (articles.md ..., pronouns/)
-  tools/                pages that embed an app (notes app); their URLs are linked from outside, keep them
-  drills/               the drills app: index.md, one page per drill, its manifest; URLs kept as for tools/
-  dictionary/           the dictionary app: index.md and its manifest
+  index.md              the hub, "Greek": cards for the three apps and install help (overrides/app.html)
+  notes/                the notes app: index.md, its manifest, grammar/ (the notes) and tools/ (full-page tools)
+  drills/               the drills app: index.md (the drills' cards), one full-page page per drill, its manifest
+  dictionary/           the dictionary app: index.md (full-page) and its manifest
   apps/                 standalone HTML apps, embedded by the pages above
   javascripts/          all JS: site-wide scripts (listed in mkdocs.yml) and the apps' modules
   stylesheets/          all CSS: site-wide (listed in mkdocs.yml), theme.css (every page's colours), and verb-grid.css and drill.css for the apps
@@ -20,9 +19,9 @@ docs/                   the site (MkDocs serves everything here)
   vendor/sql.js/        third-party code, vendored for offline use
   fonts/, icons/        self-hosted Greek font, app icons
   sw.js                 must stay at the site root (service worker scope)
-  manifest.webmanifest  the notes app's (its scope is the whole site)
-overrides/              theme templates (custom_dir)
-hooks/                  MkDocs hooks: apps.py (which app a page is in), pwa.py (offline)
+  manifest.webmanifest  the hub's (its scope is the whole site)
+overrides/              theme templates (custom_dir): main.html (every page), app.html (full-page apps)
+hooks/                  MkDocs hooks: apps.py (which app a page is in), redirects.py (old URLs), pwa.py (offline)
 scripts/                build_*.py, build_declensions.js: write the files in docs/data/; build_anki_verbs.js writes exports/
 exports/                data for anki/, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
@@ -68,9 +67,9 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
 
 ## Content
 
-- Notes are Markdown in `docs/grammar/`. Each must be added to `nav` in `mkdocs.yml`. Each app's menu shows only its own part of `nav` (see Apps below). A note's path is its URL (`grammar/articles.md` is `grammar/articles/`), so moving or renaming one breaks links to it.
+- Notes are Markdown in `docs/notes/grammar/`. Each must be added to `nav` in `mkdocs.yml`. Each app's menu shows only its own part of `nav` (see Apps below). A note's path is its URL (`notes/grammar/articles.md` is `notes/grammar/articles/`), so moving or renaming one breaks links to it.
 - **Colours** are the same in all three apps and live only in `docs/stylesheets/theme.css`: `--bg`, `--surface`, `--ink`, `--muted`, `--line`, `--accent`, `--accent-soft`, `--good`/`--warn`/`--bad` (with `-soft` tints), `--aug`, and the dictionary's part-of-speech and gender colours, light and dark. Every app in `docs/apps/` links it first, and the site loads it through `extra_css`, where it also sets Material's `--md-*` colours (palette `custom` in `mkdocs.yml`). Don't define colours anywhere else; the manifests' and `main.html`'s `theme-color` repeat `--bg` (the phone's status and navigation bars), and `pwa.js` keeps the tags in step with the site's light/dark toggle.
-- **Colour themes** (`docs/javascripts/palette.js`, the palette button left of the font button, and on the dictionary's page): the default (the site's high-contrast gruvbox), Gruvbox, Kanagawa (Wave/Lotus), Tokyo Night (Night/Day) and Melange, each with a light and a dark set; the light/dark toggle still picks between them.
+- **Colour themes** (`docs/javascripts/palette.js`, the palette button left of the font button, in the Notes header and in the full-page apps' bar): the default (the site's high-contrast gruvbox), Gruvbox, Kanagawa (Wave/Lotus), Tokyo Night (Night/Day) and Melange, each with a light and a dark set; the light/dark toggle still picks between them.
   - **`scripts/build_themes.py`** (stdlib, `make themes`) holds every theme's colours, taken from the Neovim schemes' palettes, and writes them between the `BEGIN THEMES` markers in `theme.css` (the CSS) and `palette.js` (the picker's list and previews). Change colours there, never in the generated part. It checks each colour against the backgrounds it's drawn on (text and pills 4.5:1, part-of-speech bars 3:1, `--line` 1.7:1) and moves any that fall short, darker or lighter at the same hue, printing each one. `make test` runs it with `--check`, which fails when the files are out of date.
   - A theme is `data-palette` on `<html>` (none for the default); its rules are more specific than the default's. `overrides/main.html` sets it from localStorage (`palette`) before the page draws, every app loads `palette.js` in its `<head>`, and the page passes a new choice into its frames (and `drill-frame.js` into frames that load later). `pwa.js` repaints the phone's bars when it changes. The manifests and the icons keep the default's colours.
   - The pickers' dialog styles are shared in `docs/stylesheets/pickers.css` (`.picker*`).
@@ -78,27 +77,39 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
   - **Plain Markdown tables** need no markup. `docs/javascripts/tables.js` sets `lang="el"` on cells with Greek, which get the Greek font while the other cells in that table are muted as glosses. Bold inside Greek cells shows in the accent colour. Header cells with Greek aren't uppercased.
   - **Grid layouts** (paradigms with grouped columns) are hand-written HTML: `<div class="grid-card"><table class="grid">` with `th.group`/`th.sub`, `td.who` row labels, `td.gloss`, `span.end` (accent), `span.pre` (muted), `td.gap` spacer columns, and an optional `p.grid-note` underneath. Row labels can shorten on phones: `masc<span class="full">uline</span><span class="abbr">.</span>`.
   - Greek is in GFS Neohellenic everywhere, as in the dictionary. Where Greek and English mix (the note tables, the notes' prose through `greek-font.css`, the drills' `--display`), it's a self-hosted Greek-only subset, regular and bold (`docs/fonts/`, OFL), registered as "Greek Neohellenic" with a Greek `unicode-range` and `size-adjust: 124%`, so Latin in the same cell falls through to Commissioner (or the notes' text font). The apps' display text (`--display` in `verb-grid.css`) uses Google's full "GFS Neohellenic", Latin included, at its own size.
-- **Greek font picker** (`docs/javascripts/greek-font.js`, `docs/stylesheets/greek-font.css`): the translate-icon button, in the header and on the dictionary's page, opens a dialog with `FONTS`: the default (GFS Neohellenic) and 5 other fonts with Greek (Alegreya, LXGW WenKai Mono TC, GFS Didot, Ubuntu Mono, Carlito). A choice registers its faces, the Greek subsets only, as "Chosen Greek" with a `size-adjust` that matches Commissioner's letter height. So **every font stack starts with `"Chosen Greek"`** (`--display`, `--body`, `--gn-body`, `--gn-greek`, Material's `--md-text-font-family`), and every app in `docs/apps/` loads `greek-font.js`. Until something is chosen, no such font exists and the stacks fall through to their own fonts. The choice is per device, in localStorage (`greek-font`, with its faces, so pages don't fetch the stylesheet again). The page passes a new choice into its frames, and `drill-frame.js` passes it into frames that load later. Fonts come from Google Fonts and are cached by the service worker on first use, not ahead of time; Didot's Greek subset is self-hosted, like the default's.
-- Interactive pages are standalone HTML apps in `docs/apps/`, embedded in a Markdown page with `<iframe class="drill-frame" src="../../apps/x.html">` (relative to the page's URL, `tools/x/`). `docs/javascripts/drill-frame.js` (loaded site-wide) hides the app's `<header>`, sizes the iframe to its content, and syncs the light/dark theme by setting `data-theme` on the app's root. theme.css therefore gives the apps dark tokens under both `prefers-color-scheme` and `[data-theme="dark"]`, and the site's pages under Material's `[data-md-color-scheme="slate"]` on the body. Add `data-pass-hash` to an iframe to forward the page's `#fragment` into it, which is how `tools/verb-tables/#γράφω` opens a verb. Add `data-keep-header` to keep the app's header showing.
+- **Greek font picker** (`docs/javascripts/greek-font.js`, `docs/stylesheets/greek-font.css`): the translate-icon button, in the Notes header and in the full-page apps' bar, opens a dialog with `FONTS`: the default (GFS Neohellenic) and 5 other fonts with Greek (Alegreya, LXGW WenKai Mono TC, GFS Didot, Ubuntu Mono, Carlito). A choice registers its faces, the Greek subsets only, as "Chosen Greek" with a `size-adjust` that matches Commissioner's letter height. So **every font stack starts with `"Chosen Greek"`** (`--display`, `--body`, `--gn-body`, `--gn-greek`, Material's `--md-text-font-family`), and every app in `docs/apps/` loads `greek-font.js`. Until something is chosen, no such font exists and the stacks fall through to their own fonts. The choice is per device, in localStorage (`greek-font`, with its faces, so pages don't fetch the stylesheet again). The page passes a new choice into its frames, and `drill-frame.js` passes it into frames that load later. Fonts come from Google Fonts and are cached by the service worker on first use, not ahead of time; Didot's Greek subset is self-hosted, like the default's.
+- Interactive pages are standalone HTML apps in `docs/apps/`, shown full-page by a Markdown page with `template: app.html` and `app: x.html` in its front matter (see Full-page apps below). Nothing links to the bare `apps/x.html` files any more. `docs/javascripts/drill-frame.js` (loaded site-wide) hides the app's `<header>`, sizes the iframe to its content, and syncs the light/dark theme by setting `data-theme` on the app's root. theme.css therefore gives the apps dark tokens under both `prefers-color-scheme` and `[data-theme="dark"]`, and the site's pages under Material's `[data-md-color-scheme="slate"]` on the body. Add `data-pass-hash` to an iframe to forward the page's `#fragment` into it, which is how `notes/tools/verb-tables/#γράφω` opens a verb (`pass_hash: true` in front matter). Add `data-keep-header` to keep the app's header showing (nothing does now).
 - Drills move focus to their answer box only with a mouse or trackpad (`AUTO_FOCUS`, `(hover: hover) and (pointer: fine)`). On a phone, focusing it opens the on-screen keyboard and the page jumps, so there the learner taps the box.
 
 ## Apps
 
-One site and one build, installable as three apps so a drill and the dictionary can be open at once. Each has a manifest in its folder:
+One site and one build. The root page is a hub, "Greek", with a card for each of three apps, installable on their own so a drill and the dictionary can be open at once. Each has a manifest in its folder:
 - **Greek Dictionary:** `dictionary/` (`docs/dictionary/manifest.webmanifest`).
 - **Greek Drills:** `drills/` (`docs/drills/manifest.webmanifest`).
-- **Greek Notes:** the rest, the grammar and the tools (`docs/manifest.webmanifest`, scope the whole site; the other two are nested in it, and a more specific scope wins).
+- **Greek Notes:** `notes/`, the grammar and the tools (`docs/notes/manifest.webmanifest`).
+- **Greek** (the hub): the rest (`docs/manifest.webmanifest`, scope the whole site; the others are nested in it, and a more specific scope wins). Installing it gives one app that reaches all three. Its manifest id is the old notes app's, so a notes app installed before the hub became the hub.
 
 `hooks/apps.py` (`APPS`) puts each page in the app whose folder holds it, and gives the templates:
 - `app`: that app's names, read from its manifest. `overrides/main.html` uses it for the manifest link, the apple-touch-icon and the home-screen name.
-- `nav` with only that app's top-level sections: one `nav` in `mkdocs.yml` serves all three. Its homepage, which the logo links to, is the app's first page.
+- `nav` with only that app's top-level sections: one `nav` in `mkdocs.yml` serves them all. Its homepage, which the Notes header's logo links to, is the hub.
 - `config.site_name`: the app's name, so the header and titles say Greek Drills, and an app's first page is titled with the name alone.
 
 Links between apps are ordinary links. Inside an installed app, one that leaves the app's scope still works, shown with the browser's address bar. Search still covers the whole site.
 
-Icons are `docs/icons/<app>-{512,192,180}.png`: the same Αα and Greek key, with gruvbox's blue, orange or aqua behind them (dictionary, drills, notes). `scripts/icon.html?app=` is the source, with the commands to render them. The favicon is the notes app's.
+Icons are `docs/icons/<app>-{512,192,180}.png`: the same Αα and Greek key, with gruvbox's blue, orange, aqua or purple behind them (dictionary, drills, notes, and `home` for the hub). `scripts/icon.html?app=` is the source, with the commands to render them. The favicon is the hub's.
 
 The dictionary used to be the home page. The home page sends a Greek `#fragment` (`/#σπίτι`) on to `dictionary/#σπίτι`, so old links still open the word.
+
+The notes and tools were at `grammar/` and `tools/` until they moved under `notes/`. `hooks/redirects.py` writes a page at each old address after every build that sends the browser on, keeping the `#fragment` (`tools/verb-tables/#γράφω`). Don't put a new page at an old address; the hook refuses to overwrite one.
+
+### Full-page apps (`overrides/app.html`)
+
+The hub, the drills' list, each drill, each tool and the dictionary have no site header, menu or footer (`docs/stylesheets/app-page.css` hides them with `body:has(.app-bar)`; they stay in the page because instant navigation needs them). A slim sticky bar takes their place: a back link, the page's title from `nav`, then the about (ⓘ), colour theme, Greek font and light/dark buttons (`docs/javascripts/app-bar.js` picks the next of Material's palettes through its hidden radio inputs, reading the current one from `body[data-md-color-scheme]`). Front matter:
+- `back` and `back_label`: the back link, relative to the site (`""` is the hub, `drills/`, `notes/`).
+- `app`: the app in `docs/apps/` to show in the frame. The page's Markdown is then its description, in a popover under the ⓘ button (the `# heading` is hidden), with its links to the notes. Keep it short; the drill itself comes first.
+- `pass_hash: true` to pass the `#fragment` into the frame (verb tables, aspect forks, the dictionary).
+
+Without `app` (the hub, the drills' list), the Markdown is the page, under the bar; its `# heading` is hidden since the bar has the title. Their cards are hand-written HTML (`.app-cards`, `a.app-card`) with directory links (`noun-gender/`), which the strict build doesn't check, so check them by hand. Notes pages keep Material's layout (menu, search, table of contents).
 
 ## Offline (PWA)
 
@@ -110,11 +121,11 @@ All three apps work offline through one service worker:
   - the Google Fonts stylesheets found in the pages;
   - a version stamp: a hash of every listed file plus the worker's own source.
 - A new stamp makes installed apps cache the new copy and delete the old one. The worker also caches the Latin and Greek font subsets, kept across versions.
-- Nothing needs updating when pages are added. Pages are cached under their directory URL (`tools/verb-tables/`), matching how they're linked.
+- Nothing needs updating when pages are added. Pages are cached under their directory URL (`notes/tools/verb-tables/`), matching how they're linked.
 - Large data files (`*.db.gz`, the dictionary) stay out of the file list and the version stamp. The hook lists them in `DATA` with their own content hash, and the worker keeps them in a separate `data` cache, so a deploy doesn't download them again unless they changed. A new version only pre-downloads the data files this browser has saved before. Otherwise a file waits for its first use, since only the dictionary reads it and a phone may give each home-screen app its own storage.
 - `mkdocs serve` hands out the unfilled `docs/sw.js`. Its empty file list caches nothing, so dev edits show on reload; keep the template valid JS for that reason.
 
-## Verb tables (`docs/tools/`, `docs/apps/verb-tables.html`)
+## Verb tables (`docs/notes/tools/`, `docs/apps/verb-tables.html`)
 
 Data flows from the sheet and the dictionary to JSON to the browser. There is no backend. **The dictionary is the source of truth for forms:** the verb tables page shows its cells, and the engine and sheet only fill what it doesn't have.
 
@@ -144,13 +155,13 @@ Data flows from the sheet and the dictionary to JSON to the browser. There is no
 
 When changing the engine, run `make test` and also diff all generated forms against the previous commit's engine. Most verbs aren't in `EXPECTED`, so the checks alone can miss regressions.
 
-## Aspect forks (`docs/tools/aspect-forks.md`, `docs/apps/aspect-forks.html`)
+## Aspect forks (`docs/notes/tools/aspect-forks.md`, `docs/apps/aspect-forks.html`)
 
 A verb's present forking into its two stems, imperfective and perfective, each with its past and future, with the augment and the changed letters highlighted. Active verbs only. **`aspect-fork.js`** (browser and Node) draws it from a conjugation, normally `verbToShow()`'s, so it shows the same forms as the verb tables. It generates no forms:
 - `analyse(conjugation, verb)` compares the 1st singular present, past continuous, aorist and dependent, ignoring accents and diaeresis, and returns them in a bracket notation: `[έ]` augment, `{ψ}` changed or added in the perfective, `(ν)` lost in the perfective, `<γ>` added in the imperfective. `forkHTML()` turns it into spans.
 - **Groups** come from rules on the end of the present and dependent stems (labials, velars, dentals, ν → σ, -ησ- ...), in `GROUPS`. The word list's class decides b1/b2, else the 2nd singular. A verb that fits no rule, whose pasts don't come from its stems (πήγαινα), or that has ή-/εί- on a consonant (ήθελα, είδα) is `irregular` and gets a one-line note, no fork. Passives return null.
 - Notes on single verbs are generated (internal augment, an extra letter change, -ηκ-). There are no hand-written ones; don't add any.
-- Always shown, never folded: under the grid on the verb tables page and in dictionary entries, and on the aspect forks page, which groups the word list's active verbs. `tools/aspect-forks/#κλείνω` opens a verb, `#labials` a group.
+- Always shown, never folded: under the grid on the verb tables page and in dictionary entries, and on the aspect forks page, which groups the word list's active verbs. `notes/tools/aspect-forks/#κλείνω` opens a verb, `#labials` a group.
 - `tests/test_aspect_forks.js` checks hand-checked groups, markup and notes, and that every dictionary verb's markup spells its forms. `--groups` prints the counts (about 1,880 active verbs, 95 irregular). Run it after changing the rules or `verb-forms.json`; `make verb-forms` and `make sync` do.
 
 ## Anki verb cards (`scripts/build_anki_verbs.js`, `exports/anki-verbs.json`)
@@ -227,7 +238,7 @@ Noun gender, agreement (article + adjective + noun in a case), numbers and prepo
 - **`words.json`**: the words tab's nouns and adjectives (`greek`, `english`, `pos`, `gender`, `tag`), written by `scripts/build_verbs.py` next to `verbs.json`. `gender` is the sheet's `attributes` column, `invariable` for ο/η γιατρός.
 - **`declensions.json`** (`scripts/build_declensions.js`, Node, through `greek-dictionary.js`'s `declensions()` and `adjectiveDeclensions()`, so the cells are the dictionary page's): one word per line, `{ greek, pos, gender, cells }`, plus `name: true` for proper names (Ελλάδα, Απρίλιος; `declensions(word, "name")`) and `indeclinable: true` (ταξί). The word list's gender wins over the table's; the script prints disagreements and the words with no table (about 55: multi-word nouns, plurals the dictionary files under a singular, spellings it files under another, like αυγό for αβγό). Rebuild with `make declensions` after `make sync` (which runs it) or a new dictionary.
 - **`noun-drill.js`** (browser and Node): articles and the ν rule (`articleForms`: τη before most consonants, την before a vowel and κ π τ ξ ψ), phrases as slots (`phrase()`), and `gradePhrase()`, which aligns the typed words to the slots and names a wrong form by its case, number or gender. `ADJECTIVE_TAGS` is a small hand-made list of which adjectives suit which noun tags, so the agreement drill doesn't pair "hungry" with "spoon"; adjectives not in it aren't drilled.
-- **`number-words.js`**: cardinals 0 to 999.999.999 in words, by gender and case, with spelling variants (εφτά/επτά), following `grammar/numerals.md`.
+- **`number-words.js`**: cardinals 0 to 999.999.999 in words, by gender and case, with spelling variants (εφτά/επτά), following `notes/grammar/numerals.md`.
 - **`preposition-drill.js`** and `preposition-sentences.json`: one object per line, `prep` (`σε`, `από`, `δίπλα σε`… or `none`), `noun` (word list spelling), `en` with the phrase `*marked*`, `el`, `answer` (as it appears in `el`), optional `also` (other accepted answers) and `note`. `analyse()` reads the answer as preposition + accusative against the noun's table.
 - Progress is per device in localStorage: `gng-*` (noun gender), `gag-*` (agreement), `gnm-*` (numbers), `gpp-*` (prepositions).
 - `tests/test_nouns.js` checks the data and grades every phrase the agreement drill can ask for against its own answer; `test_numbers.js` checks hand-checked numbers; `test_preposition_sentences.js` checks every sentence against its noun's table and the grader.
@@ -246,7 +257,7 @@ Marking works in these drills as in the verb drills, through `voice-drill.js`'s 
 
 A Greek ↔ English dictionary that runs entirely in the browser. It's an app of its own at `dictionary/`, so `dictionary/#σπίτι` opens a word.
 
-- **Page:** `docs/dictionary/index.md` is only the iframe. Its template, `overrides/home.html`, adds a light/dark button (top right, `docs/javascripts/home.js`) and no menu, since the notes and drills are other apps. The theme button picks the next palette through Material's own radio inputs, still in the hidden header, so the choice is saved for every page and `drill-frame.js` passes it into the dictionary. It reads the current palette from `body[data-md-color-scheme]`, because on a first visit neither input is checked. `docs/stylesheets/home.css` hides the site's header and footer with `body:has(.dict-home)`. They stay in the page because instant navigation needs them. The point is that the app is only a dictionary, so don't add links to the notes there.
+- **Page:** `docs/dictionary/index.md` is a full-page app (`overrides/app.html`, see Apps): the bar, with a back link to the hub, and the dictionary. The point is that the app is only a dictionary, so don't add links to the notes there.
 
 - **Data:** `lemma_greek_en.db.gz` is the lemma SQLite dictionary (schema version 4, built from English Wiktionary via kaikki.org, CC BY-SA, so the page credits it), gzipped. The owner's copy is built in `../lemma` (`make sqlite` there, output `lemma_greek_en/lemma_greek_en.db`), and its developer guide is copied to `sqlite-database.md`. It changes about once a year: `make dictionary`, then `make verb-forms` and `make declensions`, then `make publish-dictionary`.
   - **It isn't in git** (23 MB; ignored). It's an asset on a GitHub release of this repo (`dictionary-YYYYMMDD`). The Makefile pins it by `DICT_URL` and `DICT_SHA256`, and `make fetch-dictionary` downloads it when missing; `build`, `serve`, `test` and CI run that first. A local file that isn't the pinned build is left alone, with a note, so a fresh `make dictionary` isn't overwritten. `publish-dictionary` creates the release with `gh` and rewrites the two pin lines; commit the Makefile after. Older copies remain in git history (before 2026-11-07); history was deliberately not rewritten.

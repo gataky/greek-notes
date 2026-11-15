@@ -25,7 +25,7 @@
     { id: "carlito", name: "Carlito", family: "Carlito", size: "105%" },
   ];
 
-  // The button's icon (Material Symbols' "translate"), also in overrides/home.html
+  // The button's icon (Material Symbols' "translate"), also in overrides/app.html
   const ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24" width="24" fill="currentColor" aria-hidden="true"><path d="M11.9,22l4.55-12h2.1L23.1,22H21l-1.07-3.05H15.08L14,22H11.9ZM4,19L2.6,17.6l5.05-5.05q-0.88-0.88-1.59-2T4.75,8h2.1q0.5,0.97 1,1.7t1.2,1.45q0.82-0.82 1.71-2.31T12.1,6H1V4H8V2h2V4h7V6H14.1q-0.53,1.8-1.58,3.7t-2.07,2.9l2.4,2.45L12.1,17.1L9.05,13.98L4,19Zm11.7-1.8h3.6l-1.8-5.1l-1.8,5.1Z"/></svg>';
 
   const cssURL = (font, query) =>
@@ -117,8 +117,8 @@
   const header = document.querySelector(".md-header__inner");
   if (!header) return;
 
-  // In the header, before the light/dark toggle. The dictionary's page draws its own button
-  // (overrides/home.html), since its header is hidden.
+  // In the header, before the light/dark toggle. The full-page apps draw their own button in
+  // their bar (overrides/app.html), since the header is hidden.
   const button = document.createElement("button");
   button.className = "md-header__button md-icon greek-font__open";
   button.type = "button";

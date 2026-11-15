@@ -103,7 +103,7 @@ function renderFork(verb, conjugation) {
   $("fork").hidden = !fork;
   if (!fork) return;
   const inList = verbs.some(v => v.greek === verb.greek && v.voice === "active");
-  const href = `../tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
+  const href = `../notes/tools/aspect-forks/#${encodeURIComponent(inList ? verb.greek : fork.group)}`;
   const drawn = fork.group !== "irregular" && fork.group !== "missing";
   $("fork").innerHTML = `<h3 class="fork-title">Aspect fork<a href="${href}" target="_top">All the groups →</a></h3>
     ${AspectFork.forkHTML(fork)}${drawn ? AspectFork.LEGEND : ""}`;

@@ -1,9 +1,9 @@
-// The light/dark button on the dictionary's page (overrides/home.html). Listens on the document,
+// The light/dark button in the full-page apps' bar (overrides/app.html). Listens on the document,
 // so it keeps working after instant navigation swaps the page.
 
 // The button picks the next of Material's palettes (mkdocs.yml). Their radio inputs are still
 // in the hidden site header, so choosing one there saves the choice for every page the same way
-// the header's own toggle does, and drill-frame.js passes it into the dictionary.
+// the header's own toggle does, and drill-frame.js passes it into the app's frame.
 // The current palette comes from the page, not the inputs: on a first visit Material follows the
 // system setting without checking either input.
 function nextPalette() {
@@ -15,5 +15,5 @@ function nextPalette() {
 }
 
 document.addEventListener("click", e => {
-  if (e.target.closest("#site-theme")) nextPalette()?.click();
+  if (e.target.closest("[data-scheme-toggle]")) nextPalette()?.click();
 });

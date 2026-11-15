@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Greek Notes",
-  "short_name": "Notes",
-  "description": "Modern Greek grammar notes and verb tools that work offline",
+  "name": "Greek",
+  "short_name": "Greek",
+  "description": "Modern Greek notes, drills and a dictionary that work offline",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
@@ -10,7 +10,7 @@
   "background_color": "#f2e5bc",
   "theme_color": "#f2e5bc",
   "icons": [
-    { "src": "icons/notes-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/notes-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icons/home-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/home-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

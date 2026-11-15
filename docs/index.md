@@ -1,5 +1,20 @@
-# Greek Notes
+---
+template: app.html
+---
 
-Notes on Modern Greek grammar, from the articles to the passive, and tools for verbs: the [verb tables](tools/verb-tables.md), the [conjugation patterns](tools/conjugation-patterns.md) and the [aspect forks](tools/aspect-forks.md). Pick a note from the menu.
+# Greek
 
-The [dictionary](dictionary/index.md) and the [drills](drills/index.md) are apps of their own, so a drill and a word lookup can be open at the same time. Each one installs from its own page, like this one: on iPhone, Safari → Share → Add to Home Screen; on Android, Chrome → Install app. All three work offline.
+<div class="app-cards app-cards--apps">
+<a class="app-card" href="dictionary/"><img src="icons/dictionary-192.png" alt=""><span class="app-card__name">Dictionary</span><span class="app-card__text">Any word, Greek or English, with its forms: conjugations, declensions and the aspect fork.</span></a>
+<a class="app-card" href="drills/"><img src="icons/drills-192.png" alt=""><span class="app-card__name">Drills</span><span class="app-card__text">Type the Greek: verbs, nouns, pronouns, prepositions and numbers. Brings back what you miss.</span></a>
+<a class="app-card" href="notes/"><img src="icons/notes-192.png" alt=""><span class="app-card__name">Notes &amp; tools</span><span class="app-card__text">Grammar notes, from the articles to the passive, and the verb tables, patterns and aspect forks.</span></a>
+</div>
+
+## Install
+
+Each app installs on its own, so a drill and the dictionary can be open side by side. Open the app, then:
+
+- **iPhone or iPad:** in Safari, Share → Add to Home Screen.
+- **Android:** in Chrome, ⋮ → Install app (or Add to Home screen).
+
+Installing from this page installs Greek, which opens all three. Everything works offline once you've opened it.
