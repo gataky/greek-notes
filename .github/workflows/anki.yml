@@ -31,9 +31,13 @@ jobs:
         working-directory: anki
     steps:
       - uses: actions/checkout@v4
+      # setup-go reads go-version-file as a bare version, not asdf's .tool-versions, so take the
+      # golang line from it.
+      - id: go
+        run: echo "version=$(awk '$1 == "golang" { print $2 }' ../.tool-versions)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-go@v5
         with:
-          go-version-file: .tool-versions
+          go-version: ${{ steps.go.outputs.version }}
           cache-dependency-path: anki/go.sum
       - run: go vet ./...
       - run: go test ./...
