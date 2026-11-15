@@ -148,3 +148,19 @@ body[data-md-color-scheme="slate"] .app-bar__to-light { display: flex !important
 /* Drill cards have no icon */
 .app-cards--drills .app-card { grid-template-columns: 1fr; }
 .app-cards--drills .app-card__text { grid-column: 1; }
+
+/* ---------- The build stamp (partials/build.html) and the GitHub link ---------- */
+
+/* Under a full-page app, which has no footer: the stamp on the left, GitHub on the right */
+.app-build {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.md-typeset .build-stamp, .md-copyright .build-stamp {
+  font-family: var(--gn-body); font-size: 12px; color: var(--muted); text-decoration: none; font-variant-numeric: tabular-nums;
+}
+.md-typeset .build-stamp:hover, .md-copyright .build-stamp:hover { color: var(--accent); text-decoration: underline; }
+.md-copyright .build-stamp { display: block; }
+.md-typeset .app-build__repo { display: flex; padding: 6px; border-radius: 8px; color: var(--muted); }
+.md-typeset .app-build__repo:hover { color: var(--ink); background: var(--accent-soft); }
+.app-build__repo svg { width: 22px; height: 22px; fill: currentColor; }

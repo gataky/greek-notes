@@ -1,6 +1,15 @@
 site_name: Greek Notes
 site_description: Modern Greek grammar notes, drills and a dictionary that work offline
 
+# The repository: the GitHub icon at the bottom right of every page, beside the build stamp
+# (hooks/version.py). Not repo_url, which would put Material's GitHub button in the notes' header.
+extra:
+  repo: &repo https://github.com/gataky/greek-notes
+  social:
+    - icon: fontawesome/brands/github
+      link: *repo
+      name: Source on GitHub
+
 theme:
   name: material
   custom_dir: overrides
@@ -50,6 +59,7 @@ extra_javascript:
 hooks:
   - hooks/apps.py
   - hooks/redirects.py
+  - hooks/version.py
   - hooks/pwa.py
 
 plugins:

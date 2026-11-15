@@ -20,8 +20,8 @@ docs/                   the site (MkDocs serves everything here)
   fonts/, icons/        self-hosted Greek font, app icons
   sw.js                 must stay at the site root (service worker scope)
   manifest.webmanifest  the hub's (its scope is the whole site)
-overrides/              theme templates (custom_dir): main.html (every page), app.html (full-page apps)
-hooks/                  MkDocs hooks: apps.py (which app a page is in), redirects.py (old URLs), pwa.py (offline)
+overrides/              theme templates (custom_dir): main.html (every page), app.html (full-page apps), partials/ (the build stamp, and the notes' footer that shows it)
+hooks/                  MkDocs hooks: apps.py (which app a page is in), redirects.py (old URLs), version.py (the build stamp), pwa.py (offline)
 scripts/                build_*.py, build_declensions.js: write the files in docs/data/; build_anki_verbs.js writes exports/
 exports/                data for anki/, not served by the site (anki-verbs.json)
 tests/                  node test_*.js, run by make test and CI
@@ -110,6 +110,8 @@ The hub, the drills' list, each drill, each tool and the dictionary have no site
 - `pass_hash: true` to pass the `#fragment` into the frame (verb tables, aspect forks, the dictionary).
 
 Without `app` (the hub, the drills' list), the Markdown is the page, under the bar; its `# heading` is hidden since the bar has the title. Their cards are hand-written HTML (`.app-cards`, `a.app-card`) with directory links (`noun-gender/`), which the strict build doesn't check, so check them by hand. Notes pages keep Material's layout (menu, search, table of contents).
+
+**Build stamp:** every page shows the commit it was built from ("Build 55ef2ac · 2026-11-15", linked to the commit on GitHub), so an installed app shows which version it's running, with a GitHub icon on the right of the same line (`extra.repo` in `mkdocs.yml`; in the notes' footer it's Material's `extra.social`). There's no `repo_url`, which would add Material's GitHub button to the notes' header. `hooks/version.py` reads it from git into `config.extra.build`, adding "local changes" when the working tree has uncommitted changes (a local build, never CI); `overrides/partials/build.html` draws it, at the bottom of full-page apps (`app.html`) and in the notes' footer (`partials/copyright.html`, Material's with the stamp added). Since every page changes with every commit, every deploy gives the service worker a new version stamp.
 
 ## Offline (PWA)
 

@@ -3,7 +3,8 @@
 {# A full-page app: the hub, the drills' list, each drill and tool, and the dictionary. No site
    header, menu or footer (stylesheets/app-page.css hides them; they stay in the page because
    instant navigation expects them), only a slim bar: a back link, the page's title, and the
-   about, colour theme, Greek font and light/dark buttons.
+   about, colour theme, Greek font and light/dark buttons. At the bottom, the build stamp and the
+   GitHub link, as in the notes' footer.
 
    Front matter:
      back, back_label   where the back link goes, relative to the site ("" is the hub), and its
@@ -54,4 +55,11 @@
   {% else %}
     <div class="app-content">{{ page.content }}</div>
   {% endif %}
+  {# These pages have no footer: the commit this page was built from, and the repository on the right #}
+  <footer class="app-build">
+    {% include "partials/build.html" %}
+    <a class="app-build__repo" href="{{ config.extra.repo }}" target="_blank" rel="noopener" aria-label="Source on GitHub" title="Source on GitHub">
+      {% include ".icons/fontawesome/brands/github.svg" %}
+    </a>
+  </footer>
 {% endblock %}

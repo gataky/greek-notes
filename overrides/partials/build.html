@@ -1,0 +1,5 @@
+{# The commit this page was built from (hooks/version.py), linked to it on GitHub #}
+{% set build = config.extra.build %}
+{% if build %}
+  <a class="build-stamp" href="{{ build.url }}" target="_blank" rel="noopener" title="The commit this version of the site was built from">Build {{ build.commit }} · {{ build.date }}{% if build.dirty %} · local changes{% endif %}</a>
+{% endif %}
