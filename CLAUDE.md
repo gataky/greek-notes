@@ -2,21 +2,22 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Personal Modern Greek study notes: an MkDocs Material site: a hub at the root linking to three apps (dictionary, drills, notes & tools), each installable on its own, deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
+Personal Modern Greek study notes: an MkDocs Material site: a hub at the root linking to four apps (dictionary, drills, notes & tools, labs), each installable on its own, deployed to GitHub Pages (https://gataky.github.io/greek-notes/) by `.github/workflows/deploy.yml` on every push to `main` (except pushes that only touch `anki/` or `.claude/`). `anki/` is the owner's Go tool that pushes the same vocabulary sheet to Anki, merged in from gataky/go-anki-sync with its history.
 
 ## Layout
 
 ```
 docs/                   the site (MkDocs serves everything here)
-  index.md              the hub, "Greek": cards for the three apps and install help (overrides/app.html)
+  index.md              the hub, "Greek": cards for the four apps and install help (overrides/app.html)
   notes/                the notes app: index.md, its manifest, grammar/ (the notes) and tools/ (full-page tools)
   drills/               the drills app: index.md (the drills' cards), one full-page page per drill, its manifest
   dictionary/           the dictionary app: index.md (full-page) and its manifest
+  labs/                 the labs app: index.md (the labs' cards), one full-page page per lab, its manifest
   apps/                 standalone HTML apps, embedded by the pages above
   javascripts/          all JS: site-wide scripts (listed in mkdocs.yml) and the apps' modules
   stylesheets/          all CSS: site-wide (listed in mkdocs.yml), theme.css (every page's colours), and verb-grid.css and drill.css for the apps
   data/                 JSON the apps fetch, and the gzipped dictionary (downloaded, not in git)
-  vendor/sql.js/        third-party code, vendored for offline use
+  vendor/               third-party code, vendored for offline use: sql.js/, d3/ (d3 and d3-sankey)
   fonts/, icons/        self-hosted Greek font, app icons
   sw.js                 must stay at the site root (service worker scope)
   manifest.webmanifest  the hub's (its scope is the whole site)
@@ -51,6 +52,7 @@ make publish-dictionary  # upload docs/data's dictionary as a GitHub release and
 make verb-forms  # copy our verbs' forms from the dictionary into docs/data/verb-forms.json, then test
 make declensions  # copy our nouns' and adjectives' tables from the dictionary into docs/data/declensions.json, then test
 make anki-verbs  # write the verb cards for anki/ into exports/anki-verbs.json (sync and verb-forms do too)
+make aspect-map  # write the aspect map's data into docs/data/aspect-map.json (sync and verb-forms do too)
 make anki-build  # go build anki/sync
 make anki-test   # go test ./... in anki/
 make push-words  # anki/sync push: the words tab to the Greek deck
@@ -83,11 +85,12 @@ uv is configured with `python-preference = "only-system"`, so it uses asdf's Pyt
 
 ## Apps
 
-One site and one build. The root page is a hub, "Greek", with a card for each of three apps, installable on their own so a drill and the dictionary can be open at once. Each has a manifest in its folder:
+One site and one build. The root page is a hub, "Greek", with a card for each of four apps, installable on their own so a drill and the dictionary can be open at once. Each has a manifest in its folder:
 - **Greek Dictionary:** `dictionary/` (`docs/dictionary/manifest.webmanifest`).
 - **Greek Drills:** `drills/` (`docs/drills/manifest.webmanifest`).
 - **Greek Notes:** `notes/`, the grammar and the tools (`docs/notes/manifest.webmanifest`).
-- **Greek** (the hub): the rest (`docs/manifest.webmanifest`, scope the whole site; the others are nested in it, and a more specific scope wins). Installing it gives one app that reaches all three. Its manifest id is the old notes app's, so a notes app installed before the hub became the hub.
+- **Greek Labs:** `labs/`, experiments with the data that may become tools or drills (`docs/labs/manifest.webmanifest`).
+- **Greek** (the hub): the rest (`docs/manifest.webmanifest`, scope the whole site; the others are nested in it, and a more specific scope wins). Installing it gives one app that reaches all four. Its manifest id is the old notes app's, so a notes app installed before the hub became the hub.
 
 `hooks/apps.py` (`APPS`) puts each page in the app whose folder holds it, and gives the templates:
 - `app`: that app's names, read from its manifest. `overrides/main.html` uses it for the manifest link, the apple-touch-icon and the home-screen name.
@@ -115,7 +118,7 @@ Without `app` (the hub, the drills' list), the Markdown is the page, under the b
 
 ## Offline (PWA)
 
-All three apps work offline through one service worker:
+All the apps work offline through one service worker:
 - `overrides/main.html` (theme `custom_dir`) adds the page's app's manifest and the home-screen tags.
 - `docs/javascripts/pwa.js` registers `docs/sw.js`.
 - `hooks/pwa.py` (an MkDocs hook, so it also runs in CI) fills placeholders in the built `sw.js` after every build:
@@ -165,6 +168,18 @@ A verb's present forking into its two stems, imperfective and perfective, each w
 - Notes on single verbs are generated (internal augment, an extra letter change, -ηκ-). There are no hand-written ones; don't add any.
 - Always shown, never folded: under the grid on the verb tables page and in dictionary entries, and on the aspect forks page, which groups the word list's active verbs. `notes/tools/aspect-forks/#κλείνω` opens a verb, `#labials` a group.
 - `tests/test_aspect_forks.js` checks hand-checked groups, markup and notes, and that every dictionary verb's markup spells its forms. `--groups` prints the counts (about 1,880 active verbs, 95 irregular). Run it after changing the rules or `verb-forms.json`; `make verb-forms` and `make sync` do.
+
+## Aspect map (`docs/labs/aspect-map.md`, `docs/apps/aspect-map.html`)
+
+The labs app's first page: every active dictionary verb as a flow chart (d3-sankey) from the ending of its present, through its aspect-fork group, to what its perfective stem does, then each group's share of the verbs against its share of usage. Clicking a band, a box or a group lists its verbs in a table: past perfective, past continuous, present, future continuous, future perfective, then the meaning.
+- **Data:** `scripts/build_aspect_map.js` (Node) writes `docs/data/aspect-map.json`: the endings and outcomes (`endings`, `signatures`), then one verb per line. Each verb goes through `verbToShow()` and `analyse()`, so its group and markup are the aspect forks'. The script adds:
+  - `ending`: from the present's 1st singular, with -χνω, -σσω and -ττω as velars and -πτω and -φτω as labials. All contracted verbs share one ending, -ώ / -άω: their group tells b1 from b2.
+  - `signature`: from the letters `analyse()` marks as added in the perfective stem (`{ψ}`), or from the group when nothing is added (strong, same, no perfective, irregular). Irregular stays one band; it isn't split further.
+  - `f`: the dictionary's frequency (subtitle counts of the dictionary form only, a rough ranking), and `english`: the word list's, else the first gloss.
+  - Spellings with the same table (αγαπώ, αγαπάω) are one verb, under the word list's spelling, with their frequencies added (`also`).
+- `make aspect-map` rebuilds it; `make sync` and `make verb-forms` run it, since it follows `verbs.json` and `verb-forms.json`. Commit the JSON with them.
+- **Colours** are one per outcome, not from `theme.css`: the dataviz skill's reference categorical palette in its fixed order, checked with its validator on the default theme's surfaces in both modes, and greys for no perfective and irregular. They stay the same in every colour theme. Every outcome is labelled, since several are under 3:1 on the light surface.
+- d3 7.9.0 and d3-sankey 0.12.3 are vendored in `docs/vendor/d3/`, with their licences.
 
 ## Anki verb cards (`scripts/build_anki_verbs.js`, `exports/anki-verbs.json`)
 

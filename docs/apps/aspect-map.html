@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aspect Map</title>
+<!-- The aspect map, in the labs app (labs/aspect-map/). Its data is docs/data/aspect-map.json,
+     from scripts/build_aspect_map.js; d3 and d3-sankey are vendored in docs/vendor/d3/. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<link rel="stylesheet" href="../stylesheets/theme.css">
+<script src="../javascripts/palette.js"></script>
+<link rel="stylesheet" href="../stylesheets/verb-grid.css">
+<link rel="stylesheet" href="../stylesheets/aspect-fork.css">
+<script src="../javascripts/greek-font.js"></script>
+<style>
+.wrap { max-width: 1040px; }
+/* One colour per perfective outcome: the dataviz skill's reference categorical palette, in its
+   fixed order (validated on theme.css's surfaces, #f9f5d7 and #282828: CVD ΔE >= 8.4, normal
+   >= 19.3), with the two outcomes that aren't a change of stem in the theme's greys. Several are
+   under 3:1 on the light surface, so every outcome is labelled in the chart and the legend.
+   They don't change with the colour theme, so an outcome keeps its colour everywhere. */
+:root {
+  --o-psi: #2a78d6; --o-xi: #eb6834; --o-sigma: #1baf7a; --o-eta-sigma: #eda100;
+  --o-vowel-sigma: #e87ba4; --o-no-sigma: #008300; --o-short: #6250d6; --o-same: #e34948;
+  --o-none: var(--line); --o-irregular: var(--muted);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --o-psi: #3987e5; --o-xi: #d95926; --o-sigma: #199e70; --o-eta-sigma: #c98500;
+    --o-vowel-sigma: #d55181; --o-no-sigma: #008300; --o-short: #9085e9; --o-same: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  --o-psi: #3987e5; --o-xi: #d95926; --o-sigma: #199e70; --o-eta-sigma: #c98500;
+  --o-vowel-sigma: #d55181; --o-no-sigma: #008300; --o-short: #9085e9; --o-same: #e66767;
+}
+.card h2.small { font-family: var(--body); font-size: 20px; font-weight: 600; line-height: 1.2; }
+.card p { margin: 0; }
+.muted { color: var(--muted); font-size: 14px; }
+
+/* Filters: two segmented switches */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--surface); }
+.seg-label { font-size: 13px; color: var(--muted); margin-right: 8px; }
+.seg button { font: 500 14px var(--body); color: var(--ink); background: none; border: 0; padding: 6px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+/* Charts: wide SVGs that scroll inside their card on a phone, not the page */
+.chart { overflow-x: auto; margin: 0 -8px; padding: 0 8px; }
+.chart svg { display: block; width: 100%; min-width: 720px; height: auto; font-family: var(--body); }
+.chart text { fill: var(--ink); font-size: 13px; }
+.chart text.el { font-family: var(--display); font-size: 16px; }
+.chart text.count { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.chart text.col { fill: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.chart .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.chart .link { fill: none; stroke-opacity: .45; cursor: pointer; transition: stroke-opacity .15s; }
+.chart .link:hover { stroke-opacity: .75; }
+.chart .faded .link:not(.on) { stroke-opacity: .07; }
+.chart .faded .link.on { stroke-opacity: .7; }
+.chart .node rect { cursor: pointer; }
+.chart .node.sel rect { stroke: var(--ink); stroke-width: 2px; }
+.chart .slope line { stroke-width: 2.5px; cursor: pointer; }
+.chart .slope.dim { opacity: .2; }
+.chart .slope text { cursor: pointer; }
+.chart .axis { stroke: var(--line); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.legend b { font-family: var(--display); font-size: 16px; font-weight: 400; color: var(--ink); }
+
+#tip { position: fixed; pointer-events: none; z-index: 10; max-width: 340px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; box-shadow: 0 4px 14px rgb(0 0 0 / .15); }
+#tip .el { font-family: var(--display); font-size: 16px; }
+
+/* The selected path's verbs */
+.path { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.path .step { font-family: var(--display); font-size: 20px; }
+.path .arrow { color: var(--muted); }
+#clear { font: 500 13px var(--body); color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+/* One row per verb, the five forms in columns: perfective on the outside, continuous around the
+   present, in the site's aspect colours (aspect-fork.css: imperfective accent, perfective warn) */
+.table-wrap { overflow-x: auto; margin: 0 -8px; padding: 0 8px; }
+.verbs th.group { text-align: center; }
+.verbs th.sub { text-align: left; }
+.verbs th.p { color: var(--warn); }
+.verbs th.i { color: var(--accent); }
+.verbs th.group.past, .verbs th.group.future { border-bottom-color: var(--line); }
+.verbs td { font-size: 18px; padding-right: 18px; }
+.verbs td.p { background: color-mix(in srgb, var(--warn-soft) 45%, transparent); }
+.verbs td.now { font-weight: 600; }
+.verbs td .star { color: var(--accent); font-family: var(--body); font-size: 13px; margin-left: 4px; }
+.verbs td.gloss { font-family: var(--body); font-size: 14px; color: var(--muted); white-space: normal; min-width: 180px; padding-top: 8px; }
+.verbs td .also { display: block; font-size: 13px; }
+#more { align-self: flex-start; font: 600 14px var(--body); color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Labs</div>
+    <h1>Aspect map</h1>
+    <p class="sub">How each verb's present turns into its perfective: which ending it has, which group that puts it in, and what the perfective stem does. Every active verb in the dictionary, with the forms the verb tables show.</p>
+  </header>
+
+  <div class="controls">
+    <div><span class="seg-label">Verbs</span><span class="seg" id="scope">
+      <button type="button" data-v="all" aria-pressed="true">All</button>
+      <button type="button" data-v="list" aria-pressed="false">My word list</button>
+    </span></div>
+    <div><span class="seg-label">Size by</span><span class="seg" id="weight">
+      <button type="button" data-v="count" aria-pressed="true">Number of verbs</button>
+      <button type="button" data-v="usage" aria-pressed="false">Usage</button>
+    </span></div>
+  </div>
+
+  <section class="card">
+    <h2 class="small">From the present to the perfective</h2>
+    <p class="muted" id="flow-note"></p>
+    <div class="chart" id="flow"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="card" id="panel">
+    <div class="path" id="path"></div>
+    <p class="muted" id="path-note"></p>
+    <div class="table-wrap" id="verbs-wrap" hidden>
+      <table class="verbs">
+        <thead>
+          <tr><th class="group past" colspan="2">Past</th><th class="group">Present</th><th class="group future" colspan="2">Future</th><th></th></tr>
+          <tr><th class="sub p">perfective</th><th class="sub i">continuous</th><th class="sub i">continuous</th><th class="sub i">continuous</th><th class="sub p">perfective</th><th class="sub">meaning</th></tr>
+        </thead>
+        <tbody id="verbs"></tbody>
+      </table>
+    </div>
+    <button id="more" type="button" hidden>Show all</button>
+  </section>
+
+  <section class="card">
+    <h2 class="small">Group size against usage</h2>
+    <p class="muted">Left, each group's share of the verbs; right, its share of verb usage in a subtitle corpus, by the frequency of the dictionary form. The groups that slope up are worth learning before their size suggests. Click a group to list its verbs.</p>
+    <div class="chart" id="slope"></div>
+  </section>
+
+  <p class="muted" id="foot"></p>
+</div>
+<div id="tip" hidden></div>
+
+<script src="../vendor/d3/d3.min.js"></script>
+<script src="../vendor/d3/d3-sankey.min.js"></script>
+<script src="../javascripts/greek-verbs.js"></script>
+<script src="../javascripts/aspect-fork.js"></script>
+<script>
+"use strict";
+let DATA;  // aspect-map.json, with the groups from aspect-fork.js
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const fmt = d3.format(",");
+const pct = x => x >= 0.095 ? `${Math.round(x * 100)}%` : `${(x * 100).toFixed(1)}%`;
+
+// Short names for the chart's middle column; the full names and rules show under it.
+const SHORT = {
+  labials: "Labials", velars: "Velars", dentals: "Dentals", "zeta-xi": "-ζω taking ξ", ev: "-εύω",
+  vowel: "Vowel stem", "nu-sigma": "-νω: ν → σ", liquids: "Nasals & liquids", same: "Same both ways",
+  strong: "Strong aorist", aino: "-αίνω: -ησ- / -ασ-", "b1-eta": "-άω: -ησ-", "b1-other": "-άω: -ασ- -αξ- …",
+  b2: "-ώ (-είς)", "no-perf": "No perfective", irregular: "Irregular",
+};
+// One colour per perfective outcome (--o-* in the style above), the same in both charts
+const colour = sig => `var(--o-${sig})`;
+
+const COLUMNS = [
+  { key: "ending", items: [], name: e => e.label, title: "Present ending" },
+  { key: "group", items: AspectFork.GROUPS.filter(g => g.id !== "missing"), name: g => SHORT[g.id] || g.name, title: "Group" },
+  { key: "signature", items: [], name: s => s.label, title: "Perfective" },
+];
+const GROUP = AspectFork.GROUP;
+const label = (key, id) => COLUMNS.find(c => c.key === key).items.find(i => i.id === id);
+
+const state = { scope: "all", weight: "count", sel: {}, shown: 40 };
+const verbsIn = () => DATA.verbs.filter(v => state.scope === "all" || v.list);
+const value = vs => state.weight === "count" ? vs.length : d3.sum(vs, v => v.f);
+const matches = (v, sel = state.sel) => Object.entries(sel).every(([k, id]) => v[k] === id);
+
+// Each group's main outcome colours its bars in the slope chart
+const mainSignature = vs => d3.greatest(d3.rollups(vs, g => g.length, v => v.signature), d => d[1])?.[0];
+
+// ---------- Flow chart ----------
+function drawFlow() {
+  const vs = verbsIn();
+  const W = 1000, H = 640, M = { top: 34, right: 210, bottom: 8, left: 215 };
+  const nodes = [], index = new Map();
+  COLUMNS.forEach((col, c) => col.items.forEach(item => {
+    index.set(`${col.key}:${item.id}`, nodes.length);
+    nodes.push({ key: col.key, id: item.id, name: col.name(item), column: c });
+  }));
+  const linkMap = new Map();
+  for (const v of vs) {
+    for (const [a, b] of [["ending", "group"], ["group", "signature"]]) {
+      const k = `${a}:${v[a]}|${b}:${v[b]}`;
+      if (!linkMap.has(k)) linkMap.set(k, { source: index.get(`${a}:${v[a]}`), target: index.get(`${b}:${v[b]}`), verbs: [], from: a, to: b });
+      linkMap.get(k).verbs.push(v);
+    }
+  }
+  const links = [...linkMap.values()].map(l => ({ ...l, value: value(l.verbs) })).filter(l => l.value > 0)
+    .sort((a, b) => a.source - b.source || a.target - b.target);
+  // Only nodes something flows through
+  const used = new Set(links.flatMap(l => [l.source, l.target]));
+  const keep = nodes.map((n, i) => used.has(i) ? i : -1).filter(i => i >= 0);
+  const remap = new Map(keep.map((old, i) => [old, i]));
+  const graph = d3.sankey()
+    .nodeAlign(d3.sankeyLeft)
+    .nodeSort(null).linkSort(null)
+    .nodeWidth(12).nodePadding(9)
+    .extent([[M.left, M.top], [W - M.right, H - M.bottom]])({
+      nodes: keep.map(i => ({ ...nodes[i] })),
+      links: links.map(l => ({ ...l, source: remap.get(l.source), target: remap.get(l.target) })),
+    });
+
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img")
+    .attr("aria-label", "Flow from present endings through groups to perfective outcomes");
+  const xs = [0, 1, 2].map(c => graph.nodes.find(n => n.column === c)?.x0 ?? 0);
+  svg.append("g").selectAll("text").data(COLUMNS).join("text").attr("class", "col")
+    .attr("x", (d, c) => c === 0 ? xs[0] + 12 : c === 2 ? xs[2] : xs[1]).attr("y", 14)
+    .attr("text-anchor", (d, c) => c === 0 ? "end" : "start").text(d => d.title);
+
+  const total = d3.sum(graph.nodes.filter(n => n.column === 0), n => n.value);
+  const sel = state.sel;
+  const any = Object.keys(sel).length > 0;
+  const linkG = svg.append("g").classed("faded", any);
+  linkG.selectAll("path").data(graph.links).join("path")
+    .attr("class", l => "link" + (any && l.verbs.some(v => matches(v)) ? " on" : ""))
+    .attr("d", d3.sankeyLinkHorizontal())
+    .style("stroke", l => colour(l.to === "signature" ? l.target.id : mainSignature(l.verbs)))
+    .attr("stroke-width", l => Math.max(1, l.width))
+    .on("mousemove", (e, l) => tip(e, `${esc(l.source.name)} → ${esc(l.target.name)}<br><b>${amount(l.value)}</b>${sample(l.verbs)}`))
+    .on("mouseleave", hideTip)
+    .on("click", (e, l) => select({ [l.from]: l.source.id, [l.to]: l.target.id }));
+
+  const node = svg.append("g").selectAll("g").data(graph.nodes).join("g")
+    .attr("class", n => "node" + (sel[n.key] === n.id ? " sel" : ""))
+    .on("mousemove", (e, n) => tip(e, `<b>${esc(n.name)}</b><br>${amount(n.value)} · ${pct(n.value / total)}`))
+    .on("mouseleave", hideTip)
+    .on("click", (e, n) => select({ [n.key]: n.id }));
+  node.append("rect").attr("x", n => n.x0).attr("y", n => n.y0)
+    .attr("width", n => n.x1 - n.x0).attr("height", n => Math.max(1, n.y1 - n.y0))
+    .attr("rx", 2)
+    .style("fill", n => n.key === "signature" ? colour(n.id) : "var(--ink)");
+  // Labels: left of the first column, right of the others. Tiny nodes keep theirs in the tooltip.
+  node.filter(n => n.y1 - n.y0 >= 8).append("text").attr("class", n => "halo" + (/[α-ω]/.test(n.name) ? " el" : ""))
+    .attr("x", n => n.column === 0 ? n.x0 - 8 : n.x1 + 8).attr("y", n => (n.y0 + n.y1) / 2).attr("dy", "0.35em")
+    .attr("text-anchor", n => n.column === 0 ? "end" : "start")
+    .text(n => n.name)
+    .append("tspan").attr("class", "count").attr("dx", 6).text(n => state.weight === "count" ? fmt(n.value) : pct(n.value / total));
+
+  $("flow").replaceChildren(svg.node());
+  $("flow-note").textContent = state.weight === "count"
+    ? `${fmt(vs.length)} verbs. Each band is the verbs that take that path; click a band or a box to list them.`
+    : `The same ${fmt(vs.length)} verbs, sized by how often their dictionary form appears in a subtitle corpus. A few very common verbs (έχω, ξέρω, θέλω) make up much of it.`;
+  $("legend").innerHTML = DATA.signatures.map(s => `<span><i style="background:${colour(s.id)}"></i><b>${esc(s.label)}</b></span>`).join("");
+}
+
+const amount = x => state.weight === "count" ? `${fmt(x)} verb${x === 1 ? "" : "s"}` : `${fmt(x)} uses`;
+const sample = vs => `<br><span class="el">${vs.slice(0, 6).map(v => esc(v.greek)).join(", ")}${vs.length > 6 ? "…" : ""}</span>`;
+
+// ---------- Slope chart ----------
+function drawSlope() {
+  const vs = verbsIn();
+  const n = vs.length, usage = d3.sum(vs, v => v.f) || 1;
+  const rows = d3.groups(vs, v => v.group).map(([id, g]) => ({
+    id, name: SHORT[id] || id, left: g.length / n, right: d3.sum(g, v => v.f) / usage, sig: mainSignature(g),
+  }));
+  const W = 1000, H = 560, M = { top: 34, bottom: 16 }, X0 = 300, X1 = 700;
+  const y = d3.scaleLinear().domain([0, d3.max(rows, r => Math.max(r.left, r.right))]).nice().range([H - M.bottom, M.top]);
+  // Labels pushed apart so they don't overlap; the lines still end at the true values
+  const spread = (key) => {
+    const order = [...rows].sort((a, b) => y(a[key]) - y(b[key]));
+    let last = -Infinity;
+    for (const r of order) { r[key + "Y"] = Math.max(y(r[key]), last + 17); last = r[key + "Y"]; }
+  };
+  spread("left"); spread("right");
+
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${Math.max(H, d3.max(rows, r => Math.max(r.leftY, r.rightY)) + 20)}`)
+    .attr("role", "img").attr("aria-label", "Each group's share of verbs against its share of usage");
+  svg.append("text").attr("class", "col").attr("x", X0).attr("y", 14).attr("text-anchor", "middle").text("Share of verbs");
+  svg.append("text").attr("class", "col").attr("x", X1).attr("y", 14).attr("text-anchor", "middle").text("Share of usage");
+  for (const x of [X0, X1]) svg.append("line").attr("class", "axis").attr("x1", x).attr("x2", x).attr("y1", M.top - 6).attr("y2", H - M.bottom);
+
+  const chosen = state.sel.group;
+  const g = svg.append("g").selectAll("g").data(rows).join("g")
+    .attr("class", r => "slope" + (chosen && chosen !== r.id ? " dim" : ""))
+    .on("click", (e, r) => select({ group: r.id }))
+    .on("mousemove", (e, r) => tip(e, `<b>${esc(GROUP[r.id].name)}</b><br>${pct(r.left)} of verbs, ${pct(r.right)} of usage`))
+    .on("mouseleave", hideTip);
+  g.append("line").attr("x1", X0).attr("x2", X1).attr("y1", r => y(r.left)).attr("y2", r => y(r.right)).style("stroke", r => colour(r.sig));
+  g.append("circle").attr("cx", X0).attr("cy", r => y(r.left)).attr("r", 4).style("fill", r => colour(r.sig));
+  g.append("circle").attr("cx", X1).attr("cy", r => y(r.right)).attr("r", 4).style("fill", r => colour(r.sig));
+  g.append("text").attr("class", "halo").attr("x", X0 - 12).attr("y", r => r.leftY).attr("dy", "0.35em").attr("text-anchor", "end")
+    .text(r => r.name).append("tspan").attr("class", "count").attr("dx", 6).text(r => pct(r.left));
+  g.append("text").attr("class", "halo").attr("x", X1 + 12).attr("y", r => r.rightY).attr("dy", "0.35em")
+    .text(r => pct(r.right)).append("tspan").attr("dx", 6).text(r => r.name);
+  $("slope").replaceChildren(svg.node());
+}
+
+// ---------- The selected path's verbs ----------
+function drawPanel() {
+  const sel = state.sel;
+  const keys = COLUMNS.map(c => c.key).filter(k => sel[k]);
+  if (!keys.length) {
+    $("path").innerHTML = `<span class="muted">Click a band or a box in the chart to list its verbs, most common first.</span>`;
+    $("path-note").textContent = "";
+    $("verbs").innerHTML = "";
+    $("verbs-wrap").hidden = true;
+    $("more").hidden = true;
+    return;
+  }
+  const vs = verbsIn().filter(v => matches(v));
+  $("path").innerHTML = keys.map(k => `<span class="step" lang="el">${esc(COLUMNS.find(c => c.key === k).name(label(k, sel[k])))}</span>`)
+    .join(`<span class="arrow">→</span>`) + `<span class="muted">${fmt(vs.length)} verb${vs.length === 1 ? "" : "s"}</span><button id="clear" type="button">Clear</button>`;
+  const G = sel.group && GROUP[sel.group];
+  $("path-note").textContent = G ? `${G.name}: ${G.rule}. ${G.note}` : "";
+  // Past perfective, past continuous, present, future continuous, future perfective
+  const cell = (form, cls) => `<td class="${cls}" lang="el">${form ? AspectFork.markHTML(form) : `<span class="dash">—</span>`}</td>`;
+  $("verbs").innerHTML = vs.slice(0, state.shown).map(v => `<tr>
+      ${cell(v.aorist, "p")}${cell(v.imperfect, "i")}
+      <td class="now" lang="el">${AspectFork.markHTML(v.present)}${v.list ? `<span class="star" title="In your word list">★</span>` : ""}</td>
+      ${cell(v.present && "θα " + v.present, "i")}${cell(v.dependent && "θα " + v.dependent, "p")}
+      <td class="gloss">${esc(v.english)}${v.also ? `<span class="also">also <span lang="el">${esc(v.also.join(", "))}</span></span>` : ""}</td>
+    </tr>`).join("");
+  $("verbs-wrap").hidden = false;
+  $("more").hidden = vs.length <= state.shown;
+  $("more").textContent = `Show all ${fmt(vs.length)}`;
+}
+
+function select(sel) {
+  const same = JSON.stringify(sel) === JSON.stringify(state.sel);
+  state.sel = same ? {} : sel;
+  state.shown = 40;
+  draw();
+  if (!same) $("panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// ---------- Tooltip ----------
+function tip(e, html) {
+  const t = $("tip");
+  t.innerHTML = html;
+  t.hidden = false;
+  const x = Math.min(e.clientX + 14, innerWidth - t.offsetWidth - 8);
+  const y = e.clientY + 16 + t.offsetHeight > innerHeight ? e.clientY - t.offsetHeight - 12 : e.clientY + 16;
+  t.style.left = `${x}px`;
+  t.style.top = `${y}px`;
+}
+const hideTip = () => { $("tip").hidden = true; };
+
+// ---------- Controls ----------
+function draw() {
+  if (!DATA) return;
+  drawFlow();
+  drawSlope();
+  drawPanel();
+}
+for (const id of ["scope", "weight"]) {
+  $(id).addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    state[id] = b.dataset.v;
+    $(id).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    draw();
+  });
+}
+document.addEventListener("click", e => {
+  if (e.target.id === "clear") select(state.sel);
+  if (e.target.id === "more") { state.shown = Infinity; drawPanel(); }
+});
+fetch("../data/aspect-map.json").then(r => r.json()).then(data => {
+  DATA = data;
+  COLUMNS[0].items = data.endings;
+  COLUMNS[2].items = data.signatures;
+  $("foot").textContent = `${fmt(data.verbs.length)} active verbs, ${fmt(data.verbs.filter(v => v.list).length)} of them in your word list (★). Spellings of one verb count once.`;
+  draw();
+  document.fonts.ready.then(draw);
+});
+</script>
+</body>
+</html>

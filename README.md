@@ -27,11 +27,13 @@ The vocabulary sheet (`make sheet` opens it) feeds both the site and Anki. After
 
 ## Installing on a phone
 
-The site installs as three apps that work offline, so a drill and the dictionary can be open side by side:
+The site installs as four apps that work offline, so a drill and the dictionary can be open side by side:
 
-- **Greek Notes:** the grammar notes and the verb tools, https://gataky.github.io/greek-notes/
+- **Greek:** the hub, which opens all four, https://gataky.github.io/greek-notes/
+- **Greek Notes:** the grammar notes and the verb tools, https://gataky.github.io/greek-notes/notes/
 - **Greek Drills:** https://gataky.github.io/greek-notes/drills/
 - **Greek Dictionary:** https://gataky.github.io/greek-notes/dictionary/
+- **Greek Labs:** experiments like the aspect map, https://gataky.github.io/greek-notes/labs/
 
 Open each one's page and add it to the home screen: on iPhone, Safari → Share → Add to Home Screen; on Android, Chrome → Install app. The first visit online saves the whole site (every page, the verb data, search and fonts), and the dictionary saves its data the first time it opens. After that each app opens without a connection, and picks up new deploys the next time it's opened online.
 

@@ -3,9 +3,9 @@
   Source of the app icons in docs/icons/: one per app (hooks/apps.py), picked with ?app=. Each
   has its own background colour; the hub has the Αα and Greek key, the others a Material Symbols
   glyph (Apache 2.0): the dictionary "dictionary", the drills "fitness_center", the notes
-  "description". To re-render, from the repo root:
+  "description", the labs "lab_research". To re-render, from the repo root:
     CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    for app in home dictionary drills notes; do
+    for app in home dictionary drills notes labs; do
       "$CH" --headless --hide-scrollbars --force-device-scale-factor=2 --window-size=512,512 \
         --screenshot=$PWD/icon-1024.png "file://$PWD/scripts/icon.html?app=$app"
       for size in 512 192 180; do sips -s format png -Z $size icon-1024.png --out docs/icons/$app-$size.png; done
@@ -48,18 +48,20 @@ svg{display:block;width:100vw;height:100vh}
         style="filter:drop-shadow(0 0.5px 0.8px rgba(0,0,0,.25))" d=""/>
 </svg>
 <script>
-// Each app's background, top left to bottom right: gruvbox's blue, orange, aqua and purple (theme.css),
+// Each app's background, top left to bottom right: gruvbox's blue, orange, aqua, yellow and purple (theme.css),
 // darkening towards the corner. The letters and glyphs are gruvbox's cream, the α and key its yellow.
 const BACKGROUNDS = {
   dictionary: ["#458588", "#1f3f45"],
   drills: ["#d65d0e", "#6e2a05"],
   notes: ["#689d6a", "#2a4a35"],
+  labs: ["#d79921", "#5c3f0b"],
   home: ["#b16286", "#4a2238"],  // Greek, the hub
 };
 // Each app's glyph, from Material Symbols (24 by 24). The hub has none and keeps the letters.
 const GLYPHS = {
   dictionary: "M4,14.23H5.13L5.7,12.58H8.3l0.6,1.65H10L7.58,7.77H6.43L4,14.23Zm2.03-2.58L6.98,8.98H7.03l0.95,2.67H6.03ZM14,9.9V8.2q0.83-0.35 1.69-0.52T17.5,7.5q0.65,0 1.28,0.1T20,7.85v1.6q-0.6-0.22-1.21-0.34T17.5,9q-0.95,0-1.82,0.24Q14.8,9.48 14,9.9Zm0,5.5V13.7q0.83-0.35 1.69-0.53T17.5,13q0.65,0 1.28,0.1T20,13.35v1.6q-0.6-0.22-1.21-0.34T17.5,14.5q-0.95,0-1.82,0.22T14,15.4Zm0-2.75v-1.7q0.83-0.35 1.69-0.53t1.81-0.17q0.65,0 1.28,0.1T20,10.6v1.6q-0.6-0.22-1.21-0.34T17.5,11.75q-0.95,0-1.82,0.24Q14.8,12.23 14,12.65ZM6.5,16q1.18,0 2.29,0.26T11,17.05V7.2Q9.98,6.6 8.83,6.3T6.5,6Q5.6,6 4.71,6.18T3,6.7v9.9q0.88-0.3 1.74-0.45T6.5,16ZM13,17.05q1.1-0.53 2.21-0.79T17.5,16q0.9,0 1.76,0.15T21,16.6V6.7q-0.82-0.35-1.71-0.52T17.5,6q-1.18,0-2.32,0.3T13,7.2v9.85ZM12,20q-1.2-0.95-2.6-1.48T6.5,18q-1.05,0-2.06,0.27T2.5,19.05q-0.52,0.27-1.01-0.03Q1,18.73 1,18.15V6.1Q1,5.82 1.14,5.57Q1.28,5.32 1.55,5.2Q2.7,4.6 3.95,4.3T6.5,4Q7.95,4 9.34,4.38T12,5.5q1.28-0.75 2.66-1.13T17.5,4q1.3,0 2.55,0.3t2.4,0.9q0.27,0.13 0.41,0.38T23,6.1V18.15q0,0.58-0.49,0.88q-0.49,0.3-1.01,0.03q-0.92-0.5-1.94-0.78T17.5,18q-1.5,0-2.9,0.52T12,20ZM7,11.52Z",
   drills: "M20.65,9.38l-1.4-1.4L20,7.2L16.8,4L16.03,4.75L14.6,3.32l0.75-0.78q0.57-0.57 1.43-0.56T18.2,2.57L21.43,5.8Q22,6.38 22,7.21T21.43,8.63L20.65,9.38ZM8.65,21.4q-0.57,0.58-1.41,0.58T5.83,21.4L2.6,18.18Q2.03,17.6 2.03,16.76q0-0.84 0.58-1.41L3.35,14.6l1.43,1.42L4,16.77L7.23,20l0.75-0.77L9.4,20.65L8.65,21.4ZM18.58,13L20,11.58L12.43,4L11,5.43L18.58,13Zm-7,7L13,18.55L5.45,11L4,12.43L11.58,20Zm-0.15-5.85l2.75-2.72l-1.6-1.6L9.85,12.58l1.57,1.57ZM13,21.4q-0.57,0.58-1.42,0.58T10.15,21.4L2.6,13.85q-0.58-0.58-0.58-1.43T2.6,11L4.03,9.57Q4.6,9 5.44,9T6.85,9.57l1.58,1.57L11.18,8.4L9.6,6.85Q9.03,6.27 9.03,5.43Q9.03,4.57 9.6,4l1.42-1.43Q11.6,2 12.44,2q0.84,0 1.41,0.57l7.57,7.57Q22,10.73 22,11.56t-0.57,1.41L20,14.4q-0.57,0.58-1.43,0.58q-0.85,0-1.42-0.58L15.6,12.83l-2.75,2.75l1.57,1.57Q15,17.73 15,18.56t-0.57,1.41L13,21.4Z",
+  labs: "M8,17V15h2.18q-0.13,0.5-0.16,1t0.01,1H8Zm0,5q-2.07,0-3.54-1.46T3,17V8Q2.18,8 1.59,7.41T1,6V4Q1,3.17 1.59,2.59T3,2H13q0.83,0 1.41,0.59T15,4V6q0,0.82-0.59,1.41T13,8v3.02q-0.6,0.38-1.1,0.88T11.03,13H8V11h3V8H5v9q0,1.25 0.88,2.13T8,20q0.75,0 1.36-0.32t1.04-0.9q0.2,0.5 0.45,0.95t0.6,0.88q-0.68,0.65-1.55,1.02T8,22ZM3,6H13V4H3V6ZM18.28,18.27Q19,17.55 19,16.5t-0.72-1.78T16.5,14t-1.77,0.72T14,16.5t0.73,1.77T16.5,19t1.78-0.73ZM21.6,23l-2.7-2.7q-0.55,0.35-1.15,0.52T16.5,21q-1.88,0-3.19-1.31T12,16.5t1.31-3.19T16.5,12t3.19,1.31T21,16.5q0,0.65-0.17,1.25T20.3,18.9L23,21.6L21.6,23ZM3,6V4V6Z",
   notes: "M8,18h8V16H8v2Zm0-4h8V12H8v2ZM6,22q-0.82,0-1.41-0.59T4,20V4Q4,3.17 4.59,2.59T6,2h8l6,6V20q0,0.82-0.59,1.41T18,22H6ZM13,9V4H6V20H18V9H13ZM6,4V9V4V9V20V4Z",
 };
 const app = new URLSearchParams(location.search).get("app");

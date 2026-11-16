@@ -16,7 +16,7 @@ ANKI        := anki/sync
 DRY_RUN     := $(if $(DRY),--dry-run)
 
 .DEFAULT_GOAL := help
-.PHONY: help install upgrade themes sync fetch-dictionary dictionary publish-dictionary verb-forms declensions anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet
+.PHONY: help install upgrade themes sync fetch-dictionary dictionary publish-dictionary verb-forms declensions anki-verbs anki-build anki-test push-words push-verbs anki test dump serve build check clean sheet aspect-map
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-18s %s\n", $$1, $$2}'
@@ -40,6 +40,7 @@ sync: fetch-dictionary ## Pull verbs, nouns and adjectives from the Google Sheet
 	@$(NODE) tests/test_nouns.js
 	@$(NODE) tests/test_preposition_sentences.js
 	@$(NODE) scripts/build_anki_verbs.js
+	@$(NODE) scripts/build_aspect_map.js
 
 fetch-dictionary: ## Download the pinned dictionary into docs/data/ if it isn't there
 	@if [ ! -f $(DICT_GZ) ]; then \
@@ -74,12 +75,17 @@ verb-forms: ## Copy our verbs' forms from the dictionary into verb-forms.json (D
 	@$(NODE) tests/test_aspect_forks.js
 	@$(NODE) tests/test_verb_buckets.js
 	@$(NODE) scripts/build_anki_verbs.js
+	@$(MAKE) --no-print-directory fetch-dictionary && $(NODE) scripts/build_aspect_map.js
 
 declensions: fetch-dictionary ## Copy the word list's noun and adjective tables from the dictionary into declensions.json
 	$(NODE) scripts/build_declensions.js
 	@git diff --stat -- docs/data/declensions.json
 	@$(NODE) tests/test_nouns.js
 	@$(NODE) tests/test_preposition_sentences.js
+
+aspect-map: fetch-dictionary ## Write the aspect map's data (labs) into docs/data/aspect-map.json
+	$(NODE) scripts/build_aspect_map.js
+	@git diff --stat -- docs/data/aspect-map.json
 
 anki-verbs: ## Write the verb cards for anki/ into exports/anki-verbs.json
 	$(NODE) scripts/build_anki_verbs.js

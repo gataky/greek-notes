@@ -107,3 +107,6 @@ nav:
       - Prepositions: drills/prepositions.md
       - Numbers: drills/numbers.md
   - Dictionary: dictionary/index.md
+  - Labs:
+      - Labs: labs/index.md
+      - Aspect map: labs/aspect-map.md

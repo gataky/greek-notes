@@ -1,11 +1,11 @@
-"""MkDocs hook that splits the site into installable apps: the dictionary, the drills and the
-notes (the grammar and the tools), each in its own folder with its own manifest, and Greek, the
-hub at the root that links to the three (and has the rest of the site). A page belongs to the
+"""MkDocs hook that splits the site into installable apps: the dictionary, the drills, the
+notes (the grammar and the tools) and the labs, each in its own folder with its own manifest, and
+Greek, the hub at the root that links to the four (and has the rest of the site). A page belongs to the
 app whose folder holds it.
 
 For every page it gives the templates `app` (the names from that app's manifest, used by
 overrides/main.html), the app's name as the site name, and a nav with only that app's pages,
-so the menu stays inside it. One service worker (docs/sw.js) still serves all three.
+so the menu stays inside it. One service worker (docs/sw.js) still serves them all.
 """
 
 import copy
@@ -16,7 +16,7 @@ from mkdocs.structure.nav import Navigation
 
 # Folder of each app, most specific first: the hub's "" matches every page. The id names the
 # icons (icons/<id>-192.png).
-APPS = {"dictionary": "dictionary/", "drills": "drills/", "notes": "notes/", "home": ""}
+APPS = {"dictionary": "dictionary/", "drills": "drills/", "notes": "notes/", "labs": "labs/", "home": ""}
 
 _apps = {}
 
