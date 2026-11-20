@@ -13,6 +13,10 @@
 <link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <script src="../javascripts/greek-font.js"></script>
 <style>
+/* Wide enough for the conjugation's five columns (verb-grid.js) without scrolling: every word-list
+   verb fits, and all but the longest dictionary ones. Prose keeps its reading width. */
+.wrap { max-width: 1180px; }
+
 /* Shown on its own and from the dictionary. The notes page hides the header. */
 .back { align-self: flex-start; margin-bottom: 10px; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: none; }
 
@@ -45,7 +49,7 @@
 .list .g { font-family: var(--display); font-size: 18px; white-space: nowrap; }
 .list .e { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.credit { margin: 0; color: var(--muted); font-size: 13px; }
+.credit { margin: 0; color: var(--muted); font-size: 13px; max-width: 75ch; }
 .credit a { color: inherit; }
 </style>
 </head>

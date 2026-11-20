@@ -26,6 +26,10 @@
 .gender.neuter { --gender: var(--neuter); }
 .gender { color: var(--surface); background: var(--gender); }
 
+/* Wide enough for the conjugation's five columns (verb-grid.js) without scrolling: every word-list
+   verb fits, and all but the longest dictionary ones. Prose keeps its reading width. */
+.wrap { max-width: 1180px; }
+
 /* Search box */
 #search { width: 100%; font: 400 20px var(--body); padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
 #search:focus { border-color: var(--accent); outline: none; }
@@ -54,9 +58,9 @@
 .entry { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .entry + .entry { border-top: 2px solid var(--line); margin-top: 10px; padding-top: 22px; }
 .entry .pos { font-size: 20px; font-weight: 600; line-height: 1.2; margin: 0 0 2px; padding-left: 10px; border-left: 4px solid var(--pos, var(--accent)); }
-.entry .head { color: var(--muted); font-size: 15px; margin: 0; }
+.entry .head { color: var(--muted); font-size: 15px; margin: 0; max-width: 75ch; }
 .head .gender { font-size: 14px; font-weight: 600; padding: 1px 9px; border-radius: 999px; }
-.senses { margin: 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; }
+.senses { margin: 0; padding-left: 26px; max-width: 75ch; display: flex; flex-direction: column; gap: 8px; }
 .senses li::marker { color: var(--muted); font-size: 14px; }
 .entry > .conjugation, .entry > .declension { margin-top: 10px; }
 .label { color: var(--muted); font-style: italic; font-size: 14px; }
@@ -68,7 +72,7 @@
 a.w { font-family: var(--display); font-size: 1.1em; text-decoration: none; }
 a.w:hover { text-decoration: underline; }
 .card details summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
-.card details p { margin: 8px 0 0; font-size: 15px; }
+.card details p { margin: 8px 0 0; font-size: 15px; max-width: 75ch; }
 .links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; font-weight: 600; }
 
 /* A verb's conjugation (verb-grid.js) and a noun's or adjective's declension, inside the entry */
@@ -80,7 +84,7 @@ a.w:hover { text-decoration: underline; }
 .declension.adjective td:not(.who) { padding-right: 18px; }
 .declension.adjective td.gap { padding: 0; }
 
-footer { color: var(--muted); font-size: 13px; }
+footer { color: var(--muted); font-size: 13px; max-width: 75ch; }
 footer a { color: inherit; }
 </style>
 </head>
