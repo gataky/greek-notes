@@ -1,0 +1,411 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  Prototype from 2026-11-19, kept for reference: the verb grid as a timeline, with two phone layouts.
+    A · Top to bottom: one small card per tense in time order (singular | plural), under Past / Now /
+        Future dividers, like the sheet's `verb tenses` tab. Not used.
+    C · Scroll sideways: the wide grid with the person column fixed. This is what verb-grid.js does.
+  Standalone: open it in a browser. The forms of γράφω, αγαπάω, χρησιμοποιώ and παραλαμβάνω are
+  embedded (verbToShow()'s, as of that day). Its headings are older than the site's (Now, not
+  Present; "past simple" over "simple"), and its colours are its own, not the aspect forks'.
+  To switch the site's phones to A, port optAHTML() and the .a-* styles into verb-grid.js/.css.
+-->
+<title>Timeline Verb Grid</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=GFS+Neohellenic:wght@400;700&display=swap">
+<style>
+/* Layout: the site's verb card, wide timeline first, then the two phone layouts side by side in phone-sized frames.
+   Colours: the site's default theme (theme.css), light and dark. */
+:root {
+  --bg: #f2e5bc; --surface: #f9f5d7; --ink: #282828; --muted: #665c54; --line: #bdae93;
+  --accent: #006598; --accent-soft: #ebdbb2; --aug: #a21f79; --warn: #ad3800;
+  --tint: #efe3bd; --now: #fffbe6;
+  --display: "GFS Neohellenic", "Noto Serif", Georgia, serif;
+  --body: "Commissioner", "Noto Sans", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d2021; --surface: #282828; --ink: #fbf1c7; --muted: #bdae93; --line: #665c54;
+    --accent: #5eb3cc; --accent-soft: #3c3836; --aug: #f17da0; --warn: #febc00;
+    --tint: #32302f; --now: #2f2c2a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d2021; --surface: #282828; --ink: #fbf1c7; --muted: #bdae93; --line: #665c54;
+  --accent: #5eb3cc; --accent-soft: #3c3836; --aug: #f17da0; --warn: #febc00;
+  --tint: #32302f; --now: #2f2c2a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.wrap > * { min-width: 0; }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(32px, 6vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; max-width: 62ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 14px; cursor: pointer; font-family: var(--display); font-size: 19px; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.chip.small { font-family: var(--body); font-size: 13px; padding: 5px 12px; }
+.spacer { flex: 1; }
+
+section { display: flex; flex-direction: column; gap: 12px; }
+section > h2 { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+section > p { margin: 0; color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.verb-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.verb-top h3 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 7vw, 42px); line-height: 1.1; margin: 0; }
+.english { color: var(--muted); font-size: 16px; }
+
+/* The timeline table (wide, and option C) */
+.scroll { overflow-x: auto; min-width: 0; }
+table.tl { border-collapse: collapse; width: 100%; }
+.tl th { text-align: left; font-weight: 600; font-size: 12px; color: var(--muted); padding: 0 12px 4px; vertical-align: bottom; }
+.tl th.time { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: 5px; }
+.tl th.time.past { text-align: left; }
+.tl th.time.now { text-align: center; }
+.tl th.time.future { text-align: right; }
+.tl th.sub { font-weight: 500; font-size: 13px; color: var(--ink); padding-top: 8px; }
+.tl th.sub small { display: block; font-family: var(--display); font-weight: 400; font-size: 14px; color: var(--muted); line-height: 1.2; }
+.tl th.stemrow { padding-top: 2px; padding-bottom: 8px; }
+.stem { font-family: var(--display); font-size: 18px; font-weight: 400; color: var(--accent); }
+.stem b { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.aspect { display: block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.tl td { border-top: 1px solid var(--line); padding: 5px 12px; vertical-align: top; font-family: var(--display); font-size: 19px; white-space: nowrap; }
+.tl td.who, .tl th.who { font-family: var(--body); font-size: 13px; color: var(--muted); padding-left: 0; padding-top: 8px; }
+.tl .perf { background: var(--tint); }
+.tl .nowcol { background: var(--now); box-shadow: inset 1px 0 var(--line), inset -1px 0 var(--line); }
+.tl tr.extra td { border-top-width: 2px; }
+.tl tr.extra td.who { padding-top: 9px; }
+.tl td.blank { color: transparent; }
+
+.pre { color: var(--muted); }
+.end { color: var(--accent); }
+.aug { color: var(--aug); font-weight: 700; }
+.alt { display: block; font-size: 15px; color: var(--muted); }
+.alt .end { color: inherit; }
+.alt .aug { color: inherit; font-weight: 400; }
+.dash { color: var(--muted); }
+.sep { color: var(--muted); margin: 0 6px; }
+.imp { display: inline-block; vertical-align: top; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 22px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); margin: 0; }
+.legend span.form { font-family: var(--display); font-size: 17px; color: var(--ink); }
+.key { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); display: inline-block; }
+
+/* Phones: two frames side by side, each the width of a phone */
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+.phone { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.phone-head { display: flex; flex-direction: column; gap: 2px; }
+.phone-head h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.phone-head p { margin: 0; font-size: 14px; color: var(--muted); }
+.frame { width: 100%; max-width: 390px; border: 1px solid var(--line); border-radius: 24px; background: var(--bg); padding: 14px 10px; }
+.frame .card { padding: 14px 12px; border-radius: 12px; gap: 12px; }
+.frame .tl td { font-size: 17px; padding: 5px 9px; }
+.frame .tl th { padding-left: 9px; padding-right: 9px; }
+.frame .tl td.who, .frame .tl th.who { padding-left: 0; }
+
+/* Option C: sticky person column, fades at the scrolling edges */
+.c-scroll { overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-left: 56px; position: relative; overscroll-behavior-x: contain; }
+.c-scroll .who { position: sticky; left: 0; z-index: 1; background: var(--surface); min-width: 56px; }
+.c-scroll .who::after { content: ""; position: absolute; top: 0; bottom: -1px; right: -10px; width: 10px; background: linear-gradient(to right, var(--shadow, transparent), transparent); pointer-events: none; }
+.c-scroll.scrolled { --shadow: rgba(0,0,0,.12); }
+:root[data-theme="dark"] .c-scroll.scrolled { --shadow: rgba(0,0,0,.45); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .c-scroll.scrolled { --shadow: rgba(0,0,0,.45); } }
+.c-scroll th.sub { scroll-snap-align: start; }
+.c-wrap { position: relative; min-width: 0; }
+.c-wrap::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 22px; background: linear-gradient(to left, var(--surface), transparent); pointer-events: none; opacity: var(--fade, 1); transition: opacity .2s; }
+.c-wrap.at-end { --fade: 0; }
+.c-opts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+
+/* Option A: one card per tense, top to bottom in time order */
+.a-list { display: flex; flex-direction: column; gap: 8px; }
+.a-time { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.a-time::after { content: ""; flex: 1; height: 2px; background: var(--accent); }
+.a-time:first-child { margin-top: 0; }
+.a-tense { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 6px; background: var(--surface); min-width: 0; }
+.a-tense.perf { background: var(--tint); }
+.a-tense.nowcol { background: var(--now); border-color: var(--muted); }
+.a-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.a-name { font-size: 13px; font-weight: 600; }
+.a-name small { font-family: var(--display); font-weight: 400; font-size: 14px; color: var(--muted); margin-left: 6px; }
+.a-grid { display: grid; grid-template-columns: 14px minmax(0, 1fr) minmax(0, 1fr); column-gap: 8px; }
+.a-grid > div { border-top: 1px solid var(--line); padding: 3px 0; font-family: var(--display); font-size: 17px; overflow-wrap: anywhere; }
+.a-grid > .n { font-family: var(--body); font-size: 12px; color: var(--muted); padding-top: 6px; }
+.a-grid > .h { border-top: 0; font-family: var(--body); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0 0 2px; }
+.a-extra { border-top: 2px solid var(--line); margin-top: 2px; padding-top: 4px; font-size: 13px; color: var(--muted); }
+.a-extra .form { font-family: var(--display); font-size: 17px; color: var(--ink); }
+.a-perfect { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 13px; color: var(--muted); }
+.a-perfect .form { font-family: var(--display); font-size: 17px; color: var(--ink); }
+
+.verdict { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--muted); max-width: 70ch; }
+.verdict strong { color: var(--ink); }
+
+@media (max-width: 620px) {
+  .order { display: flex; flex-direction: column; gap: 28px; }
+  .order .s-phones { order: -1; }
+  .card { padding: 16px 14px; }
+  .frame { border: 0; padding: 0; border-radius: 0; background: transparent; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) { .c-wrap::after { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Verb tables · prototype</p>
+    <h1>The conjugation as a timeline</h1>
+    <p class="lede">Past simple, past continuous, present, then the two futures, left to right. The tinted columns share the simple (perfective) stem, the plain ones the continuous stem. Pick a verb: χρησιμοποιώ is the longest, αγαπάω has the most alternatives.</p>
+    <div class="controls">
+      <div class="controls" id="verbs" role="group" aria-label="Verb"></div>
+      <span class="spacer"></span>
+      <button class="chip small" id="theme" type="button">Dark</button>
+    </div>
+  </header>
+
+  <div class="order">
+    <section class="s-wide">
+      <h2>Wide screens</h2>
+      <div class="card" id="wide"></div>
+    </section>
+
+    <section class="s-phones">
+      <h2>Phones</h2>
+      <p>On a computer the two frames are about a phone's width. On a phone they fill the screen, so try them there.</p>
+      <div class="phones">
+        <div class="phone">
+          <div class="phone-head">
+            <h3>A · Top to bottom</h3>
+            <p>One small card per tense, in time order down the page, like your sheet.</p>
+          </div>
+          <div class="frame"><div class="card" id="optA"></div></div>
+        </div>
+        <div class="phone">
+          <div class="phone-head">
+            <h3>C · Scroll sideways</h3>
+            <p>The wide grid. The person column stays put and the columns snap into place.</p>
+          </div>
+          <div class="c-opts" role="group" aria-label="Where C opens">Opens at
+            <button class="chip small" type="button" data-open="past" aria-pressed="true">the past</button>
+            <button class="chip small" type="button" data-open="now" aria-pressed="false">now</button>
+          </div>
+          <div class="frame"><div class="card" id="optC"></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const DATA = {"γράφω":{"english":"I write","cls":"a1","voice":"active","present":[["γράφ|ω"],["γράφ|εις"],["γράφ|ει"],["γράφ|ουμε"],["γράφ|ετε"],["γράφ|ουν(ε)"]],"imperfect":[["έγραφ|α"],["έγραφ|ες"],["έγραφ|ε"],["γράφ|αμε"],["γράφ|ατε"],["έγραφ|αν","γράφ|αν(ε)"]],"aorist":[["έγραψ|α"],["έγραψ|ες"],["έγραψ|ε"],["γράψ|αμε"],["γράψ|ατε"],["έγραψ|αν","γράψ|αν(ε)"]],"futCont":[["θα γράφ|ω"],["θα γράφ|εις"],["θα γράφ|ει"],["θα γράφ|ουμε"],["θα γράφ|ετε"],["θα γράφ|ουν(ε)"]],"futSimple":[["θα γράψ|ω"],["θα γράψ|εις"],["θα γράψ|ει"],["θα γράψ|ουμε"],["θα γράψ|ετε"],["θα γράψ|ουν(ε)"]],"impCont":[["γράφ|ε"],["γράφ|ετε"]],"impSimple":[["γράψ|ε"],["γράψ|τε","γράφ|τε"]],"perfect":[["έχω γράψ|ει"],["έχεις γράψ|ει"],["έχει γράψ|ει"],["έχουμε γράψ|ει"],["έχετε γράψ|ει"],["έχουν(ε) γράψ|ει"]],"pluperfect":[["είχα γράψ|ει"],["είχες γράψ|ει"],["είχε γράψ|ει"],["είχαμε γράψ|ει"],["είχατε γράψ|ει"],["είχαν(ε) γράψ|ει"]],"futPerfect":[["θα έχω γράψ|ει"],["θα έχεις γράψ|ει"],["θα έχει γράψ|ει"],["θα έχουμε γράψ|ει"],["θα έχετε γράψ|ει"],["θα έχουν(ε) γράψ|ει"]],"generated":{"present":[false,false,false,false,false,false],"imperfect":[false,false,false,false,false,false],"dependent":[false,false,false,false,false,false],"past":[false,false,false,false,false,false],"impCont":[false,false],"impSimple":[false,false],"perfect":false}},"αγαπάω":{"english":"I like, love","cls":"b1","voice":"active","present":[["αγαπ|άω","αγαπ|ώ"],["αγαπ|άς"],["αγαπ|άει","αγαπ|ά"],["αγαπ|άμε","αγαπ|ούμε"],["αγαπ|άτε"],["αγαπ|άν(ε)","αγαπ|ούν(ε)"]],"imperfect":[["αγαπ|ούσα","αγάπ|αγα"],["αγαπ|ούσες","αγάπ|αγες"],["αγαπ|ούσε","αγάπ|αγε"],["αγαπ|ούσαμε","αγαπ|άγαμε"],["αγαπ|ούσατε","αγαπ|άγατε"],["αγαπ|ούσαν(ε)","αγάπ|αγαν","αγαπ|άγανε"]],"aorist":[["αγάπησ|α"],["αγάπησ|ες"],["αγάπησ|ε"],["αγαπήσ|αμε"],["αγαπήσ|ατε"],["αγάπησ|αν","αγαπήσ|αν(ε)"]],"futCont":[["θα αγαπ|άω","θα αγαπ|ώ"],["θα αγαπ|άς"],["θα αγαπ|άει","θα αγαπ|ά"],["θα αγαπ|άμε","θα αγαπ|ούμε"],["θα αγαπ|άτε"],["θα αγαπ|άν(ε)","θα αγαπ|ούν(ε)"]],"futSimple":[["θα αγαπήσ|ω"],["θα αγαπήσ|εις"],["θα αγαπήσ|ει"],["θα αγαπήσ|ουμε"],["θα αγαπήσ|ετε"],["θα αγαπήσ|ουν(ε)"]],"impCont":[["αγάπ|α","αγάπ|αγε"],["αγαπ|άτε"]],"impSimple":[["αγάπησ|ε","αγάπ|α"],["αγαπήσ|τε"]],"perfect":[["έχω αγαπήσ|ει"],["έχεις αγαπήσ|ει"],["έχει αγαπήσ|ει"],["έχουμε αγαπήσ|ει"],["έχετε αγαπήσ|ει"],["έχουν(ε) αγαπήσ|ει"]],"pluperfect":[["είχα αγαπήσ|ει"],["είχες αγαπήσ|ει"],["είχε αγαπήσ|ει"],["είχαμε αγαπήσ|ει"],["είχατε αγαπήσ|ει"],["είχαν(ε) αγαπήσ|ει"]],"futPerfect":[["θα έχω αγαπήσ|ει"],["θα έχεις αγαπήσ|ει"],["θα έχει αγαπήσ|ει"],["θα έχουμε αγαπήσ|ει"],["θα έχετε αγαπήσ|ει"],["θα έχουν(ε) αγαπήσ|ει"]],"generated":{"present":[false,false,false,false,false,false],"imperfect":[false,false,false,false,false,false],"dependent":[false,false,false,false,false,false],"past":[false,false,false,false,false,false],"impCont":[false,false],"impSimple":[false,false],"perfect":false}},"χρησιμοποιώ":{"english":"I use","cls":"b2","voice":"active","present":[["χρησιμοποι|ώ"],["χρησιμοποι|είς"],["χρησιμοποι|εί"],["χρησιμοποι|ούμε"],["χρησιμοποι|είτε"],["χρησιμοποι|ούν(ε)"]],"imperfect":[["χρησιμοποι|ούσα"],["χρησιμοποι|ούσες"],["χρησιμοποι|ούσε"],["χρησιμοποι|ούσαμε"],["χρησιμοποι|ούσατε"],["χρησιμοποι|ούσαν(ε)"]],"aorist":[["χρησιμοποίησ|α"],["χρησιμοποίησ|ες"],["χρησιμοποίησ|ε"],["χρησιμοποιήσ|αμε"],["χρησιμοποιήσ|ατε"],["χρησιμοποίησ|αν","χρησιμοποιήσ|αν(ε)"]],"futCont":[["θα χρησιμοποι|ώ"],["θα χρησιμοποι|είς"],["θα χρησιμοποι|εί"],["θα χρησιμοποι|ούμε"],["θα χρησιμοποι|είτε"],["θα χρησιμοποι|ούν(ε)"]],"futSimple":[["θα χρησιμοποιήσ|ω"],["θα χρησιμοποιήσ|εις"],["θα χρησιμοποιήσ|ει"],["θα χρησιμοποιήσ|ουμε"],["θα χρησιμοποιήσ|ετε"],["θα χρησιμοποιήσ|ουν(ε)"]],"impCont":[[],["χρησιμοποι|είτε"]],"impSimple":[["χρησιμοποίησ|ε"],["χρησιμοποιήσ|τε"]],"perfect":[["έχω χρησιμοποιήσ|ει"],["έχεις χρησιμοποιήσ|ει"],["έχει χρησιμοποιήσ|ει"],["έχουμε χρησιμοποιήσ|ει"],["έχετε χρησιμοποιήσ|ει"],["έχουν(ε) χρησιμοποιήσ|ει"]],"pluperfect":[["είχα χρησιμοποιήσ|ει"],["είχες χρησιμοποιήσ|ει"],["είχε χρησιμοποιήσ|ει"],["είχαμε χρησιμοποιήσ|ει"],["είχατε χρησιμοποιήσ|ει"],["είχαν(ε) χρησιμοποιήσ|ει"]],"futPerfect":[["θα έχω χρησιμοποιήσ|ει"],["θα έχεις χρησιμοποιήσ|ει"],["θα έχει χρησιμοποιήσ|ει"],["θα έχουμε χρησιμοποιήσ|ει"],["θα έχετε χρησιμοποιήσ|ει"],["θα έχουν(ε) χρησιμοποιήσ|ει"]],"generated":{"present":[false,false,false,false,false,false],"imperfect":[false,false,false,false,false,false],"dependent":[false,false,false,false,false,false],"past":[false,false,false,false,false,false],"impCont":[false,false],"impSimple":[false,false],"perfect":false}},"παραλαμβάνω":{"english":"I receive, collect","cls":"a1","voice":"active","present":[["παραλαμβάν|ω"],["παραλαμβάν|εις"],["παραλαμβάν|ει"],["παραλαμβάν|ουμε"],["παραλαμβάν|ετε"],["παραλαμβάν|ουν(ε)"]],"imperfect":[["παραλάμβαν|α"],["παραλάμβαν|ες"],["παραλάμβαν|ε"],["παραλαμβάν|αμε"],["παραλαμβάν|ατε"],["παραλάμβαν|αν","παραλαμβάν|αν(ε)"]],"aorist":[["παρέλαβ|α"],["παρέλαβ|ες"],["παρέλαβ|ε"],["παραλάβ|αμε"],["παραλάβ|ατε"],["παρέλαβ|αν","παραλάβ|αν(ε)"]],"futCont":[["θα παραλαμβάν|ω"],["θα παραλαμβάν|εις"],["θα παραλαμβάν|ει"],["θα παραλαμβάν|ουμε"],["θα παραλαμβάν|ετε"],["θα παραλαμβάν|ουν(ε)"]],"futSimple":[["θα παραλάβ|ω"],["θα παραλάβ|εις"],["θα παραλάβ|ει"],["θα παραλάβ|ουμε"],["θα παραλάβ|ετε"],["θα παραλάβ|ουν(ε)"]],"impCont":[["παραλάμβαν|ε"],["παραλαμβάν|ετε"]],"impSimple":[["παράλαβ|ε"],["παραλάβ|ετε"]],"perfect":[["έχω παραλάβ|ει"],["έχεις παραλάβ|ει"],["έχει παραλάβ|ει"],["έχουμε παραλάβ|ει"],["έχετε παραλάβ|ει"],["έχουν(ε) παραλάβ|ει"]],"pluperfect":[["είχα παραλάβ|ει"],["είχες παραλάβ|ει"],["είχε παραλάβ|ει"],["είχαμε παραλάβ|ει"],["είχατε παραλάβ|ει"],["είχαν(ε) παραλάβ|ει"]],"futPerfect":[["θα έχω παραλάβ|ει"],["θα έχεις παραλάβ|ει"],["θα έχει παραλάβ|ει"],["θα έχουμε παραλάβ|ει"],["θα έχετε παραλάβ|ει"],["θα έχουν(ε) παραλάβ|ει"]],"generated":{"present":[false,false,false,false,false,false],"imperfect":[false,false,false,false,false,false],"dependent":[false,false,false,false,false,false],"past":[false,false,false,false,false,false],"impCont":[false,false],"impSimple":[false,false],"perfect":false}}};
+
+const PEOPLE = ["εγώ", "εσύ", "αυτός/ή/ό", "εμείς", "εσείς", "αυτοί/ές/ά"];
+const SHORT = ["εγώ", "εσύ", "αυτός", "εμείς", "εσείς", "αυτοί"];
+const COLS = [
+  { key: "aorist", en: "past simple", el: "Αόριστος", perf: true, time: "past", base: "futSimple" },
+  { key: "imperfect", en: "past continuous", el: "Παρατατικός", perf: false, time: "past", base: "present" },
+  { key: "present", en: "present", el: "Ενεστώτας", perf: false, time: "now" },
+  { key: "futCont", en: "future continuous", el: "Εξακολουθητικός Μέλλοντας", perf: false, time: "future" },
+  { key: "futSimple", en: "future simple", el: "Στιγμιαίος Μέλλοντας", perf: true, time: "future" },
+];
+
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const bare = ch => ch.normalize("NFD")[0].toLowerCase();
+const plain = f => f.replace("|", "");
+const dropTha = f => f.replace(/^θα /, "");
+
+// Where the augment is: an ε or η the base form (same person, no augment) doesn't have there,
+// added (έ|γραψα / γράψω) or in place of a vowel (παρ|έ|λαβα / παραλάβω).
+function augmentAt(past, base) {
+  const p = [...plain(past)].map(bare), b = [...plain(dropTha(base))].map(bare);
+  let i = 0;
+  while (i < p.length && i < b.length && p[i] === b[i]) i++;
+  if (i >= p.length || !"εη".includes(p[i])) return -1;
+  const next = p.slice(i + 1, i + 3).join("");
+  if (next.length < 2) return -1;
+  if (next === b.slice(i, i + 2).join("")) return i;
+  if (next === b.slice(i + 1, i + 3).join("") && "αεηιουω".includes(b[i])) return i;
+  return -1;
+}
+
+// "θα γράψ|ω" → muted θα, stem, accent ending; an augment index lights that letter.
+function formHTML(form, aug = -1) {
+  const space = form.lastIndexOf(" ");
+  const pre = space >= 0 ? form.slice(0, space + 1) : "";
+  const word = form.slice(pre.length);
+  const bar = word.indexOf("|");
+  const chars = [...word.replace("|", "")];
+  const stemLen = bar < 0 ? chars.length : [...word.slice(0, bar)].length;
+  let html = "";
+  chars.forEach((ch, i) => {
+    if (i === stemLen) html += `<span class="end">`;
+    html += i === aug ? `<span class="aug">${esc(ch)}</span>` : esc(ch);
+  });
+  if (stemLen < chars.length) html += `</span>`;
+  return (pre ? `<span class="pre">${esc(pre)}</span>` : "") + html;
+}
+
+function cellHTML(verb, col, i) {
+  const alts = verb[col.key][i] || [];
+  if (!alts.length) return `<span class="dash">—</span>`;
+  const base = col.base ? (verb[col.base][i] || [])[0] || "" : "";
+  const one = f => formHTML(f, base ? augmentAt(f, base) : -1);
+  const [main, ...rest] = alts;
+  return one(main) + rest.map(a => `<span class="alt">${one(a)}</span>`).join("");
+}
+
+// Stem chips: the simple stem's changed letters underlined (γράψ-, αγαπήσ-).
+function stems(verb) {
+  const word = f => dropTha(f || "");
+  const stemOf = f => (word(f).includes("|") ? word(f).split("|")[0] : "");
+  const imp = stemOf((verb.present[0] || [])[0]);
+  const perf = stemOf((verb.futSimple[0] || [])[0]);
+  const a = [...perf].map(bare), b = [...imp].map(bare);
+  let k = 0;
+  while (k < a.length && k < b.length && a[k] === b[k]) k++;
+  const perfHTML = perf ? esc([...perf].slice(0, k).join("")) + (k < a.length ? `<b>${esc([...perf].slice(k).join(""))}</b>` : "") + "-" : "";
+  return { imp: imp ? esc(imp) + "-" : "", perf: perfHTML };
+}
+
+const impHTML = pair => (pair.some(r => r.length)
+  ? pair.map(r => (r.length ? `<span class="imp">${formHTML(r[0])}${r.slice(1).map(a => `<span class="alt">${formHTML(a)}</span>`).join("")}</span>` : `<span class="dash">—</span>`)).join(`<span class="sep">·</span>`)
+  : `<span class="dash">—</span>`);
+
+const colClass = c => [c.perf ? "perf" : "", c.time === "now" ? "nowcol" : ""].join(" ").trim();
+
+function headingHTML(name, v) {
+  return `<div class="verb-top"><h3 lang="el">${esc(name)}</h3><span class="english">${esc(v.english)}</span></div>`;
+}
+
+function tableHTML(name, v, { short = false } = {}) {
+  const st = stems(v);
+  const labels = short ? SHORT : PEOPLE;
+  const time = `<tr><th class="who"></th>
+      <th class="time past" colspan="2">← past</th>
+      <th class="time now">now</th>
+      <th class="time future" colspan="2">future →</th></tr>`;
+  const subs = `<tr><th class="who"></th>${COLS.map(c => `<th class="sub ${colClass(c)}" data-col="${c.key}">${c.en}<small lang="el">${c.el}</small></th>`).join("")}</tr>`;
+  const stemRow = `<tr><th class="who"></th>${COLS.map(c => `<th class="stemrow ${colClass(c)}"><span class="aspect">${c.perf ? "simple" : "continuous"}</span><span class="stem" lang="el">${c.perf ? st.perf : st.imp}</span></th>`).join("")}</tr>`;
+  const rows = labels.map((who, i) => `<tr><td class="who">${who}</td>${COLS.map(c => `<td class="${colClass(c)}">${cellHTML(v, c, i)}</td>`).join("")}</tr>`).join("");
+  const imp = `<tr class="extra"><td class="who">imperative</td>
+      <td class="perf blank"></td><td class="blank"></td><td class="nowcol blank"></td>
+      <td>${impHTML(v.impCont)}</td><td class="perf">${impHTML(v.impSimple)}</td></tr>`;
+  const perfect = `<tr><td class="who">perfect</td>
+      <td colspan="2">${formHTML(v.pluperfect[0][0])}</td>
+      <td class="nowcol">${formHTML(v.perfect[0][0])}</td>
+      <td colspan="2">${formHTML(v.futPerfect[0][0])}</td></tr>`;
+  return `<table class="tl" lang="el"><thead>${time}${subs}${stemRow}</thead><tbody>${rows}${imp}${perfect}</tbody></table>`;
+}
+
+function naLine(v) {
+  const c = dropTha(v.futCont[0][0]), s = dropTha(v.futSimple[0][0]);
+  return `<span>After να, the futures without θα: <span class="form" lang="el">${formHTML("να " + c)} · ${formHTML("να " + s)}</span></span>`;
+}
+
+function legendHTML(v) {
+  return `<div class="legend">
+    ${naLine(v)}
+    <span class="key"><span class="swatch" style="background: var(--tint)"></span>simple stem</span>
+    <span class="key"><span class="aug" lang="el" style="font-family: var(--display); font-size: 17px">έ</span>augment</span>
+    <span class="key"><span class="end" lang="el" style="font-family: var(--display); font-size: 17px">-ω</span>ending</span>
+  </div>`;
+}
+
+function wideHTML(name, v) {
+  return headingHTML(name, v) + `<div class="scroll">${tableHTML(name, v)}</div>` + legendHTML(v);
+}
+
+function optCHTML(name, v) {
+  return headingHTML(name, v) + `<div class="c-wrap"><div class="c-scroll">${tableHTML(name, v, { short: true })}</div></div>` + legendHTML(v);
+}
+
+function optAHTML(name, v) {
+  const st = stems(v);
+  let html = headingHTML(name, v) + `<div class="a-list">`;
+  let lastTime = "";
+  for (const c of COLS) {
+    if (c.time !== lastTime) {
+      html += `<div class="a-time">${{ past: "Past", now: "Now", future: "Future" }[c.time]}</div>`;
+      lastTime = c.time;
+    }
+    const cells = [0, 1, 2].map(i => `<div class="n">${i + 1}</div><div lang="el">${cellHTML(v, c, i)}</div><div lang="el">${cellHTML(v, c, i + 3)}</div>`).join("");
+    const imp = c.key === "futCont" ? v.impCont : c.key === "futSimple" ? v.impSimple : null;
+    html += `<div class="a-tense ${colClass(c)}">
+      <div class="a-head"><span class="a-name">${c.en}<small lang="el">${c.el}</small></span><span class="stem" lang="el">${c.perf ? st.perf : st.imp}</span></div>
+      <div class="a-grid"><div class="h"></div><div class="h">singular</div><div class="h">plural</div>${cells}</div>
+      ${imp ? `<div class="a-extra">imperative <span class="form" lang="el">${impHTML(imp)}</span></div>` : ""}
+    </div>`;
+  }
+  html += `<div class="a-time">Perfect</div>
+    <div class="a-tense"><div class="a-perfect">
+      <span>past</span><span class="form" lang="el">${formHTML(v.pluperfect[0][0])}</span>
+      <span>now</span><span class="form" lang="el">${formHTML(v.perfect[0][0])}</span>
+      <span>future</span><span class="form" lang="el">${formHTML(v.futPerfect[0][0])}</span>
+    </div></div></div>`;
+  return html + legendHTML(v);
+}
+
+let current = Object.keys(DATA)[0];
+let openAt = "past";
+
+function wireC() {
+  const scroller = document.querySelector("#optC .c-scroll");
+  const wrap = document.querySelector("#optC .c-wrap");
+  const update = () => {
+    scroller.classList.toggle("scrolled", scroller.scrollLeft > 2);
+    wrap.classList.toggle("at-end", scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 2);
+  };
+  scroller.addEventListener("scroll", update, { passive: true });
+  if (openAt === "now") {
+    const th = scroller.querySelector('th[data-col="present"]');
+    const who = scroller.querySelector("td.who");
+    scroller.scrollLeft = th.offsetLeft - (who ? who.offsetWidth : 0);
+  } else scroller.scrollLeft = 0;
+  update();
+}
+
+function render() {
+  const v = DATA[current];
+  document.getElementById("wide").innerHTML = wideHTML(current, v);
+  document.getElementById("optA").innerHTML = optAHTML(current, v);
+  document.getElementById("optC").innerHTML = optCHTML(current, v);
+  document.querySelectorAll("#verbs .chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.verb === current)));
+  requestAnimationFrame(wireC);
+}
+
+document.getElementById("verbs").innerHTML = Object.keys(DATA).map(g => `<button class="chip" type="button" lang="el" data-verb="${g}">${g}</button>`).join("");
+document.getElementById("verbs").addEventListener("click", e => {
+  const b = e.target.closest("[data-verb]");
+  if (b) { current = b.dataset.verb; render(); }
+});
+document.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => {
+  openAt = b.dataset.open;
+  document.querySelectorAll("[data-open]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  wireC();
+}));
+
+const themeBtn = document.getElementById("theme");
+const isDark = () => {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+};
+const label = () => { themeBtn.textContent = isDark() ? "Light" : "Dark"; };
+themeBtn.addEventListener("click", () => { document.documentElement.dataset.theme = isDark() ? "light" : "dark"; label(); });
+label();
+
+render();
+</script>

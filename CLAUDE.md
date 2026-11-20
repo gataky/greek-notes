@@ -25,6 +25,7 @@ overrides/              theme templates (custom_dir): main.html (every page), ap
 hooks/                  MkDocs hooks: apps.py (which app a page is in), redirects.py (old URLs), version.py (the build stamp), pwa.py (offline)
 scripts/                build_*.py, build_declensions.js: write the files in docs/data/; build_anki_verbs.js writes exports/
 exports/                data for anki/, not served by the site (anki-verbs.json)
+prototypes/             standalone HTML mock-ups kept for reference, not served (verb-grid-timeline.html)
 tests/                  node test_*.js, run by make test and CI
 sqlite-database.md      the lemma dictionary's developer guide (a copy)
 anki/                   the Anki sync tool (Go module, its own Makefile and README)
@@ -147,6 +148,7 @@ Data flows from the sheet and the dictionary to JSON to the browser. There is no
    - The imperatives sit under the futures, singular over plural, and the perfects along the timeline (είχα, έχω, θα έχω + participle). The να forms are written out underneath.
    - It shouldn't scroll on a desktop. The verb tables, conjugation patterns and dictionary pages are 1180px wide for it (prose capped at 75ch), which fits every word-list verb and 99% of the dictionary's. Windows under 1240px get slightly smaller type, and the five columns share the width evenly where their forms allow.
    - Phones (560px and under) scroll it sideways, with the person column fixed and the columns snapping beside it. There's no stacked layout; `.wide`/`.stacked` in the CSS are the dictionary's declensions'.
+   - The other phone layout considered, one card per tense from top to bottom (A), is in `prototypes/verb-grid-timeline.html`, next to this one (C). Open it in a browser to compare before switching.
 5. **Pages:** `apps/verb-tables.html` (search, a list grouped by class, URL hash = current verb) and `apps/conjugation-patterns.html` (one regular example verb per class; the c3/c4 examples are defined inline because they aren't in the sheet).
 
 6. **`scripts/build_verb_forms.py`** (stdlib `sqlite3`, read-only) copies the grid's cells from the lemma database into the committed `verb-forms.json` (about 2,500 verbs, 2.9 MB, 320 KB gzipped), so the verb tables page doesn't load the dictionary. It has the sheet's verbs, keyed by the sheet's spelling, and every other verb headword it can find a table for. The verb tables page reads the forms; the dictionary page only reads which verbs are there.
