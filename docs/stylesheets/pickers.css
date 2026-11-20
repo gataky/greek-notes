@@ -74,3 +74,52 @@
 }
 .palette__dots { display: flex; gap: 3px; }
 .palette__dots i { width: 7px; height: 7px; border-radius: 50%; }
+
+/* The dictionary's saved words (javascripts/saved-words.js): the picker's card with a list of
+   words instead of radio rows, each with its part of speech as a bar on the left, as in the
+   dictionary's results. The word open in the frame is tinted. */
+.saved__list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; margin: 0; padding: 0; list-style: none; max-height: min(420px, 60dvh); overflow-y: auto; }
+.saved__item { position: relative; display: flex; align-items: center; border-radius: 8px; }
+.saved__item::before { content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 4px; border-radius: 2px; background: var(--pos); }
+.saved__item:hover, .saved__item--open { background: var(--accent-soft); }
+.saved__item.pos-verb { --pos: var(--verb); }
+.saved__item.pos-noun { --pos: var(--noun); }
+.saved__item.pos-adj { --pos: var(--adj); }
+.saved__item.pos-adv { --pos: var(--adv); }
+.saved__item.pos-prep { --pos: var(--prep); }
+.saved__item.pos-other { --pos: var(--other); }
+.saved__word {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  padding: 6px 4px 6px 20px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.saved__greek { flex: none; font: 400 20px/1.2 var(--gn-greek); }
+.saved__gloss { min-width: 0; overflow: hidden; color: var(--muted); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.saved__remove, .saved__clear, .saved__undo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.saved__remove { flex: none; padding: 6px; }
+.saved__remove:hover, .saved__clear:hover { color: var(--ink); }
+.saved .picker__done { margin: 0 0 0 auto; }
+.saved__actions { display: flex; align-items: center; margin-top: 14px; }
+.saved__clear { padding: 6px 10px 6px 6px; font-size: 14px; font-weight: 600; }
+.saved__clear[hidden] { display: none; }
+.saved p.saved__empty { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; padding: 8px 0; color: var(--muted); }
+.saved__undo { padding: 0; color: var(--accent); font-weight: 600; text-decoration: underline; }

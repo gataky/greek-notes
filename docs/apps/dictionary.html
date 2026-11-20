@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../stylesheets/verb-grid.css">
 <link rel="stylesheet" href="../stylesheets/aspect-fork.css">
 <script src="../javascripts/greek-font.js"></script>
+<script src="../javascripts/saved-words.js"></script>
 <style>
 /* The colours, the part-of-speech and gender ones included, are theme.css's; the fonts are
    verb-grid.css's. */
@@ -54,6 +55,13 @@
 
 /* Entry */
 .card h2 { overflow-wrap: anywhere; }
+/* The pin next to the headword saves it for the bar's saved words (saved-words.js): an outline
+   pin when it isn't saved, a filled one in the accent colour when it is. */
+.pin { align-self: center; display: flex; padding: 6px; border: 0; border-radius: 8px; background: none; color: var(--muted); cursor: pointer; }
+.pin:hover { background: var(--accent-soft); color: var(--ink); }
+.pin[aria-pressed="true"] { color: var(--accent); }
+.pin .on, .pin[aria-pressed="true"] .off { display: none; }
+.pin[aria-pressed="true"] .on { display: block; }
 /* One section per part of speech: heading, headword line, senses, then its own tables */
 .entry { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .entry + .entry { border-top: 2px solid var(--line); margin-top: 10px; padding-top: 22px; }
@@ -319,7 +327,7 @@ function entryHTML(found) {
       <ol class="senses">${senses}</ol>${etymology}${tables}</section>`;
   }).join("");
   const wiktionary = `<a href="https://en.wiktionary.org/wiki/${encodeURIComponent(found.word)}#Greek" target="_blank" rel="noopener">Wiktionary →</a>`;
-  return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2></div>
+  return `<div class="verb-top"><h2 lang="el">${esc(found.word)}</h2>${pinHTML(found.word)}</div>
     ${entries}${verbEntry ? "" : conjugation}<div class="links">${wiktionary}</div>`;
 }
 
@@ -389,6 +397,35 @@ function forkHTML(verb, conjugation) {
     ${AspectFork.forkHTML(fork)}${drawn ? AspectFork.LEGEND : ""}</div>`;
 }
 
+// ---------- Saved words (saved-words.js) ----------
+
+// Material Symbols' "keep", outlined and filled (Apache 2.0)
+const PIN = '<svg class="off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24" width="24" fill="currentColor" aria-hidden="true"><path d="M16,12l2,2v2H13v6l-1,1l-1-1V16H6V14l2-2V5H7V3H17V5H16v7ZM8.85,14h6.3L14,12.85V5H10v7.85L8.85,14ZM12,14Z"/></svg>'
+  + '<svg class="on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24" width="24" fill="currentColor" aria-hidden="true"><path d="M16,12l2,2v2H13v6l-1,1l-1-1V16H6V14l2-2V5H7V3H17V5H16v7Z"/></svg>';
+
+const pinHTML = word => `<button type="button" class="pin" data-pin="${esc(word)}" aria-pressed="${SavedWords.has(word)}" aria-label="Save ${esc(word)}" title="Save for later">${PIN}</button>`;
+
+// What the list shows for a word: its first meaning without its labels, and its colour.
+function savedItem(found) {
+  const entry = found.entries[0];
+  const sense = entry?.senses.find(s => !s.isReference) || entry?.senses[0];
+  const gloss = (sense?.gloss || "").replace(/^(\s*\([^)]*\))+\s*/, "");
+  return { word: found.word, gloss, pos: POS_COLOURS[entry?.pos] || "other" };
+}
+
+$("card").addEventListener("click", e => {
+  const pin = e.target.closest("[data-pin]");
+  if (!pin) return;
+  const word = pin.dataset.pin;
+  if (SavedWords.has(word)) SavedWords.remove(word);
+  else SavedWords.add(savedItem(dict.lookup(word)));
+});
+
+// Saved or cleared here or in the bar's list: the pin follows.
+addEventListener("saved-words", () => {
+  document.querySelectorAll("[data-pin]").forEach(pin => pin.setAttribute("aria-pressed", SavedWords.has(pin.dataset.pin)));
+});
+
 function showHash() {
   if (!dict) return;
   const wanted = decodeURIComponent(location.hash.slice(1));
@@ -403,7 +440,25 @@ function showHash() {
   $("card").hidden = false;
   $("card").innerHTML = entryHTML(found);
   document.title = `${found.word} · Greek Dictionary`;
-  $("card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  showCardTop();
+}
+
+// A word opened from further down (a link in a meaning, the saved words) scrolls the page back to
+// the top of its entry, just under the site's bar; one whose top is already in sight stays put.
+// Not scrollIntoView, whose "nearest" lines up the top of an entry taller than the window even
+// when it's already showing, so the page jumped down. In the site's frame it's the page around
+// it that scrolls, so the frame scrolls that page itself, measuring from the bottom of its bar.
+function showCardTop() {
+  let host = window, offset = 0, edge = 12;
+  try {
+    if (window.frameElement) {
+      host = parent;
+      offset = frameElement.getBoundingClientRect().top;
+      edge += parent.document.querySelector(".app-bar")?.getBoundingClientRect().bottom ?? 0;
+    }
+  } catch (err) {}
+  const top = offset + $("card").getBoundingClientRect().top;
+  if (top < edge) host.scrollBy({ top: top - edge, behavior: "smooth" });
 }
 
 window.addEventListener("hashchange", showHash);

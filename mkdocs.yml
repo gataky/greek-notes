@@ -53,6 +53,7 @@ extra_javascript:
   - javascripts/palette.js
   - javascripts/drill-frame.js
   - javascripts/app-bar.js
+  - javascripts/saved-words.js
   - javascripts/tables.js
   - javascripts/pwa.js
 
