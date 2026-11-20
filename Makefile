@@ -121,6 +121,7 @@ test: fetch-dictionary ## Check the conjugation engine, the verb forms, the dril
 	$(NODE) tests/test_pronoun_sentences.js
 	$(NODE) tests/test_preposition_sentences.js
 	$(NODE) tests/test_dictionary.js
+	$(NODE) tests/test_reading.js
 
 dump: ## Print every verb's conjugations, for reviewing
 	$(NODE) tests/test_verbs.js --dump

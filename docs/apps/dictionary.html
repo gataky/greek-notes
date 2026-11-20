@@ -92,6 +92,54 @@ a.w:hover { text-decoration: underline; }
 .declension.adjective td:not(.who) { padding-right: 18px; }
 .declension.adjective td.gap { padding: 0; }
 
+/* Look up or Read */
+.view { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.view[hidden] { display: none; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: -8px; }
+.tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+  font: 600 15px var(--body); padding: 8px 14px; cursor: pointer; margin-bottom: -1px; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* Reading mode: the text, a word's card, and the box to paste into */
+#reader { position: relative; }
+.button { padding: 7px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 600 15px var(--body); cursor: pointer; }
+.button:hover { border-color: var(--accent); color: var(--accent); }
+.button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.button.primary:hover { color: var(--surface); filter: brightness(1.08); }
+.read-edit { display: flex; flex-direction: column; gap: 12px; }
+#read-input { width: 100%; min-height: 280px; resize: vertical; font: 400 19px/1.5 var(--display); padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+#read-input:focus { border-color: var(--accent); outline: none; }
+.read-actions { display: flex; gap: 10px; }
+.read-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 14px; margin-bottom: 14px; }
+.read-text { padding: 22px 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; font: 400 22px/1.65 var(--display); overflow-wrap: break-word; }
+.read-text p { margin: 0; }
+.read-text p + p { margin-top: 0.9em; }
+.read-text .w { cursor: pointer; border-radius: 4px; }
+.read-text .w:hover { background: var(--accent-soft); }
+.read-text .w.on { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); color: var(--accent); }
+/* Words the dictionary doesn't have: names, slang, typos */
+.read-text .w.unknown { cursor: default; background: none; text-decoration: underline dotted var(--muted); text-underline-offset: 4px; }
+@media (max-width: 560px) { .read-text { padding: 16px 18px; font-size: 20px; } }
+
+/* A tapped word's card, under the word (or over it, near the bottom of the window) */
+.word-card { position: absolute; z-index: 5; width: min(400px, 100%); max-height: 420px; overflow-y: auto; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 28px rgb(0 0 0 / 0.18); }
+.word-card[hidden] { display: none; }
+.wc-close { position: absolute; top: 6px; right: 6px; display: flex; padding: 4px; border: 0; border-radius: 6px; background: none; color: var(--muted); cursor: pointer; }
+.wc-close:hover { color: var(--ink); background: var(--accent-soft); }
+.wc-item + .wc-item { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+.wc-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; padding-right: 26px; }
+.wc-word { font: 400 26px/1.15 var(--display); }
+.wc-word .art { color: var(--muted); }
+.wc-pos { font-size: 13px; font-weight: 600; color: var(--muted); padding-left: 8px; border-left: 3px solid var(--pos, var(--line)); }
+.wc-head .pin { padding: 4px; }
+.wc-form { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+.wc-form span { color: var(--ink); font-family: var(--display); font-size: 17px; }
+.wc-senses { margin: 8px 0 0; padding-left: 22px; font-size: 15px; display: flex; flex-direction: column; gap: 3px; }
+.wc-senses li::marker { color: var(--muted); font-size: 13px; }
+.wc-note { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.wc-open { display: inline-block; margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--accent); }
+
 footer { color: var(--muted); font-size: 13px; max-width: 75ch; }
 footer a { color: inherit; }
 </style>
@@ -104,12 +152,40 @@ footer a { color: inherit; }
     <p class="sub">Type Greek, with or without accents, Greeklish or English. Inflected forms find their dictionary word: είπα finds λέω.</p>
   </header>
 
-  <input id="search" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="σπίτι, spiti or house…" aria-label="Search the dictionary" aria-controls="results">
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" type="button" role="tab" data-mode="lookup" aria-selected="true" aria-controls="lookup">Look up</button>
+    <button class="tab" type="button" role="tab" data-mode="read" aria-selected="false" aria-controls="reader">Read</button>
+  </div>
+
   <div id="status" role="status"></div>
 
-  <div id="results" aria-live="polite"></div>
+  <div id="lookup" class="view">
+    <input id="search" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="σπίτι, spiti or house…" aria-label="Search the dictionary" aria-controls="results">
 
-  <section class="card" id="card" hidden></section>
+    <div id="results" aria-live="polite"></div>
+
+    <section class="card" id="card" hidden></section>
+  </div>
+
+  <!-- Reading mode (reading.js): a pasted text with every Greek word tappable -->
+  <section id="reader" class="view" hidden>
+    <div id="read-edit" class="read-edit">
+      <textarea id="read-input" lang="el" rows="12" spellcheck="false" aria-label="Greek text to read"
+        placeholder="Paste Greek text here: an article, a page of a book, a message…"></textarea>
+      <div class="read-actions">
+        <button type="button" class="button primary" id="read-go">Read</button>
+        <button type="button" class="button" id="read-cancel" hidden>Cancel</button>
+      </div>
+    </div>
+    <div id="read-view" hidden>
+      <div class="read-bar">
+        <span id="read-count"></span>
+        <button type="button" class="button" id="read-edit-button">Edit text</button>
+      </div>
+      <article id="read-text" class="read-text" lang="el"></article>
+    </div>
+    <div id="word-card" class="word-card" role="dialog" aria-label="Word" hidden></div>
+  </section>
 
   <footer>
     Definitions from <a href="https://en.wiktionary.org/" target="_blank" rel="noopener">English Wiktionary</a> via
@@ -125,6 +201,7 @@ footer a { color: inherit; }
 <script src="../javascripts/verb-grid.js"></script>
 <script src="../javascripts/verb-forms.js"></script>
 <script src="../javascripts/aspect-fork.js"></script>
+<script src="../javascripts/reading.js"></script>
 <script>
 const { isGreek, PHONETIC } = GreekDictionary;
 const $ = id => document.getElementById(id);
@@ -195,7 +272,7 @@ async function start() {
   status("");
   const date = dict.meta.extraction_date || dict.meta.build_date;
   if (date) $("build").textContent = `Wiktionary snapshot of ${date}.`;
-  if (location.hash) showHash();
+  showHash();
   if ($("search").value.trim()) showResults();
 }
 
@@ -413,7 +490,8 @@ function savedItem(found) {
   return { word: found.word, gloss, pos: POS_COLOURS[entry?.pos] || "other" };
 }
 
-$("card").addEventListener("click", e => {
+// In an entry and in reading mode's word card.
+document.addEventListener("click", e => {
   const pin = e.target.closest("[data-pin]");
   if (!pin) return;
   const word = pin.dataset.pin;
@@ -426,10 +504,17 @@ addEventListener("saved-words", () => {
   document.querySelectorAll("[data-pin]").forEach(pin => pin.setAttribute("aria-pressed", SavedWords.has(pin.dataset.pin)));
 });
 
+// The hash is the open headword, or "read" for reading mode, so Back goes from a word's full
+// entry to the text. No headword is spelled "read".
+const READ = "read";
+
 function showHash() {
-  if (!dict) return;
   const wanted = decodeURIComponent(location.hash.slice(1));
-  if (!wanted) { $("card").hidden = true; return; }
+  setMode(wanted === READ ? "read" : "lookup");
+  if (!dict) return;
+  if (wanted === READ) return showReader();
+  if (wanted) lastWord = wanted;
+  if (!wanted) { $("card").hidden = true; document.title = "Greek Dictionary"; return; }
   // A word that isn't a headword (an old link, a typo) opens its best match.
   const found = dict.lookup(wanted) || dict.lookup(dict.searchGreek(wanted, 1)[0]?.word ?? "");
   if (!found) {
@@ -449,6 +534,14 @@ function showHash() {
 // when it's already showing, so the page jumped down. In the site's frame it's the page around
 // it that scrolls, so the frame scrolls that page itself, measuring from the bottom of its bar.
 function showCardTop() {
+  const { host, offset, edge } = viewport();
+  const top = offset + $("card").getBoundingClientRect().top;
+  if (top < edge) host.scrollBy({ top: top - edge, behavior: "smooth" });
+}
+
+// The window that scrolls (the page around the site's frame, else this one), where this page's
+// top is in it, and where the visible part starts: 12px under the site's bar.
+function viewport() {
   let host = window, offset = 0, edge = 12;
   try {
     if (window.frameElement) {
@@ -457,12 +550,239 @@ function showCardTop() {
       edge += parent.document.querySelector(".app-bar")?.getBoundingClientRect().bottom ?? 0;
     }
   } catch (err) {}
-  const top = offset + $("card").getBoundingClientRect().top;
-  if (top < edge) host.scrollBy({ top: top - edge, behavior: "smooth" });
+  return { host, offset, edge };
+}
+
+// ---------- Look up or Read ----------
+
+let lastWord = "";   // the word Look up goes back to
+
+function setMode(mode) {
+  document.querySelectorAll("[data-mode]").forEach(tab => tab.setAttribute("aria-selected", tab.dataset.mode === mode));
+  $("lookup").hidden = mode !== "lookup";
+  $("reader").hidden = mode !== "read";
+  if (mode !== "read") closeWordCard();
+  else document.title = "Reading · Greek Dictionary";
+}
+
+document.querySelector(".tabs").addEventListener("click", e => {
+  const tab = e.target.closest("[data-mode]");
+  if (!tab || tab.getAttribute("aria-selected") === "true") return;
+  location.hash = tab.dataset.mode === "read" ? READ : lastWord ? encodeURIComponent(lastWord) : "";
+});
+
+// ---------- Reading mode (reading.js) ----------
+
+// The text is kept on this device, one at a time, so closing the app doesn't lose it.
+const READ_KEY = "gdict-reading";
+let readText = "";
+try { readText = localStorage.getItem(READ_KEY) || ""; } catch (err) {}
+let editing = !readText;
+let shownText = null;          // the text the page last drew
+let readScroll = null;         // where the text was scrolled to when a full entry opened
+const readWords = new Map();   // written word -> Reading.candidates()
+const ON_DESKTOP = matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+function showReader() {
+  $("read-edit").hidden = !editing;
+  $("read-view").hidden = editing;
+  $("read-cancel").hidden = !readText;
+  if (editing) {
+    if (!$("read-input").value) $("read-input").value = readText;
+    if (ON_DESKTOP) $("read-input").focus({ preventScroll: true });
+    return;
+  }
+  if (shownText !== readText) drawText();
+  if (readScroll != null) {
+    const y = readScroll;
+    readScroll = null;
+    restoreScroll(y);
+  }
+}
+
+const candidatesOf = written => {
+  if (!readWords.has(written)) readWords.set(written, Reading.candidates(dict, written));
+  return readWords.get(written);
+};
+
+function drawText() {
+  closeWordCard();
+  shownText = readText;
+  let count = 0;
+  $("read-text").innerHTML = Reading.split(readText).map(paragraph => `<p>${paragraph.map(piece => {
+    if (!piece.word) return esc(piece.text).replace(/\n/g, "<br>");
+    count++;
+    return `<span class="w">${esc(piece.text)}</span>`;
+  }).join("")}</p>`).join("");
+  let saved = true;
+  try { localStorage.setItem(READ_KEY, readText); } catch (err) { saved = false; }
+  $("read-count").textContent = `${count.toLocaleString("en")} ${count === 1 ? "word" : "words"}`
+    + (saved ? "" : " · too long to keep on this device");
+  markUnknown();
+}
+
+// Words the dictionary doesn't have are marked, a few hundred at a time so a long text draws
+// at once and stays responsive.
+function markUnknown() {
+  const byWord = new Map();
+  for (const span of $("read-text").querySelectorAll(".w")) {
+    const list = byWord.get(span.textContent);
+    if (list) list.push(span); else byWord.set(span.textContent, [span]);
+  }
+  const words = [...byWord.keys()];
+  const text = shownText;
+  const step = start => {
+    if (shownText !== text) return;
+    for (const written of words.slice(start, start + 300)) {
+      if (!candidatesOf(written).length) byWord.get(written).forEach(span => span.classList.add("unknown"));
+    }
+    if (start + 300 < words.length) setTimeout(() => step(start + 300));
+  };
+  step(0);
+}
+
+$("read-go").addEventListener("click", () => {
+  readText = $("read-input").value.trim();
+  if (!readText) { try { localStorage.removeItem(READ_KEY); } catch (err) {} }
+  editing = !readText;
+  showReader();
+  if (!editing) showTop($("reader"));
+});
+$("read-cancel").addEventListener("click", () => {
+  $("read-input").value = readText;
+  editing = false;
+  showReader();
+});
+$("read-edit-button").addEventListener("click", () => {
+  $("read-input").value = readText;
+  editing = true;
+  showReader();
+  showTop($("reader"));
+});
+
+// Scroll the page so an element's top is in sight, under the site's bar.
+function showTop(el) {
+  const { host, offset, edge } = viewport();
+  const top = offset + el.getBoundingClientRect().top;
+  if (top < edge) host.scrollBy({ top: top - edge });
+}
+
+// Back from a full entry: the frame grows back to the text's height over a few frames, so the
+// scroll waits until the page is tall enough.
+function restoreScroll(y) {
+  const { host } = viewport();
+  let tries = 0;
+  const step = () => {
+    host.scrollTo(0, y);
+    if (Math.abs(host.scrollY - y) > 2 && tries++ < 30) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// ---------- A word's card ----------
+
+// Material Symbols' "close" (Apache 2.0)
+const CLOSE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="20" width="20" fill="currentColor" aria-hidden="true"><path d="M6.4,19L5,17.6L10.6,12L5,6.4L6.4,5L12,10.6L17.6,5L19,6.4L13.4,12L19,17.6L17.6,19L12,13.4L6.4,19Z"/></svg>';
+
+let activeWord = null;   // the span whose card is open
+
+$("read-text").addEventListener("click", e => {
+  const span = e.target.closest(".w");
+  if (!span || span.classList.contains("unknown")) return closeWordCard();
+  if (span === activeWord) return closeWordCard();
+  openWordCard(span);
+});
+$("word-card").addEventListener("click", e => {
+  if (e.target.closest(".wc-close")) closeWordCard();
+  // Leaving for a full entry: remember where the text was, for Back.
+  if (e.target.closest(".wc-open")) readScroll = viewport().host.scrollY;
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && activeWord) closeWordCard(); });
+document.addEventListener("click", e => {
+  if (activeWord && !e.target.closest(".word-card, #read-text .w")) closeWordCard();
+});
+
+function openWordCard(span) {
+  const written = span.textContent;
+  const cards = candidatesOf(written);
+  if (!cards.length) return;
+  activeWord?.classList.remove("on");
+  activeWord = span;
+  span.classList.add("on");
+  $("word-card").innerHTML = `<button type="button" class="wc-close" aria-label="Close">${CLOSE}</button>`
+    + cards.map(c => wordCardItem(c)).join("");
+  $("word-card").hidden = false;
+  $("word-card").scrollTop = 0;
+  placeWordCard(span);
+}
+
+function closeWordCard() {
+  activeWord?.classList.remove("on");
+  activeWord = null;
+  $("word-card").hidden = true;
+  $("reader").style.minHeight = "";
+}
+
+// One headword the word can be: the headword (with its article, for a noun of one gender), its
+// part of speech, the pin, which form was written, its first meanings and a link to the entry.
+function wordCardItem({ word, written, particle }) {
+  if (particle) {
+    return `<div class="wc-item"><div class="wc-head"><span class="wc-word" lang="el">${esc(word)}</span><span class="wc-pos">particle</span></div>
+      <ol class="wc-senses"><li>${esc(particle)}</li></ol>
+      <p class="wc-note">The dictionary has no entry for this word; this note is reading mode's.</p></div>`;
+  }
+  const entryFound = dict.lookup(word);
+  if (!entryFound) return "";
+  const { label, entryId } = Reading.describe(dict, word, written);
+  const entry = entryFound.entries.find(e => e.id === entryId) || entryFound.entries[0];
+  if (!entry) return "";
+  const gender = POS_COLOURS[entry.pos] === "noun" && GENDER_HEAD.exec(entry.head || "")?.[1];
+  const art = gender && !gender.includes(" or ") ? GreekDictionary.article(gender, "nominative", "singular") : "";
+  const own = entry.senses.filter(s => !s.isReference);
+  const senses = (own.length ? own : entry.senses).slice(0, 3);
+  return `<div class="wc-item">
+    <div class="wc-head">
+      <span class="wc-word" lang="el">${art ? `<span class="art">${art}</span> ` : ""}${esc(word)}</span>
+      <span class="wc-pos ${posClass(entry.pos)}">${esc(posName(entry.pos))}</span>
+      ${pinHTML(word)}
+    </div>
+    ${label ? `<p class="wc-form"><span lang="el">${esc(written)}</span>: ${esc(label)}</p>` : ""}
+    <ol class="wc-senses">${senses.map(s => `<li>${glossHTML(s.gloss)}</li>`).join("")}</ol>
+    <a class="wc-open" href="${wordHref(word)}">Full entry →</a>
+  </div>`;
+}
+
+// Under the word, centred on it but inside the text's width. Below has to fit in the window and
+// in this page: in the site's frame, which is only as tall as the page's content (the card,
+// floating over the text, doesn't count), anything past the page's end is cut off. Else over
+// the word, when that fits under the site's bar. Else below after all, with the reader made
+// tall enough to hold the card (so the frame grows) and the page scrolled to show it.
+function placeWordCard(span) {
+  const card = $("word-card"), reader = $("reader");
+  reader.style.minHeight = "";
+  const word = span.getBoundingClientRect(), box = reader.getBoundingClientRect();
+  const width = card.offsetWidth, height = card.offsetHeight;
+  const left = Math.max(0, Math.min(word.left - box.left + word.width / 2 - width / 2, box.width - width));
+  card.style.left = left + "px";
+  const { host, offset, edge } = viewport();
+  const below = word.bottom + 6, above = word.top - 6 - height;
+  const pageBottom = document.body.getBoundingClientRect().bottom;
+  const windowBottom = host.innerHeight - 8 - offset;   // in this page's coordinates
+  if (below + height <= Math.min(pageBottom, windowBottom)) {
+    card.style.top = below - box.top + "px";
+  } else if (offset + above >= edge) {
+    card.style.top = above - box.top + "px";
+  } else {
+    card.style.top = below - box.top + "px";
+    reader.style.minHeight = below + height + 12 - box.top + "px";
+    const overflow = offset + below + height - (host.innerHeight - 8);
+    if (overflow > 0) host.scrollBy({ top: overflow, behavior: "smooth" });
+  }
 }
 
 window.addEventListener("hashchange", showHash);
 
+setMode(location.hash === "#" + READ ? "read" : "lookup");   // while the dictionary opens
 start();
 </script>
 </body>

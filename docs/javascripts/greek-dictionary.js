@@ -461,6 +461,27 @@
       return { word, frequency, entries, forms };
     }
 
+    // ---------- Reading (reading.js) ----------
+
+    // A word as written in a text -> the headwords it's a form of, by spelling alone, accents
+    // and case ignored (no sound matches, which would guess at typos):
+    // [{ headwordId, word, matchedForm, frequency, isPrimary }]. reading.js ranks them.
+    const headwordsOf = written => rows(SELECT_FORMS + " WHERE f.norm = ?", [norm(written)])
+      .map(([headwordId, matchedForm, word, frequency, , isPrimary]) => ({ headwordId, word, matchedForm, frequency, isPrimary: !!isPrimary }));
+
+    // The cells of a headword's tables that hold a form, accents and case ignored:
+    // [{ entryId, kind, form, tags }], the conjugation and declension tables first, then the
+    // headword lines' (kind "head"), each in Wiktionary's order.
+    function formTags(word, written) {
+      const found = rows(HEADWORD, [norm(word), word])[0];
+      if (!found) return [];
+      const key = norm(written);
+      return rows(`SELECT r.entry_id, r.kind, r.form, r.tags FROM inflection_row r JOIN entry e ON e.id = r.entry_id
+          WHERE e.headword_id = ? ORDER BY r.kind = 'head', e.ord, r.table_ord, r.ord`, [found[0]])
+        .filter(([, , form]) => norm(form) === key)
+        .map(([entryId, kind, form, tags]) => ({ entryId, kind, form, tags }));
+    }
+
     // ---------- Principal parts ----------
 
     // A headword's forms, or only those it is the main owner of (a spelling several headwords
@@ -610,7 +631,7 @@
       return out;
     }
 
-    return { meta, searchGreek, complete, searchEnglish, has, lookup, principalParts, declensions, adjectiveDeclensions, rows };
+    return { meta, searchGreek, complete, searchEnglish, has, lookup, headwordsOf, formTags, principalParts, declensions, adjectiveDeclensions, rows };
   }
 
   const api = { norm, phonetic, queryKeys, isGreek, normalizeTerm, stem, open, article, nounForms, CASES, NUMBERS, GENDERS, EXACT, NORM, PHONETIC };

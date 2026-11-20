@@ -48,6 +48,7 @@ jobs:
       - run: node tests/test_pronoun_sentences.js
       - run: node tests/test_preposition_sentences.js
       - run: node tests/test_dictionary.js
+      - run: node tests/test_reading.js
       - run: uv run mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:
