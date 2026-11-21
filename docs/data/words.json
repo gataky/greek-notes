@@ -712,5 +712,9 @@
 {"greek": "ντροπιασμένος", "english": "embarrassed", "pos": "adjective"},
 {"greek": "μέγεθος", "english": "size", "pos": "noun", "gender": "neuter"},
 {"greek": "γιορτή", "english": "party, feast", "pos": "noun", "gender": "feminine"},
-{"greek": "σκασμένος", "english": "flat", "pos": "adjective"}
+{"greek": "σκασμένος", "english": "flat", "pos": "adjective"},
+{"greek": "σκέτος", "english": "plain", "pos": "adjective"},
+{"greek": "συνδυασμός", "english": "combination", "pos": "noun", "gender": "masculine"},
+{"greek": "ψώνια", "english": "shopping", "pos": "noun", "gender": "neuter"},
+{"greek": "διευθυντής", "english": "manager", "pos": "noun", "gender": "masculine"}
 ]

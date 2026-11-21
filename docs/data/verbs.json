@@ -151,5 +151,14 @@
 {"greek": "φτιάχνομαι", "english": "I am made; I get dolled up", "class": "c1", "voice": "passive", "activeForm": "φτιάχνω", "future": "φτιαχτώ", "aorist": "φτιάχτηκα"},
 {"greek": "ψήνομαι", "english": "I am baked, grilled; (slang) I'm up for it", "class": "c1", "voice": "passive", "activeForm": "ψήνω", "future": "ψηθώ", "aorist": "ψήθηκα", "overrides": "imp: —, —"},
 {"greek": "κερδίζω", "english": "I earn", "class": "a1", "voice": "active", "future": "κερδίσω", "aorist": "κέρδισα"},
-{"greek": "δένω", "english": "I tie", "class": "a1", "voice": "active", "future": "δέσω", "aorist": "έδεσα"}
+{"greek": "δένω", "english": "I tie", "class": "a1", "voice": "active", "future": "δέσω", "aorist": "έδεσα"},
+{"greek": "ψωνίζω", "english": "I shop", "class": "a1", "voice": "active", "future": "ψωνίσω", "aorist": "ψώνισα"},
+{"greek": "αναγνωρίζω", "english": "I recognise", "class": "a1", "voice": "active", "future": "αναγνωρίσω", "aorist": "αναγνώρισα"},
+{"greek": "ταξιδεύω", "english": "I travel", "class": "a1", "voice": "active", "future": "ταξιδέψω", "aorist": "ταξίδεψα"},
+{"greek": "φωνάζω", "english": "I call out", "class": "a1", "voice": "active", "future": "φωνάξω", "aorist": "φώναξα"},
+{"greek": "γυρίζω", "english": "I turn", "class": "a1", "voice": "active", "future": "γυρίσω", "aorist": "γύρισα"},
+{"greek": "δανείζω", "english": "I lend", "class": "a1", "voice": "active", "future": "δανείσω", "aorist": "δάνεισα"},
+{"greek": "χαρίζω", "english": "I gift", "class": "a1", "voice": "active", "future": "χαρίσω", "aorist": "χάρισα"},
+{"greek": "σβήνω", "english": "I erase, put out", "class": "a1", "voice": "active", "future": "σβήσω", "aorist": "έσβησα"},
+{"greek": "σέρνω", "english": "I drag", "class": "a1", "voice": "active", "future": "σύρω", "aorist": "έσυρα"}
 ]
